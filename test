@@ -1,287 +1,227 @@
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KdmlGui"
-screenGui.Parent = player:WaitForChild("PlayerGui")
-
--- Main Button
-local mainButton = Instance.new("ImageButton")
-mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0.5, -50, 0.5, -50)
-mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainButton.AnchorPoint = Vector2.new(0.5, 0.5)
-mainButton.Image = "rbxassetid://104833147631294"
-mainButton.AutoButtonColor = true
-mainButton.Name = "MainButton"
-mainButton.Parent = screenGui
-
-local mainCorner = Instance.new("UICorner", mainButton)
-mainCorner.CornerRadius = UDim.new(0, 20)
-
--- Drag logic for mainButton (omitted for brevity, keep same as before)
-
--- Panel (main container for tabs)
-local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 300, 0, 220)
-panel.Position = UDim2.new(mainButton.Position.X.Scale, mainButton.Position.X.Offset, mainButton.Position.Y.Scale, mainButton.Position.Y.Offset + 110)
-panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
-panel.Visible = false
-panel.AnchorPoint = Vector2.new(0.5, 0)
-panel.Parent = screenGui
-
-local panelCorner = Instance.new("UICorner", panel)
-panelCorner.CornerRadius = UDim.new(0, 15)
-
--- Title
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Parent = panel
-titleLabel.Size = UDim2.new(1, -20, 0, 40)
-titleLabel.Position = UDim2.new(0, 10, 0, 10)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Kdml Scripts"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 28
-titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-
--- Discord Label
-local discordLabel = Instance.new("TextLabel")
-discordLabel.Parent = panel
-discordLabel.Size = UDim2.new(1, -20, 0, 20)
-discordLabel.Position = UDim2.new(0, 10, 0, 50)
-discordLabel.BackgroundTransparency = 1
-discordLabel.Text = "discord.gg/scVsN9E5YN"
-discordLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-discordLabel.Font = Enum.Font.Gotham
-discordLabel.TextSize = 14
-discordLabel.TextXAlignment = Enum.TextXAlignment.Center
-
--- Sekme butonları container
-local tabsFrame = Instance.new("Frame")
-tabsFrame.Size = UDim2.new(1, -20, 0, 30)
-tabsFrame.Position = UDim2.new(0, 10, 0, 75)
-tabsFrame.BackgroundTransparency = 1
-tabsFrame.Parent = panel
-
--- Sekmeler: Main, Visual, Misc
-local tabs = {}
-local function createTabButton(name, posX)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 90, 1, 0)
-    btn.Position = UDim2.new(0, posX, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.Text = name
-    btn.Parent = tabsFrame
-    return btn
-end
-
-tabs.Main = createTabButton("Main", 0)
-tabs.Visual = createTabButton("Visual", 100)
-tabs.Misc = createTabButton("Misc", 200)
-
--- İçerik frame'leri
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(1, 0, 1, -105)
-mainFrame.Position = UDim2.new(0, 0, 0, 105)
-mainFrame.BackgroundTransparency = 1
-mainFrame.Visible = true
-mainFrame.Parent = panel
-
-local visualFrame = Instance.new("Frame")
-visualFrame.Size = mainFrame.Size
-visualFrame.Position = mainFrame.Position
-visualFrame.BackgroundTransparency = 1
-visualFrame.Visible = false
-visualFrame.Parent = panel
-
-local miscFrame = Instance.new("Frame")
-miscFrame.Size = mainFrame.Size
-miscFrame.Position = mainFrame.Position
-miscFrame.BackgroundTransparency = 1
-miscFrame.Visible = false
-miscFrame.Parent = panel
-
--- Sekme geçiş fonksiyonu
-local function switchTab(name)
-    mainFrame.Visible = (name == "Main")
-    visualFrame.Visible = (name == "Visual")
-    miscFrame.Visible = (name == "Misc")
-end
-
-tabs.Main.MouseButton1Click:Connect(function() switchTab("Main") end)
-tabs.Visual.MouseButton1Click:Connect(function() switchTab("Visual") end)
-tabs.Misc.MouseButton1Click:Connect(function() switchTab("Misc") end)
-
--- === MAIN FRAME BUTONLARI ===
-
--- Teleport Button
-local teleportButton = Instance.new("TextButton")
-teleportButton.Parent = mainFrame
-teleportButton.Size = UDim2.new(0, 200, 0, 40)
-teleportButton.Position = UDim2.new(0.5, -100, 0, 10)
-teleportButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-teleportButton.TextColor3 = Color3.new(1,1,1)
-teleportButton.Font = Enum.Font.GothamBold
-teleportButton.TextSize = 22
-teleportButton.Text = "Teleport 171 Studs Up"
-teleportButton.AutoButtonColor = true
-
-local teleportCorner = Instance.new("UICorner", teleportButton)
-teleportCorner.CornerRadius = UDim.new(0, 10)
-
--- Instant Steal Button (yeni, işlevsiz)
-local instantStealButton = Instance.new("TextButton")
-instantStealButton.Parent = mainFrame
-instantStealButton.Size = UDim2.new(0, 200, 0, 40)
-instantStealButton.Position = UDim2.new(0.5, -100, 0, 60)
-instantStealButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-instantStealButton.TextColor3 = Color3.new(1,1,1)
-instantStealButton.Font = Enum.Font.GothamBold
-instantStealButton.TextSize = 22
-instantStealButton.Text = "Instant Steal Coming Soon.."
-instantStealButton.AutoButtonColor = true
-
-local instantStealCorner = Instance.new("UICorner", instantStealButton)
-instantStealCorner.CornerRadius = UDim.new(0, 10)
-
--- Teleport fonksiyonu
-local function teleport(distance)
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = character.HumanoidRootPart
-    hrp.CFrame = hrp.CFrame + Vector3.new(0, distance, 0)
-end
-
-teleportButton.MouseButton1Click:Connect(function()
-    teleport(171)
-end)
-
--- Instant Steal butonu basınca bir şey yapmıyor
-instantStealButton.MouseButton1Click:Connect(function()
-    -- Henüz yapılmadı
-    print("Instant Steal Coming Soon clicked!")
-end)
-
--- === VISUAL FRAME (ESP) ===
-
-local espEnabled = false
-local espLabels = {}
-
-local function createEspLabel(playerTarget)
-    if espLabels[playerTarget] then return end
-    local character = playerTarget.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "EspBillboard"
-    billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(0, 100, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = character.HumanoidRootPart
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.new(1, 0, 0)
-    label.TextStrokeTransparency = 0.5
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 18
-    label.Text = playerTarget.Name
-    label.Parent = billboard
-
-    espLabels[playerTarget] = billboard
-end
-
-local function removeEspLabel(playerTarget)
-    if espLabels[playerTarget] then
-        espLabels[playerTarget]:Destroy()
-        espLabels[playerTarget] = nil
+-- DRAG FONKSİYONU
+local function MakeDraggable(frame)
+    local dragToggle, dragInput, dragStart, startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-end
-
-local function updateEsp()
-    for _, plr in pairs(game.Players:GetPlayers()) do
-        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            if espEnabled then
-                createEspLabel(plr)
-            else
-                removeEspLabel(plr)
-            end
-        else
-            removeEspLabel(plr)
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
         end
-    end
-end
-
--- ESP toggle button in Visual tab
-local espToggle = Instance.new("TextButton")
-espToggle.Parent = visualFrame
-espToggle.Size = UDim2.new(0, 200, 0, 40)
-espToggle.Position = UDim2.new(0.5, -100, 0, 10)
-espToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-espToggle.TextColor3 = Color3.new(1,1,1)
-espToggle.Font = Enum.Font.GothamBold
-espToggle.TextSize = 22
-espToggle.Text = "Toggle ESP"
-espToggle.AutoButtonColor = true
-
-local espToggleCorner = Instance.new("UICorner", espToggle)
-espToggleCorner.CornerRadius = UDim.new(0, 10)
-
-espToggle.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    updateEsp()
-end)
-
--- Update ESP each frame (optional, for live update)
-RunService.Heartbeat:Connect(function()
-    if espEnabled then
-        updateEsp()
-    end
-end)
-
--- === MISC FRAME (Item Satın Alma Butonları) ===
-
-local items = {
-    "Trap",
-    "Invisibility Cloak",
-    "Medusa's Head",
-    "Quantum Cloner",
-    "Body Swap Potion"
-}
-
-for i, itemName in ipairs(items) do
-    local itemButton = Instance.new("TextButton")
-    itemButton.Size = UDim2.new(0, 220, 0, 30)
-    itemButton.Position = UDim2.new(0, 10, 0, 10 + (i-1) * 35)
-    itemButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-    itemButton.TextColor3 = Color3.new(1, 1, 1)
-    itemButton.Font = Enum.Font.GothamBold
-    itemButton.TextSize = 18
-    itemButton.Text = "Buy " .. itemName
-    itemButton.AutoButtonColor = true
-    itemButton.Parent = miscFrame
-
-    itemButton.MouseButton1Click:Connect(function()
-        local args = {itemName}
-        local success, err = pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy"):InvokeServer(unpack(args))
-        end)
-        if success then
-            print(itemName .. " satın alındı!")
-        else
-            warn("Satın alma başarısız: " .. tostring(err))
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragToggle then
+            update(input)
         end
     end)
 end
 
--- Main Button toggle panel visibility
+-- ANA GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KdmlGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainButton = Instance.new("TextButton")
+mainButton.Size = UDim2.new(0, 120, 0, 50)
+mainButton.Position = UDim2.new(0.5, -60, 0.5, -25)
+mainButton.Text = "Open Panel"
+mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+mainButton.Font = Enum.Font.GothamBold
+mainButton.TextSize = 18
+mainButton.Parent = screenGui
+
+MakeDraggable(mainButton)
+
+-- PANEL
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 300, 0, 300)
+panel.Position = UDim2.new(0.5, -150, 0.5, 50)
+panel.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
+panel.Visible = false
+panel.Parent = screenGui
+
+MakeDraggable(panel)
+
+-- SEKMELER
+local tabMain = Instance.new("TextButton")
+tabMain.Size = UDim2.new(0, 90, 0, 30)
+tabMain.Position = UDim2.new(0, 10, 0, 10)
+tabMain.Text = "Main"
+tabMain.Parent = panel
+
+local tabVisual = Instance.new("TextButton")
+tabVisual.Size = UDim2.new(0, 90, 0, 30)
+tabVisual.Position = UDim2.new(0, 110, 0, 10)
+tabVisual.Text = "Visual"
+tabVisual.Parent = panel
+
+local tabMisc = Instance.new("TextButton")
+tabMisc.Size = UDim2.new(0, 90, 0, 30)
+tabMisc.Position = UDim2.new(0, 210, 0, 10)
+tabMisc.Text = "Misc"
+tabMisc.Parent = panel
+
+local mainFrame = Instance.new("Frame", panel)
+mainFrame.Size = UDim2.new(1, -20, 1, -50)
+mainFrame.Position = UDim2.new(0, 10, 0, 50)
+mainFrame.Visible = true
+
+local visualFrame = Instance.new("Frame", panel)
+visualFrame.Size = UDim2.new(1, -20, 1, -50)
+visualFrame.Position = UDim2.new(0, 10, 0, 50)
+visualFrame.Visible = false
+
+local miscFrame = Instance.new("Frame", panel)
+miscFrame.Size = UDim2.new(1, -20, 1, -50)
+miscFrame.Position = UDim2.new(0, 10, 0, 50)
+miscFrame.Visible = false
+
+-- SEKMELER ARASI GEÇİŞ
+tabMain.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
+    visualFrame.Visible = false
+    miscFrame.Visible = false
+end)
+
+tabVisual.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    visualFrame.Visible = true
+    miscFrame.Visible = false
+end)
+
+tabMisc.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    visualFrame.Visible = false
+    miscFrame.Visible = true
+end)
+
+-- MAIN: TELEPORT + INSTANT STEAL
+local teleportButton = Instance.new("TextButton", mainFrame)
+teleportButton.Size = UDim2.new(0, 200, 0, 40)
+teleportButton.Position = UDim2.new(0.5, -100, 0, 20)
+teleportButton.Text = "Teleport 171 Up"
+teleportButton.BackgroundColor3 = Color3.fromRGB(100, 0, 100)
+teleportButton.TextColor3 = Color3.fromRGB(255,255,255)
+teleportButton.Font = Enum.Font.GothamBold
+teleportButton.TextSize = 18
+
+local instantSteal = Instance.new("TextButton", mainFrame)
+instantSteal.Size = UDim2.new(0, 200, 0, 40)
+instantSteal.Position = UDim2.new(0.5, -100, 0, 70)
+instantSteal.Text = "Instant Steal (Coming Soon..)"
+instantSteal.BackgroundColor3 = Color3.fromRGB(100, 0, 100)
+instantSteal.TextColor3 = Color3.fromRGB(255,255,255)
+instantSteal.Font = Enum.Font.GothamBold
+instantSteal.TextSize = 14
+
+teleportButton.MouseButton1Click:Connect(function()
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then hrp.CFrame = hrp.CFrame + Vector3.new(0, 171, 0) end
+end)
+
+-- VISUAL: ESP
+local espButton = Instance.new("TextButton", visualFrame)
+espButton.Size = UDim2.new(0, 200, 0, 40)
+espButton.Position = UDim2.new(0.5, -100, 0, 20)
+espButton.Text = "ESP: OFF"
+espButton.BackgroundColor3 = Color3.fromRGB(0, 100, 100)
+espButton.TextColor3 = Color3.fromRGB(255,255,255)
+espButton.Font = Enum.Font.GothamBold
+espButton.TextSize = 18
+
+local espEnabled = false
+local espLabels = {}
+
+local function createEsp(plr)
+    if espLabels[plr] then return end
+    local char = plr.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = char.HumanoidRootPart
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = char.HumanoidRootPart
+
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1,0,1,0)
+    label.Text = plr.Name
+    label.TextColor3 = Color3.new(1,0,0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 14
+
+    espLabels[plr] = billboard
+end
+
+local function removeEsp(plr)
+    if espLabels[plr] then
+        espLabels[plr]:Destroy()
+        espLabels[plr] = nil
+    end
+end
+
+espButton.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espButton.Text = espEnabled and "ESP: ON" or "ESP: OFF"
+    if not espEnabled then
+        for plr, _ in pairs(espLabels) do removeEsp(plr) end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if espEnabled then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= player then
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                    createEsp(plr)
+                else
+                    removeEsp(plr)
+                end
+            end
+        end
+    end
+end)
+
+-- MISC: ITEM BUTONLARI
+local items = {"Trap","Invisibility Cloak","Medusa's Head","Quantum Cloner","Body Swap Potion"}
+
+for i, itemName in pairs(items) do
+    local btn = Instance.new("TextButton", miscFrame)
+    btn.Size = UDim2.new(0, 200, 0, 30)
+    btn.Position = UDim2.new(0.5, -100, 0, (i-1)*40 + 20)
+    btn.Text = "Buy: "..itemName
+    btn.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
+
+    btn.MouseButton1Click:Connect(function()
+        local args = {itemName}
+        ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy"):InvokeServer(unpack(args))
+    end)
+end
+
+-- MAIN BUTON PANEL TOGGLE
 mainButton.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
 end)
