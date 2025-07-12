@@ -1,281 +1,134 @@
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KdmlGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
-local function MakeDraggable(frame)
-    local dragging = false
-    local dragInput, dragStart, startPos
-
-    local function update(input)
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
-
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
-end
-
--- Main button
+-- Ana buton (ikon)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
 mainButton.Position = UDim2.new(0.5, -50, 0.5, -50)
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0.5, 0.5)
 mainButton.Image = "rbxassetid://104833147631294"
+mainButton.Name = "MainButton"
 mainButton.Parent = screenGui
 
 local mainCorner = Instance.new("UICorner", mainButton)
 mainCorner.CornerRadius = UDim.new(0, 20)
-MakeDraggable(mainButton)
 
--- Panel
+-- Ana panel
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 300, 0, 350)
-panel.Position = UDim2.new(0.5, -150, 0.5, 60)
-panel.BackgroundColor3 = Color3.fromRGB(60, 0, 90)
+panel.Size = UDim2.new(0, 300, 0, 400)
+panel.Position = UDim2.new(0.5, -150, 0.5, -200)
+panel.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
 panel.Visible = false
 panel.Parent = screenGui
 
 local panelCorner = Instance.new("UICorner", panel)
 panelCorner.CornerRadius = UDim.new(0, 12)
 
--- Başlık çubuğu
+-- Başlık barı
 local titleBar = Instance.new("TextLabel")
+titleBar.Parent = panel
 titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
 titleBar.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
-titleBar.Text = "Kdml GUI"
+titleBar.Text = "Kdml Scripts"
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 18
-titleBar.Parent = panel
+titleBar.TextSize = 20
 
-MakeDraggable(titleBar)
+-- Başlık bar draggable
+local dragging, dragInput, dragStart, startPos = false
 
--- Sekmeler
-local tabMain = Instance.new("TextButton")
-tabMain.Size = UDim2.new(0, 90, 0, 30)
-tabMain.Position = UDim2.new(0, 10, 0, 35)
-tabMain.Text = "Main"
-tabMain.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-tabMain.TextColor3 = Color3.new(1, 1, 1)
-tabMain.Font = Enum.Font.GothamBold
-tabMain.TextSize = 16
-tabMain.Parent = panel
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = panel.Position
 
-local tabVisual = Instance.new("TextButton")
-tabVisual.Size = UDim2.new(0, 90, 0, 30)
-tabVisual.Position = UDim2.new(0, 105, 0, 35)
-tabVisual.Text = "Visual"
-tabVisual.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-tabVisual.TextColor3 = Color3.new(1, 1, 1)
-tabVisual.Font = Enum.Font.GothamBold
-tabVisual.TextSize = 16
-tabVisual.Parent = panel
-
-local tabMisc = Instance.new("TextButton")
-tabMisc.Size = UDim2.new(0, 90, 0, 30)
-tabMisc.Position = UDim2.new(0, 200, 0, 35)
-tabMisc.Text = "Misc"
-tabMisc.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-tabMisc.TextColor3 = Color3.new(1, 1, 1)
-tabMisc.Font = Enum.Font.GothamBold
-tabMisc.TextSize = 16
-tabMisc.Parent = panel
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(1, -20, 1, -75)
-mainFrame.Position = UDim2.new(0, 10, 0, 70)
-mainFrame.BackgroundTransparency = 1
-mainFrame.Parent = panel
-
-local visualFrame = Instance.new("Frame")
-visualFrame.Size = UDim2.new(1, -20, 1, -75)
-visualFrame.Position = UDim2.new(0, 10, 0, 70)
-visualFrame.BackgroundTransparency = 1
-visualFrame.Visible = false
-visualFrame.Parent = panel
-
-local miscFrame = Instance.new("Frame")
-miscFrame.Size = UDim2.new(1, -20, 1, -75)
-miscFrame.Position = UDim2.new(0, 10, 0, 70)
-miscFrame.BackgroundTransparency = 1
-miscFrame.Visible = false
-miscFrame.Parent = panel
-
-local function openTab(tab)
-    mainFrame.Visible = false
-    visualFrame.Visible = false
-    miscFrame.Visible = false
-
-    if tab == "Main" then
-        mainFrame.Visible = true
-    elseif tab == "Visual" then
-        visualFrame.Visible = true
-    elseif tab == "Misc" then
-        miscFrame.Visible = true
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        panel.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Satın alma fonksiyonu
+local function buyItem(itemName)
+    local rf = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+    rf:InvokeServer(itemName)
 end
 
-tabMain.MouseButton1Click:Connect(function() openTab("Main") end)
-tabVisual.MouseButton1Click:Connect(function() openTab("Visual") end)
-tabMisc.MouseButton1Click:Connect(function() openTab("Misc") end)
+-- Buton oluşturucu
+local function createBuyButton(name, posY)
+    local btn = Instance.new("TextButton")
+    btn.Parent = panel
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Position = UDim2.new(0.1, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(120, 0, 180)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.Text = "Buy " .. name
 
+    btn.MouseButton1Click:Connect(function()
+        buyItem(name)
+    end)
+
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(0, 8)
+end
+
+-- Tüm item butonları
+local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
+
+for i, item in ipairs(items) do
+    createBuyButton(item, 30 + (i * 50))
+end
+
+-- "Instant Steal Coming Soon.." butonu
+local comingSoon = Instance.new("TextButton")
+comingSoon.Parent = panel
+comingSoon.Size = UDim2.new(0.8, 0, 0, 40)
+comingSoon.Position = UDim2.new(0.1, 0, 0, 30 + (#items + 1) * 50)
+comingSoon.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+comingSoon.TextColor3 = Color3.new(1, 1, 1)
+comingSoon.Font = Enum.Font.GothamBold
+comingSoon.TextSize = 18
+comingSoon.Text = "Instant Steal Coming Soon.."
+
+local csCorner = Instance.new("UICorner", comingSoon)
+csCorner.CornerRadius = UDim.new(0, 8)
+
+comingSoon.MouseButton1Click:Connect(function()
+    -- şimdilik bişi yapmıyor
+end)
+
+-- Menü aç/kapa
 mainButton.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
 end)
-
--- Main Frame içerik
-local teleportButton = Instance.new("TextButton")
-teleportButton.Size = UDim2.new(0, 200, 0, 40)
-teleportButton.Position = UDim2.new(0.5, -100, 0, 10)
-teleportButton.BackgroundColor3 = Color3.fromRGB(120, 0, 200)
-teleportButton.Text = "Teleport Up/Down"
-teleportButton.TextColor3 = Color3.new(1, 1, 1)
-teleportButton.Font = Enum.Font.GothamBold
-teleportButton.TextSize = 16
-teleportButton.Parent = mainFrame
-
-local comingSoonButton = Instance.new("TextButton")
-comingSoonButton.Size = UDim2.new(0, 200, 0, 40)
-comingSoonButton.Position = UDim2.new(0.5, -100, 0, 60)
-comingSoonButton.BackgroundColor3 = Color3.fromRGB(80, 0, 130)
-comingSoonButton.Text = "Instant Steal (Coming Soon..)"
-comingSoonButton.TextColor3 = Color3.new(1, 1, 1)
-comingSoonButton.Font = Enum.Font.GothamBold
-comingSoonButton.TextSize = 14
-comingSoonButton.Parent = mainFrame
-
-local tpUp = true
-
-teleportButton.MouseButton1Click:Connect(function()
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local offset = tpUp and 171 or -171
-        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, offset, 0)
-        tpUp = not tpUp
-    end
-end)
-
--- Visual Frame içerik
-local espButton = Instance.new("TextButton")
-espButton.Size = UDim2.new(0, 200, 0, 40)
-espButton.Position = UDim2.new(0.5, -100, 0, 10)
-espButton.BackgroundColor3 = Color3.fromRGB(120, 0, 200)
-espButton.Text = "ESP: OFF"
-espButton.TextColor3 = Color3.new(1, 1, 1)
-espButton.Font = Enum.Font.GothamBold
-espButton.TextSize = 16
-espButton.Parent = visualFrame
-
-local espEnabled = false
-local espLabels = {}
-
-local function createEspLabel(playerTarget)
-    if espLabels[playerTarget] then return end
-    local character = playerTarget.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Adornee = character.HumanoidRootPart
-    billboard.Size = UDim2.new(0, 100, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = character.HumanoidRootPart
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.new(1, 0, 0)
-    label.Text = playerTarget.Name
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 16
-    label.Parent = billboard
-
-    espLabels[playerTarget] = billboard
-end
-
-local function removeEspLabel(playerTarget)
-    if espLabels[playerTarget] then
-        espLabels[playerTarget]:Destroy()
-        espLabels[playerTarget] = nil
-    end
-end
-
-espButton.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    espButton.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-    if not espEnabled then
-        for _, b in pairs(espLabels) do b:Destroy() end
-        espLabels = {}
-    end
-end)
-
-RunService.Heartbeat:Connect(function()
-    if espEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr ~= player then
-                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    createEspLabel(plr)
-                else
-                    removeEspLabel(plr)
-                end
-            end
-        end
-    end
-end)
-
--- Misc Frame içerik (ayrı ayrı butonlar)
-local items = {
-    "Quantum Cloner",
-    "Basic Crate",
-    "Iron Mine",
-    "Large Conveyor",
-    "Tesla Resetter"
-}
-
-for i, itemName in ipairs(items) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 0, 30)
-    btn.Position = UDim2.new(0.5, -100, 0, (i - 1) * 35)
-    btn.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
-    btn.Text = "Buy: " .. itemName
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.Parent = miscFrame
-
-    btn.MouseButton1Click:Connect(function()
-        game:GetService("ReplicatedStorage").BuyItem:FireServer(itemName)
-    end)
-end
