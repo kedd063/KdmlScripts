@@ -6,12 +6,12 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KdmlGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana buton (resimli)
+-- Ana buton (solda, dikey ortada)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0.5, -50, 0.5, -50)
+mainButton.Position = UDim2.new(0, 20, 0.5, -50)
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainButton.AnchorPoint = Vector2.new(0.5, 0.5)
+mainButton.AnchorPoint = Vector2.new(0, 0.5)
 mainButton.Image = "rbxassetid://104833147631294"
 mainButton.AutoButtonColor = true
 mainButton.Name = "MainButton"
@@ -20,50 +20,32 @@ mainButton.Parent = screenGui
 local mainCorner = Instance.new("UICorner", mainButton)
 mainCorner.CornerRadius = UDim.new(0, 20)
 
--- Panel (orta açılıyor)
-local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 350, 0, 280)
-panel.Position = UDim2.new(0.5, -175, 0.5, -140)
-panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
-panel.Visible = false
-panel.AnchorPoint = Vector2.new(0, 0)
-panel.Parent = screenGui
-
-local panelCorner = Instance.new("UICorner", panel)
-panelCorner.CornerRadius = UDim.new(0, 15)
-
--- Alt çizgi: sürükleme barı
-local dragBar = Instance.new("Frame")
-dragBar.Size = UDim2.new(1, 0, 0, 30)
-dragBar.Position = UDim2.new(0, 0, 1, -30)
-dragBar.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-dragBar.Parent = panel
-
-local dragBarCorner = Instance.new("UICorner", dragBar)
-dragBarCorner.CornerRadius = UDim.new(0, 12)
-
--- Başlık label drag bar içinde
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 22
-titleLabel.Text = "Kdml Scripts"
-titleLabel.Parent = dragBar
-titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.TextYAlignment = Enum.TextYAlignment.Center
-
--- Dragging değişkenleri
+-- Drag mekanizması ana buton için
 local dragging = false
 local dragInput, dragStart, startPos
 
-dragBar.InputBegan:Connect(function(input)
+local function update(input)
+    local delta = input.Position - dragStart
+    mainButton.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+    if panel then
+        panel.Position = UDim2.new(mainButton.Position.X.Scale, mainButton.Position.X.Offset + 110, mainButton.Position.Y.Scale, mainButton.Position.Y.Offset)
+    end
+    if dragBar then
+        dragBar.Position = UDim2.new(panel.Position.X.Scale, panel.Position.X.Offset, panel.Position.Y.Scale, panel.Position.Y.Offset + panel.Size.Y.Offset - dragBar.Size.Y.Offset)
+    end
+end
+
+mainButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or
        input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = panel.Position
+        startPos = mainButton.Position
 
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
@@ -73,7 +55,7 @@ dragBar.InputBegan:Connect(function(input)
     end
 end)
 
-dragBar.InputChanged:Connect(function(input)
+mainButton.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or
        input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
@@ -82,127 +64,247 @@ end)
 
 UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        panel.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
+        update(input)
     end
 end)
 
--- Sekme butonlarını yapalım (Main, Visual, Misc)
+-- Panel (menü) - solda ana butona göre, ortada yükseklik 250, genişlik 300
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 300, 0, 250)
+panel.Position = UDim2.new(mainButton.Position.X.Scale, mainButton.Position.X.Offset + 110, mainButton.Position.Y.Scale, mainButton.Position.Y.Offset)
+panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- mor
+panel.Visible = false
+panel.AnchorPoint = Vector2.new(0, 0.5)
+panel.Parent = screenGui
 
-local tabNames = {"Main", "Visual", "Misc"}
-local tabs = {}
-local tabFrames = {}
+local panelCorner = Instance.new("UICorner", panel)
+panelCorner.CornerRadius = UDim.new(0, 15)
 
-local function setActiveTab(activeName)
-    for name, frame in pairs(tabFrames) do
-        frame.Visible = (name == activeName)
-        tabs[name].BackgroundColor3 = (name == activeName) and Color3.fromRGB(75,0,130) or Color3.fromRGB(128,0,128)
-    end
+-- Drag bar (altında kalın çizgi)
+local dragBar = Instance.new("Frame")
+dragBar.Size = UDim2.new(1, 0, 0, 25)
+dragBar.Position = UDim2.new(0, 0, 1, -25)
+dragBar.BackgroundColor3 = Color3.fromRGB(100, 0, 150)
+dragBar.Parent = panel
+
+local dragBarCorner = Instance.new("UICorner", dragBar)
+dragBarCorner.CornerRadius = UDim.new(0, 10)
+
+-- Drag bar drag mekanizması
+local dragBarDragging = false
+local dragBarInput, dragBarStart, dragBarPos
+
+local function dragBarUpdate(input)
+    local delta = input.Position - dragBarStart
+    panel.Position = UDim2.new(
+        dragBarPos.X.Scale,
+        dragBarPos.X.Offset + delta.X,
+        dragBarPos.Y.Scale,
+        dragBarPos.Y.Offset + delta.Y
+    )
+    -- Ana butonu panelin soluna göre konumlandır
+    mainButton.Position = UDim2.new(panel.Position.X.Scale, panel.Position.X.Offset - 110, panel.Position.Y.Scale, panel.Position.Y.Offset)
 end
 
-local tabButtonsFrame = Instance.new("Frame")
-tabButtonsFrame.Size = UDim2.new(1, 0, 0, 35)
-tabButtonsFrame.Position = UDim2.new(0, 0, 0, 0)
-tabButtonsFrame.BackgroundTransparency = 1
-tabButtonsFrame.Parent = panel
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragBarDragging = true
+        dragBarStart = input.Position
+        dragBarPos = panel.Position
 
-local tabButtonWidth = 350 / #tabNames
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragBarDragging = false
+            end
+        end)
+    end
+end)
 
-for i, name in ipairs(tabNames) do
+dragBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragBarInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragBarInput and dragBarDragging then
+        dragBarUpdate(input)
+    end
+end)
+
+-- Başlık label (panel içinde, üstte)
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Parent = panel
+titleLabel.Size = UDim2.new(1, -20, 0, 40)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Kdml Scripts"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 28
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Discord label
+local discordLabel = Instance.new("TextLabel")
+discordLabel.Parent = panel
+discordLabel.Size = UDim2.new(1, -20, 0, 20)
+discordLabel.Position = UDim2.new(0, 10, 0, 50)
+discordLabel.BackgroundTransparency = 1
+discordLabel.Text = "discord.gg/scVsN9E5YN"
+discordLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+discordLabel.Font = Enum.Font.Gotham
+discordLabel.TextSize = 14
+discordLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Sekme butonları (Main, Visual, Misc)
+local tabs = {"Main", "Visual", "Misc"}
+local tabFrames = {}
+local tabButtons = {}
+
+local tabButtonHolder = Instance.new("Frame")
+tabButtonHolder.Parent = panel
+tabButtonHolder.Size = UDim2.new(1, 0, 0, 30)
+tabButtonHolder.Position = UDim2.new(0, 0, 0, 80)
+tabButtonHolder.BackgroundTransparency = 1
+
+for i, tabName in ipairs(tabs) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, tabButtonWidth, 1, 0)
-    btn.Position = UDim2.new((i-1) * tabButtonWidth/350, 0, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+    btn.Parent = tabButtonHolder
+    btn.Size = UDim2.new(1/#tabs, 0, 1, 0)
+    btn.Position = UDim2.new((i-1)/#tabs, 0, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
     btn.TextColor3 = Color3.new(1,1,1)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 18
-    btn.Text = name
-    btn.Parent = tabButtonsFrame
-    tabs[name] = btn
+    btn.Text = tabName
+    btn.AutoButtonColor = true
+    btn.Name = tabName.."Tab"
+    tabButtons[tabName] = btn
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, -20, 1, -65) -- panel yüksekliğine göre
-    frame.Position = UDim2.new(0, 10, 0, 40)
+    frame.Parent = panel
+    frame.Size = UDim2.new(1, -20, 1, -120)
+    frame.Position = UDim2.new(0, 10, 0, 120)
     frame.BackgroundTransparency = 1
     frame.Visible = false
-    frame.Parent = panel
-    tabFrames[name] = frame
+    tabFrames[tabName] = frame
 
     btn.MouseButton1Click:Connect(function()
-        setActiveTab(name)
+        for _, f in pairs(tabFrames) do
+            f.Visible = false
+        end
+        tabFrames[tabName].Visible = true
+        for _, b in pairs(tabButtons) do
+            b.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+        end
+        btn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
     end)
 end
 
-setActiveTab("Main") -- başta Main açık olsun
+-- Başlangıçta Main tab aktif olsun
+tabButtons["Main"].BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+tabFrames["Main"].Visible = true
 
--- MAIN Sekmesi içerikleri --
-
+-- Main Tab içeriği
 local mainFrame = tabFrames["Main"]
 
--- Teleport butonu
 local teleportButton = Instance.new("TextButton")
+teleportButton.Parent = mainFrame
 teleportButton.Size = UDim2.new(0, 200, 0, 40)
-teleportButton.Position = UDim2.new(0, 70, 0, 10)
+teleportButton.Position = UDim2.new(0, 10, 0, 10)
 teleportButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
 teleportButton.TextColor3 = Color3.new(1,1,1)
 teleportButton.Font = Enum.Font.GothamBold
 teleportButton.TextSize = 22
-teleportButton.Text = "Teleport 171 Stud Up"
-teleportButton.Parent = mainFrame
+teleportButton.Text = "171 Stud Teleport"
+teleportButton.AutoButtonColor = true
 
 local teleportCorner = Instance.new("UICorner", teleportButton)
 teleportCorner.CornerRadius = UDim.new(0, 10)
 
--- Instant Steal butonu (henüz işlev yok)
-local stealButton = Instance.new("TextButton")
-stealButton.Size = UDim2.new(0, 200, 0, 40)
-stealButton.Position = UDim2.new(0, 70, 0, 60)
-stealButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-stealButton.TextColor3 = Color3.new(1,1,1)
-stealButton.Font = Enum.Font.GothamBold
-stealButton.TextSize = 22
-stealButton.Text = "Instant Steal Coming Soon.."
-stealButton.Parent = mainFrame
+local instanStealButton = Instance.new("TextButton")
+instanStealButton.Parent = mainFrame
+instanStealButton.Size = UDim2.new(0, 200, 0, 40)
+instanStealButton.Position = UDim2.new(0, 10, 0, 60)
+instanStealButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+instanStealButton.TextColor3 = Color3.new(1,1,1)
+instanStealButton.Font = Enum.Font.GothamBold
+instanStealButton.TextSize = 22
+instanStealButton.Text = "Instan Steal Coming Soon.."
+instanStealButton.AutoButtonColor = true
 
-local stealCorner = Instance.new("UICorner", stealButton)
-stealCorner.CornerRadius = UDim.new(0, 10)
+local instanStealCorner = Instance.new("UICorner", instanStealButton)
+instanStealCorner.CornerRadius = UDim.new(0, 10)
 
--- Teleport fonksiyonu
-local function teleportUp()
-    local character = player.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 171, 0)
-end
-
-teleportButton.MouseButton1Click:Connect(teleportUp)
-
--- VISUAL Sekmesi içerikleri --
-
+-- Visual Tab içeriği
 local visualFrame = tabFrames["Visual"]
 
--- ESP toggle butonu
+local espToggle = Instance.new("TextButton")
+espToggle.Parent = visualFrame
+espToggle.Size = UDim2.new(0, 200, 0, 40)
+espToggle.Position = UDim2.new(0, 10, 0, 10)
+espToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+espToggle.TextColor3 = Color3.new(1,1,1)
+espToggle.Font = Enum.Font.GothamBold
+espToggle.TextSize = 22
+espToggle.Text = "ESP: OFF"
+espToggle.AutoButtonColor = true
+
+local espToggleCorner = Instance.new("UICorner", espToggle)
+espToggleCorner.CornerRadius = UDim.new(0, 10)
+
+-- Misc Tab içeriği (item alma butonları)
+local miscFrame = tabFrames["Misc"]
+
+local function createBuyButton(itemName, posY)
+    local btn = Instance.new("TextButton")
+    btn.Parent = miscFrame
+    btn.Size = UDim2.new(0, 250, 0, 40)
+    btn.Position = UDim2.new(0, 10, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 20
+    btn.Text = "Buy "..itemName
+    btn.AutoButtonColor = true
+
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(0, 10)
+
+    btn.MouseButton1Click:Connect(function()
+        local args = {itemName}
+        local rf = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        local success, err = pcall(function()
+            rf:InvokeServer(unpack(args))
+        end)
+        if not success then
+            warn("Failed to buy "..itemName..": "..tostring(err))
+        end
+    end)
+end
+
+local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
+
+for i, item in ipairs(items) do
+    createBuyButton(item, 10 + (i-1)*50)
+end
+
+-- Buton fonksiyonları
+teleportButton.MouseButton1Click:Connect(function()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 171)
+    end
+end)
+
 local espEnabled = false
-local espLabels = {}
+espToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espToggle.Text = espEnabled and "ESP: ON" or "ESP: OFF"
+    -- Buraya esp sistemi kodu eklenebilir
+end)
 
-local espButton = Instance.new("TextButton")
-espButton.Size = UDim2.new(0, 200, 0, 40)
-espButton.Position = UDim2.new(0, 70, 0, 10)
-espButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-espButton.TextColor3 = Color3.new(1,1,1)
-espButton.Font = Enum.Font.GothamBold
-espButton.TextSize = 22
-espButton.Text = "ESP: OFF"
-espButton.Parent = visualFrame
-
-local espCorner = Instance.new("UICorner", espButton)
-espCorner.CornerRadius = UDim.new(0, 10)
-
-local function createEspLabel(playerTarget)
-    if espLabels[playerTarget] then return end
-    local character = playerTarget.Character
-    if
+-- Ana buton tıklanınca panel açılıp kapanır
+mainButton.MouseButton1Click:Connect(function()
+    panel.Visible = not panel.Visible
+end)
