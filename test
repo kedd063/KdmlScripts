@@ -1,12 +1,11 @@
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KdmlGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Draggable ana buton (resimli)
+-- Ana buton (resimli)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
 mainButton.Position = UDim2.new(0.5, -50, 0.5, -50)
@@ -20,10 +19,10 @@ mainButton.Parent = screenGui
 local mainCorner = Instance.new("UICorner", mainButton)
 mainCorner.CornerRadius = UDim.new(0, 20)
 
--- Panel açılır kapalı, ortada ve draggable olacak
+-- Panel (orta konumda)
 local panel = Instance.new("Frame")
 panel.Size = UDim2.new(0, 300, 0, 200)
-panel.Position = UDim2.new(0.5, -150, 0.5, -100)  -- Ekranın ortası
+panel.Position = UDim2.new(0.5, -150, 0.5, -100)
 panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
 panel.Visible = false
 panel.AnchorPoint = Vector2.new(0, 0)
@@ -32,26 +31,23 @@ panel.Parent = screenGui
 local panelCorner = Instance.new("UICorner", panel)
 panelCorner.CornerRadius = UDim.new(0, 15)
 
--- Başlık bar (sürüklemek için)
-local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-titleBar.TextColor3 = Color3.new(1,1,1)
-titleBar.Text = "Kdml Scripts"
-titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 24
-titleBar.Parent = panel
+-- Alt çizgi: sürükleme çubuğu
+local dragBar = Instance.new("Frame")
+dragBar.Size = UDim2.new(1, 0, 0, 25)  -- kalın çizgi
+dragBar.Position = UDim2.new(0, 0, 1, -25) -- panelin altına hizalanır
+dragBar.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+dragBar.Parent = panel
 
-local titleBarCorner = Instance.new("UICorner", titleBar)
-titleBarCorner.CornerRadius = UDim.new(0, 15)
+local dragBarCorner = Instance.new("UICorner", dragBar)
+dragBarCorner.CornerRadius = UDim.new(0, 12)
 
--- Panel sürükleme değişkenleri
+-- Dragging değişkenleri
 local dragging = false
 local dragInput, dragStart, startPos
 
-titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or
+       input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = panel.Position
@@ -64,8 +60,9 @@ titleBar.InputBegan:Connect(function(input)
     end
 end)
 
-titleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+dragBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or
+       input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
@@ -85,26 +82,4 @@ end)
 -- Ana butona tıklayınca panel aç/kapa
 mainButton.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
-end)
-
--- Teleport butonu (örnek)
-local teleportButton = Instance.new("TextButton")
-teleportButton.Parent = panel
-teleportButton.Size = UDim2.new(0, 150, 0, 40)
-teleportButton.Position = UDim2.new(0.5, -75, 0, 50)
-teleportButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-teleportButton.Font = Enum.Font.GothamBold
-teleportButton.TextSize = 22
-teleportButton.Text = "Teleport"
-teleportButton.AutoButtonColor = true
-
-local teleportCorner = Instance.new("UICorner", teleportButton)
-teleportCorner.CornerRadius = UDim.new(0, 10)
-
-teleportButton.MouseButton1Click:Connect(function()
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 171, 0)
-    end
 end)
