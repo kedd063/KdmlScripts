@@ -1,52 +1,57 @@
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KdmlGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana buton (ikon)
+-- Draggable ana buton (resimli)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
 mainButton.Position = UDim2.new(0.5, -50, 0.5, -50)
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0.5, 0.5)
 mainButton.Image = "rbxassetid://104833147631294"
+mainButton.AutoButtonColor = true
 mainButton.Name = "MainButton"
 mainButton.Parent = screenGui
 
 local mainCorner = Instance.new("UICorner", mainButton)
 mainCorner.CornerRadius = UDim.new(0, 20)
 
--- Ana panel
+-- Panel açılır kapalı, ortada ve draggable olacak
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 300, 0, 400)
-panel.Position = UDim2.new(0.5, -150, 0.5, -200)
-panel.BackgroundColor3 = Color3.fromRGB(50, 0, 80)
-panel.AnchorPoint = Vector2.new(0.5, 0.5)
+panel.Size = UDim2.new(0, 300, 0, 200)
+panel.Position = UDim2.new(0.5, -150, 0.5, -100)  -- Ekranın ortası
+panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
 panel.Visible = false
+panel.AnchorPoint = Vector2.new(0, 0)
 panel.Parent = screenGui
 
 local panelCorner = Instance.new("UICorner", panel)
-panelCorner.CornerRadius = UDim.new(0, 12)
+panelCorner.CornerRadius = UDim.new(0, 15)
 
--- Başlık barı
+-- Başlık bar (sürüklemek için)
 local titleBar = Instance.new("TextLabel")
-titleBar.Parent = panel
-titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Size = UDim2.new(1, 0, 0, 40)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
-titleBar.BackgroundColor3 = Color3.fromRGB(80, 0, 120)
+titleBar.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+titleBar.TextColor3 = Color3.new(1,1,1)
 titleBar.Text = "Kdml Scripts"
-titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 20
+titleBar.TextSize = 24
+titleBar.Parent = panel
 
--- Başlık bar draggable
-local dragging, dragInput, dragStart, startPos = false
+local titleBarCorner = Instance.new("UICorner", titleBar)
+titleBarCorner.CornerRadius = UDim.new(0, 15)
+
+-- Panel sürükleme değişkenleri
+local dragging = false
+local dragInput, dragStart, startPos
 
 titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = panel.Position
@@ -60,7 +65,7 @@ titleBar.InputBegan:Connect(function(input)
 end)
 
 titleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
@@ -77,58 +82,29 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Satın alma fonksiyonu
-local function buyItem(itemName)
-    local rf = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-    rf:InvokeServer(itemName)
-end
-
--- Buton oluşturucu
-local function createBuyButton(name, posY)
-    local btn = Instance.new("TextButton")
-    btn.Parent = panel
-    btn.Size = UDim2.new(0.8, 0, 0, 40)
-    btn.Position = UDim2.new(0.1, 0, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(120, 0, 180)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.Text = "Buy " .. name
-
-    btn.MouseButton1Click:Connect(function()
-        buyItem(name)
-    end)
-
-    local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0, 8)
-end
-
--- Tüm item butonları
-local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
-
-for i, item in ipairs(items) do
-    createBuyButton(item, 30 + (i * 50))
-end
-
--- "Instant Steal Coming Soon.." butonu
-local comingSoon = Instance.new("TextButton")
-comingSoon.Parent = panel
-comingSoon.Size = UDim2.new(0.8, 0, 0, 40)
-comingSoon.Position = UDim2.new(0.1, 0, 0, 30 + (#items + 1) * 50)
-comingSoon.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-comingSoon.TextColor3 = Color3.new(1, 1, 1)
-comingSoon.Font = Enum.Font.GothamBold
-comingSoon.TextSize = 18
-comingSoon.Text = "Instant Steal Coming Soon.."
-
-local csCorner = Instance.new("UICorner", comingSoon)
-csCorner.CornerRadius = UDim.new(0, 8)
-
-comingSoon.MouseButton1Click:Connect(function()
-    -- şimdilik bişi yapmıyor
-end)
-
--- Menü aç/kapa
+-- Ana butona tıklayınca panel aç/kapa
 mainButton.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
+end)
+
+-- Teleport butonu (örnek)
+local teleportButton = Instance.new("TextButton")
+teleportButton.Parent = panel
+teleportButton.Size = UDim2.new(0, 150, 0, 40)
+teleportButton.Position = UDim2.new(0.5, -75, 0, 50)
+teleportButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+teleportButton.Font = Enum.Font.GothamBold
+teleportButton.TextSize = 22
+teleportButton.Text = "Teleport"
+teleportButton.AutoButtonColor = true
+
+local teleportCorner = Instance.new("UICorner", teleportButton)
+teleportCorner.CornerRadius = UDim.new(0, 10)
+
+teleportButton.MouseButton1Click:Connect(function()
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 171, 0)
+    end
 end)
