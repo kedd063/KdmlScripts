@@ -382,13 +382,13 @@ end)
 local player = game.Players.LocalPlayer
 local remote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/PlotService/ClaimCoins")
 
--- Auto Collect Money Toggle
-local autoCollectEnabled = false
-local autoCollectLoop
+local player = game.Players.LocalPlayer
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/PlotService/ClaimCoins")
 
+-- Auto Collect Toggle Button oluşturuluyor
 local autoCollectToggle = Instance.new("TextButton")
 autoCollectToggle.Size = UDim2.new(0, 280, 0, 50)
-autoCollectToggle.Position = UDim2.new(0.5, -140, 0, 120) -- Alt alta sıralı olacak
+autoCollectToggle.Position = UDim2.new(0.5, -140, 0, 120) -- otherStuffsFrame içindeyse pozisyonu ona göre ayarla
 autoCollectToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
 autoCollectToggle.Font = Enum.Font.GothamBold
 autoCollectToggle.TextColor3 = Color3.new(1,1,1)
@@ -397,45 +397,51 @@ autoCollectToggle.Text = "Auto Collect Money 💸 [OFF]"
 autoCollectToggle.Parent = otherStuffsFrame
 Instance.new("UICorner", autoCollectToggle).CornerRadius = UDim.new(0, 10)
 
--- Sahip olunan slotları bul
+local autoCollectEnabled = false
+local autoCollectLoop
+
+-- Sahip olunan slotları bulma fonksiyonu
 local function getOwnedSlots()
-	local ownedSlots = {}
-	for _, plot in pairs(workspace.Plots:GetChildren()) do
-		if plot:FindFirstChild("Owner") and plot.Owner.Value == player then
-			local slotIdValue = plot:FindFirstChild("SlotId") or plot:FindFirstChild("ID") or plot:FindFirstChild("PlotId")
-			if slotIdValue then
-				table.insert(ownedSlots, slotIdValue.Value)
-			end
-		end
-	end
-	return ownedSlots
+    local ownedSlots = {}
+    for _, plot in pairs(workspace.Plots:GetChildren()) do
+        if plot:FindFirstChild("Owner") then
+            local owner = plot.Owner.Value
+            if (typeof(owner) == "Instance" and owner == player) or (typeof(owner) == "number" and owner == player.UserId) then
+                local slotIdValue = plot:FindFirstChild("SlotId") or plot:FindFirstChild("ID") or plot:FindFirstChild("PlotId")
+                if slotIdValue then
+                    table.insert(ownedSlots, slotIdValue.Value)
+                end
+            end
+        end
+    end
+    return ownedSlots
 end
 
--- Toggle işlevi
+-- Toggle tıklama fonksiyonu
 autoCollectToggle.MouseButton1Click:Connect(function()
-	autoCollectEnabled = not autoCollectEnabled
-	autoCollectToggle.Text = autoCollectEnabled and "Auto Collect Money 💸 [ON]" or "Auto Collect Money 💸 [OFF]"
-	autoCollectToggle.BackgroundColor3 = autoCollectEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
+    autoCollectEnabled = not autoCollectEnabled
+    autoCollectToggle.Text = autoCollectEnabled and "Auto Collect Money 💸 [ON]" or "Auto Collect Money 💸 [OFF]"
+    autoCollectToggle.BackgroundColor3 = autoCollectEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
 
-	if autoCollectEnabled then
-		autoCollectLoop = task.spawn(function()
-			while autoCollectEnabled do
-				local ownedSlots = getOwnedSlots()
-				for _, slotId in pairs(ownedSlots) do
-					pcall(function()
-						remote:FireServer(slotId)
-					end)
-					task.wait(0.2)
-				end
-				task.wait(2)
-			end
-		end)
-	else
-		if autoCollectLoop then
-			task.cancel(autoCollectLoop)
-			autoCollectLoop = nil
-		end
-	end
+    if autoCollectEnabled then
+        autoCollectLoop = task.spawn(function()
+            while autoCollectEnabled do
+                local ownedSlots = getOwnedSlots()
+                for _, slotId in pairs(ownedSlots) do
+                    pcall(function()
+                        remote:FireServer(slotId)
+                    end)
+                    task.wait(0.2)
+                end
+                task.wait(2)
+            end
+        end)
+    else
+        if autoCollectLoop then
+            task.cancel(autoCollectLoop)
+            autoCollectLoop = nil
+        end
+    end
 end)
 
 
