@@ -1,0 +1,50 @@
+-- Gui + Auto Collect Script
+local player = game.Players.LocalPlayer
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "AutoCollectGui"
+
+-- Create Toggle Button
+local button = Instance.new("TextButton", screenGui)
+button.Size = UDim2.new(0, 200, 0, 50)
+button.Position = UDim2.new(0, 20, 0, 100)
+button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 20
+button.Text = "Auto Collect: OFF"
+button.BorderSizePixel = 0
+
+-- Auto Collect Logic
+local running = false
+
+local function startCollecting()
+    running = true
+    button.Text = "Auto Collect: ON"
+    while running do
+        for i = 1, 21 do
+            local args = { i }
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Packages")
+                :WaitForChild("Net")
+                :WaitForChild("RE/PlotService/ClaimCoins")
+                :FireServer(unpack(args))
+            task.wait(0.1)
+        end
+        task.wait(1)
+    end
+end
+
+local function stopCollecting()
+    running = false
+    button.Text = "Auto Collect: OFF"
+end
+
+button.MouseButton1Click:Connect(function()
+    if running then
+        stopCollecting()
+    else
+        startCollecting()
+    end
+end)
