@@ -1,15 +1,11 @@
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "KdmlHub"
-gui.ResetOnSpawn = false
-
--- Ana Frame
+-- Ana Menü Paneli
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 400, 0, 300)
 mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
 mainFrame.BackgroundColor3 = Color3.fromRGB(180, 150, 255)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = gui
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
 local gradient = Instance.new("UIGradient", mainFrame)
 gradient.Color = ColorSequence.new{
@@ -17,9 +13,6 @@ gradient.Color = ColorSequence.new{
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
 }
 gradient.Rotation = 45
-
-local corner = Instance.new("UICorner", mainFrame)
-corner.CornerRadius = UDim.new(0, 12)
 
 -- Başlık (Sürükleme alanı)
 local titleBar = Instance.new("TextLabel")
@@ -31,7 +24,7 @@ titleBar.TextSize = 24
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Parent = mainFrame
 
--- Sürükleme sistemi (sadece başlıktan)
+-- Sürükleme sistemi
 local dragging = false
 local dragInput, mousePos, framePos
 
@@ -49,7 +42,7 @@ titleBar.InputEnded:Connect(function(input)
 	end
 end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
+UIS.InputChanged:Connect(function(input)
 	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local delta = input.Position - mousePos
 		mainFrame.Position = UDim2.new(
@@ -61,13 +54,18 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
 	end
 end)
 
--- Buton Oluşturma Fonksiyonu
-local function createButton(text, yPos, scriptUrl)
+-- Aç/kapa fonksiyonu
+mainButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = not mainFrame.Visible
+end)
+
+-- Script Butonu Oluşturucu
+local function createButton(text, yPos, url)
 	local button = Instance.new("TextButton")
 	button.Size = UDim2.new(0.8, 0, 0, 40)
 	button.Position = UDim2.new(0.1, 0, 0, yPos)
-	button.Text = text
 	button.BackgroundColor3 = Color3.fromRGB(120, 90, 200)
+	button.Text = text
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.Font = Enum.Font.GothamBold
 	button.TextScaled = true
@@ -76,12 +74,12 @@ local function createButton(text, yPos, scriptUrl)
 
 	button.MouseButton1Click:Connect(function()
 		pcall(function()
-			loadstring(game:HttpGet(scriptUrl))()
+			loadstring(game:HttpGet(url))()
 		end)
 	end)
 end
 
--- Butonlar
+-- Butonları Oluştur
 createButton("Steal a Brainrot Script 1", 60, "https://pastefy.app/cjXdhdB7/raw")
 createButton("Steal a Brainrot Script 2", 110, "https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Steal%20a%20Brainrot")
 createButton("Kdml Scripts Steal a Brainrot Script", 160, "https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab")
