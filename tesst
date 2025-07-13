@@ -1,70 +1,94 @@
--- Ana Menü Paneli
+-- Servisler
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KdmlHubGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Ana Buton (GUI aç/kapa)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 80, 0, 30)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -15)
+toggleButton.BackgroundColor3 = Color3.fromRGB(90, 60, 150)
+toggleButton.Text = "Kdml Hub"
+toggleButton.TextColor3 = Color3.new(1,1,1)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 14
+toggleButton.Parent = screenGui
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
+
+-- Ana Panel
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(180, 150, 255)
+mainFrame.Size = UDim2.new(0, 400, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -140)
+mainFrame.BackgroundColor3 = Color3.fromRGB(170, 120, 255)
 mainFrame.Visible = false
 mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
+-- Arka Plan Gradyan
 local gradient = Instance.new("UIGradient", mainFrame)
 gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 150, 255)),
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(170, 120, 255)),
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
 }
 gradient.Rotation = 45
 
--- Başlık (Sürükleme alanı)
+-- Başlık (sürüklenebilir alan)
 local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.Size = UDim2.new(1, 0, 0, 35)
 titleBar.BackgroundTransparency = 1
 titleBar.Text = "Kdml Hub"
 titleBar.Font = Enum.Font.GothamBold
-titleBar.TextSize = 24
+titleBar.TextSize = 20
 titleBar.TextColor3 = Color3.new(1, 1, 1)
 titleBar.Parent = mainFrame
 
--- Sürükleme sistemi
-local dragging = false
-local dragInput, mousePos, framePos
-
+-- Sürükleme Fonksiyonu
+local dragging, dragInput, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		dragging = true
-		mousePos = input.Position
-		framePos = mainFrame.Position
-	end
-end)
+		dragStart = input.Position
+		startPos = mainFrame.Position
 
-titleBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
 	end
 end)
 
 UIS.InputChanged:Connect(function(input)
 	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - mousePos
+		local delta = input.Position - dragStart
 		mainFrame.Position = UDim2.new(
-			framePos.X.Scale,
-			framePos.X.Offset + delta.X,
-			framePos.Y.Scale,
-			framePos.Y.Offset + delta.Y
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
 		)
 	end
 end)
 
--- Aç/kapa fonksiyonu
-mainButton.MouseButton1Click:Connect(function()
+-- Toggle (Göster/Gizle)
+toggleButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Script Butonu Oluşturucu
-local function createButton(text, yPos, url)
+-- Script Butonları Oluşturucu
+local function createScriptButton(text, y, url)
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(0.8, 0, 0, 40)
-	button.Position = UDim2.new(0.1, 0, 0, yPos)
-	button.BackgroundColor3 = Color3.fromRGB(120, 90, 200)
+	button.Size = UDim2.new(0.85, 0, 0, 40)
+	button.Position = UDim2.new(0.075, 0, 0, y)
+	button.BackgroundColor3 = Color3.fromRGB(110, 80, 200)
 	button.Text = text
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.Font = Enum.Font.GothamBold
@@ -79,8 +103,8 @@ local function createButton(text, yPos, url)
 	end)
 end
 
--- Butonları Oluştur
-createButton("Steal a Brainrot Script 1", 60, "https://pastefy.app/cjXdhdB7/raw")
-createButton("Steal a Brainrot Script 2", 110, "https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Steal%20a%20Brainrot")
-createButton("Kdml Scripts Steal a Brainrot Script", 160, "https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab")
-createButton("99 Nights In The Forest", 210, "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
+-- Script Butonları (4 Adet)
+createScriptButton("Steal a Brainrot Script 1", 50, "https://pastefy.app/cjXdhdB7/raw")
+createScriptButton("Steal a Brainrot Script 2", 100, "https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Steal%20a%20Brainrot")
+createScriptButton("Kdml Scripts Steal a Brainrot Script", 150, "https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab")
+createScriptButton("99 Nights İn The Forest", 200, "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
