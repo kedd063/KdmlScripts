@@ -378,88 +378,71 @@ autoSpinToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Oyuncu referansı
 local player = game.Players.LocalPlayer
 
--- Remote referansı
-local remote = game:GetService("ReplicatedStorage")
-    :WaitForChild("Packages")
-    :WaitForChild("Net")
-    :WaitForChild("RE/PlotService/ClaimCoins")
+-- GUI içindeki Other Stuffs sekmesini bul
+local otherStuffsFrame = player:WaitForChild("PlayerGui"):WaitForChild("YourGuiNameHere"):WaitForChild("OtherStuffs") -- GUI adını yazmalısın
 
--- GUI oluştur
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "AutoCollectGui"
+-- Buton oluştur
+local launchScriptButton = Instance.new("TextButton")
+launchScriptButton.Size = UDim2.new(0, 280, 0, 50)
+launchScriptButton.Position = UDim2.new(0.5, -140, 0, 120)
+launchScriptButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+launchScriptButton.Font = Enum.Font.GothamBold
+launchScriptButton.TextColor3 = Color3.new(1, 1, 1)
+launchScriptButton.TextScaled = true
+launchScriptButton.Text = "Auto Collect Money 💸"
+launchScriptButton.Parent = otherStuffsFrame
+Instance.new("UICorner", launchScriptButton).CornerRadius = UDim.new(0, 10)
 
-local button = Instance.new("TextButton", screenGui)
-button.Size = UDim2.new(0, 250, 0, 50)
-button.Position = UDim2.new(0, 20, 0, 100)
-button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Font = Enum.Font.GothamBold
-button.TextScaled = true
-button.Text = "Auto Collect Money 💸 [OFF]"
-button.BorderSizePixel = 0
-Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
+-- Tuşa basınca senin verdiğin script çalışsın
+launchScriptButton.MouseButton1Click:Connect(function()
+    -- Senin toggle'lı scriptin çalışmaya başlar
+    local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    screenGui.Name = "AutoCollectGui"
 
--- Plot ID’lerini alma fonksiyonu
-local function getOwnedSlotIds()
-	local owned = {}
-	for _, plot in pairs(workspace:WaitForChild("Plots"):GetChildren()) do
-		local owner = plot:FindFirstChild("Owner")
-		local slotId = plot:FindFirstChild("SlotId") or plot:FindFirstChild("ID") or plot:FindFirstChild("PlotId")
-		if owner and slotId then
-			if owner.Value == player or owner.Value == player.UserId then
-				table.insert(owned, slotId.Value)
-			end
-		end
-	end
-	return owned
-end
+    local button = Instance.new("TextButton", screenGui)
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0, 20, 0, 100)
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 20
+    button.Text = "Auto Collect: OFF"
+    button.BorderSizePixel = 0
 
--- Auto Collect toggle
-local collecting = false
-local loopRef
+    local running = false
 
-local function startCollect()
-	collecting = true
-	button.Text = "Auto Collect Money 💸 [ON]"
-	button.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    local function startCollecting()
+        running = true
+        button.Text = "Auto Collect: ON"
+        while running do
+            for i = 1, 21 do
+                local args = { i }
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Packages")
+                    :WaitForChild("Net")
+                    :WaitForChild("RE/PlotService/ClaimCoins")
+                    :FireServer(unpack(args))
+                task.wait(0.1)
+            end
+            task.wait(1)
+        end
+    end
 
-	loopRef = task.spawn(function()
-		while collecting do
-			local ownedSlots = getOwnedSlotIds()
-			for _, id in ipairs(ownedSlots) do
-				pcall(function()
-					remote:FireServer(id)
-				end)
-				task.wait(0.2)
-			end
-			task.wait(2)
-		end
-	end)
-end
+    local function stopCollecting()
+        running = false
+        button.Text = "Auto Collect: OFF"
+    end
 
-local function stopCollect()
-	collecting = false
-	button.Text = "Auto Collect Money 💸 [OFF]"
-	button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-	if loopRef then
-		task.cancel(loopRef)
-	end
-end
-
--- Buton tıklanınca toggle
-button.MouseButton1Click:Connect(function()
-	if collecting then
-		stopCollect()
-	else
-		startCollect()
-	end
+    button.MouseButton1Click:Connect(function()
+        if running then
+            stopCollecting()
+        else
+            startCollecting()
+        end
+    end)
 end)
-
-
-
 
 
 -- Sekme geçişi
