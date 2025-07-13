@@ -378,6 +378,10 @@ autoSpinToggle.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Gereken tanımlar
+local player = game.Players.LocalPlayer
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/PlotService/ClaimCoins")
+
 -- Auto Collect Money Toggle
 local autoCollectEnabled = false
 local autoCollectLoop
@@ -433,6 +437,7 @@ autoCollectToggle.MouseButton1Click:Connect(function()
 		end
 	end
 end)
+
 
 
 -- Sekme geçişi
