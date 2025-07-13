@@ -200,7 +200,7 @@ verifyBtn.MouseButton1Click:Connect(function()
         showNotification("Correct Key! Loading script...")
         wait(0.8)
         screenGui:Destroy() -- GUI kapansın
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/OverflowBGSI/Overflow/refs/heads/main/loader.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tesst"))()
     else
         errorLabel.Text = "Incorrect Key!"
         showNotification("Incorrect Key! Try again.")
