@@ -1,1 +1,311 @@
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KdmlGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Ana buton (solda)
+local mainButton = Instance.new("ImageButton")
+mainButton.Size = UDim2.new(0, 100, 0, 100)
+mainButton.Position = UDim2.new(0, 10, 0.5, -50)
+mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainButton.AnchorPoint = Vector2.new(0, 0.5)
+mainButton.Image = "rbxassetid://104833147631294"
+mainButton.Name = "MainButton"
+mainButton.Parent = screenGui
+
+Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
+
+-- Panel
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 350, 0, 300)
+panel.Position = UDim2.new(0, 120, 0.5, -150)
+panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+panel.Visible = false
+panel.AnchorPoint = Vector2.new(0, 0.5)
+panel.Active = true
+panel.Draggable = true
+panel.Parent = screenGui
+
+Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 15)
+
+-- Başlık çubuğu
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(100, 0, 140)
+titleBar.Parent = panel
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Parent = titleBar
+titleLabel.Size = UDim2.new(1, -10, 1, 0)
+titleLabel.Position = UDim2.new(0, 5, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Kdml Scripts"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 20
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Sekmeler
+local tabs = {"Main", "Visual", "Misc"}
+local tabButtons, tabFrames = {}, {}
+
+local function setActiveTab(tabName)
+	for _, tab in ipairs(tabs) do
+		tabFrames[tab].Visible = (tab == tabName)
+		tabButtons[tab].BackgroundColor3 = (tab == tabName) and Color3.fromRGB(75, 0, 130) or Color3.fromRGB(40, 40, 40)
+	end
+	if tabName == "Misc" then
+		panel.Size = UDim2.new(0, 350, 0, 400)
+	else
+		panel.Size = UDim2.new(0, 350, 0, 350)
+	end
+end
+
+for i, tab in ipairs(tabs) do
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 100, 0, 30)
+	btn.Position = UDim2.new(0, (i - 1) * 105 + 5, 0, 35)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 18
+	btn.Text = tab
+	btn.Parent = panel
+	tabButtons[tab] = btn
+
+	btn.MouseButton1Click:Connect(function() setActiveTab(tab) end)
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, -10, 1, -70)
+	frame.Position = UDim2.new(0, 5, 0, 70)
+	frame.BackgroundTransparency = 1
+	frame.Visible = false
+	frame.Parent = panel
+	tabFrames[tab] = frame
+end
+
+setActiveTab("Main")
+
+-- Main Sekmesi
+local mainFrame = tabFrames["Main"]
+
+local instantStealButton = Instance.new("TextButton")
+instantStealButton.Parent = mainFrame
+instantStealButton.Size = UDim2.new(0, 330, 0, 40)
+instantStealButton.Position = UDim2.new(0, 10, 0, 10)
+instantStealButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+instantStealButton.TextColor3 = Color3.new(1, 1, 1)
+instantStealButton.Font = Enum.Font.GothamBold
+instantStealButton.TextSize = 18
+instantStealButton.Text = "Instant Steal (code: arbix hub)"
+Instance.new("UICorner", instantStealButton).CornerRadius = UDim.new(0, 10)
+instantStealButton.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Slowversion.lua"))()
+end)
+
+-- Speed Boost
+local speedButton = Instance.new("TextButton")
+speedButton.Parent = mainFrame
+speedButton.Size = UDim2.new(0, 330, 0, 40)
+speedButton.Position = UDim2.new(0, 10, 0, 60)
+speedButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+speedButton.TextColor3 = Color3.new(1, 1, 1)
+speedButton.Font = Enum.Font.GothamBold
+speedButton.TextSize = 18
+speedButton.Text = "Speed Boost 🏃‍♂️👟"
+Instance.new("UICorner", speedButton).CornerRadius = UDim.new(0, 10)
+speedButton.MouseButton1Click:Connect(function()
+	loadstring([[
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local boostedSpeed = 44
+
+local function applySpeedBoost()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	humanoid.WalkSpeed = boostedSpeed
+end
+
+if player.Character then
+	applySpeedBoost()
+end
+
+player.CharacterAdded:Connect(function()
+	task.wait(0.1)
+	applySpeedBoost()
+end)
+]])()
+end)
+
+-- Jump Boost
+local jumpButton = Instance.new("TextButton")
+jumpButton.Parent = mainFrame
+jumpButton.Size = UDim2.new(0, 330, 0, 40)
+jumpButton.Position = UDim2.new(0, 10, 0, 110)
+jumpButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+jumpButton.TextColor3 = Color3.new(1, 1, 1)
+jumpButton.Font = Enum.Font.GothamBold
+jumpButton.TextSize = 18
+jumpButton.Text = "Jump Boost 🔼🙍"
+Instance.new("UICorner", jumpButton).CornerRadius = UDim.new(0, 10)
+jumpButton.MouseButton1Click:Connect(function()
+	loadstring([[
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local jumpHeight = 40
+local jumpCooldown = 1
+local canJump = true
+
+UIS.JumpRequest:Connect(function()
+	if canJump then
+		canJump = false
+		local character = player.Character or player.CharacterAdded:Wait()
+		local hrp = character:WaitForChild("HumanoidRootPart")
+		hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
+		task.delay(jumpCooldown, function()
+			canJump = true
+		end)
+	end
+end)
+]])()
+end)
+
+-- Float 🕊️
+local floatButton = Instance.new("TextButton")
+floatButton.Parent = mainFrame
+floatButton.Size = UDim2.new(0, 330, 0, 40)
+floatButton.Position = UDim2.new(0, 10, 0, 160)
+floatButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+floatButton.TextColor3 = Color3.new(1, 1, 1)
+floatButton.Font = Enum.Font.GothamBold
+floatButton.TextSize = 18
+floatButton.Text = "Float 🕊️"
+Instance.new("UICorner", floatButton).CornerRadius = UDim.new(0, 10)
+floatButton.MouseButton1Click:Connect(function()
+	loadstring([[
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+local floatActive = false
+local floatSpeed = 46
+local floatTime = 5
+local startTime = 0
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "Float 🕊"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 120)
+frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+frame.BorderSizePixel = 3
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Float 🕊"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(0, 170, 255)
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 180, 0, 40)
+button.Position = UDim2.new(0.5, -90, 0, 40)
+button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+button.BorderSizePixel = 0
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.Text = "Float"
+button.Parent = frame
+
+local countdownLabel = Instance.new("TextLabel")
+countdownLabel.Size = UDim2.new(0, 180, 0, 25)
+countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
+countdownLabel.BackgroundTransparency = 1
+countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+countdownLabel.Font = Enum.Font.Gotham
+countdownLabel.TextScaled = true
+countdownLabel.Text = "Ready"
+countdownLabel.Parent = frame
+
+local moveConnection
+local gravityConnection
+
+local function stopFloat()
+	floatActive = false
+	button.Text = "Float"
+
+	if moveConnection then moveConnection:Disconnect() end
+	if gravityConnection then gravityConnection:Disconnect() end
+
+	local character = player.Character
+	if character then
+		local hrp = character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.Velocity = Vector3.new(0, hrp.Velocity.Y, 0)
+		end
+	end
+end
+
+local function startFloat()
+	floatActive = true
+	button.Text = "Stop"
+	startTime = tick()
+
+	local character = player.Character or player.CharacterAdded:Wait()
+	local hrp = character:WaitForChild("HumanoidRootPart")
+
+	gravityConnection = RunService.Heartbeat:Connect(function()
+		hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+	end)
+
+	moveConnection = RunService.Heartbeat:Connect(function()
+		if not floatActive then return end
+
+		local elapsed = tick() - startTime
+		local remaining = floatTime - elapsed
+		countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
+
+		if remaining <= 0 then
+			stopFloat()
+		else
+			local cameraDirection = workspace.CurrentCamera.CFrame.LookVector
+			local moveDirection = Vector3.new(cameraDirection.X, 0, cameraDirection.Z).Unit
+			hrp.Velocity = moveDirection * floatSpeed
+		end
+	end)
+end
+
+button.MouseButton1Click:Connect(function()
+	if not floatActive then
+		startFloat()
+	else
+		stopFloat()
+		countdownLabel.Text = "Stopped"
+	end
+end)
+]])()
+end)
+
+-- Visual Sekmesi (Aynen kalabilir)
+-- Misc Sekmesi (Aynen kalabilir)
+
+-- Ana butona tıklayınca panel açılır/kapanır
+mainButton.MouseButton1Click:Connect(function()
+	panel.Visible = not panel.Visible
+end)
 
