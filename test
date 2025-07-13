@@ -1,1 +1,33 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+-- Yeni küçük GUI oluştur
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TpInsideGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 150, 0, 50)
+button.Position = UDim2.new(0, 20, 0.7, 0)
+button.BackgroundColor3 = Color3.fromRGB(85, 0, 255)
+button.TextColor3 = Color3.new(1,1,1)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 20
+button.Text = "TP Inside"
+button.Parent = screenGui
+button.AutoButtonColor = true
+button.AnchorPoint = Vector2.new(0, 0)
+
+button.MouseButton1Click:Connect(function()
+    local character = player.Character
+    if not character then return end
+
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local lookVector = workspace.CurrentCamera.CFrame.LookVector
+    local newPosition = hrp.Position + lookVector * 5
+    newPosition = Vector3.new(newPosition.X, hrp.Position.Y, newPosition.Z)
+
+    hrp.CFrame = CFrame.new(newPosition, newPosition + lookVector)
+end)
