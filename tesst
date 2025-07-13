@@ -8,17 +8,30 @@ screenGui.Name = "Kdml Hub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana pencere Frame (küçük yaptım)
+-- Logo Buton (Sağ alt köşede, yuvarlak)
+local logoButton = Instance.new("ImageButton")
+logoButton.Size = UDim2.new(0, 60, 0, 60)
+logoButton.Position = UDim2.new(1, -70, 1, -70) -- sağ alt köşe biraz içerden
+logoButton.AnchorPoint = Vector2.new(1, 1) -- sağ alt köşeye sabit
+logoButton.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+logoButton.Image = "rbxassetid://104833147631294"
+logoButton.Parent = screenGui
+logoButton.BorderSizePixel = 0
+
+local logoCorner = Instance.new("UICorner")
+logoCorner.CornerRadius = UDim.new(1, 0) -- tamamen yuvarlak
+logoCorner.Parent = logoButton
+
+-- Menü Frame (Başlangıçta gizli)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 250) -- küçültüldü
-mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125)
+mainFrame.Size = UDim2.new(0, 320, 0, 250)
+mainFrame.Position = UDim2.new(1, -330, 1, -330) -- sağ alt, logo üstünde açılır
+mainFrame.AnchorPoint = Vector2.new(0, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
+mainFrame.Visible = false
 mainFrame.Parent = screenGui
 mainFrame.Active = true
--- Draggable deprecated, ona alternatif aşağıda drag kodu var
---mainFrame.Draggable = true
 
--- Gradient
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),
@@ -27,12 +40,10 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 45
 gradient.Parent = mainFrame
 
--- Yuvarlak köşeler
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = mainFrame
 
--- Başlık
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 0)
@@ -76,7 +87,7 @@ local buttons = {
 local function createButton(info, index)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(0.9, 0, 0, 45)
-    button.Position = UDim2.new(0.05, 0, 0, 50 + (index - 1) * 55) -- biraz daha sıkıştırdım
+    button.Position = UDim2.new(0.05, 0, 0, 50 + (index - 1) * 60)
     button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
     button.TextColor3 = Color3.new(1, 1, 1)
     button.Font = Enum.Font.GothamBold
@@ -113,46 +124,44 @@ for i, info in ipairs(buttons) do
     createButton(info, i)
 end
 
--- Drag işlemi (mainFrame için)
-local UIS = game:GetService("UserInputService")
+-- Menü aç/kapa fonksiyonu
+logoButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+end)
 
+-- Menü hareket ettirme (drag)
 local dragging = false
 local dragInput
 local dragStart
 local startPos
 
-local function update(input)
-	local delta = input.Position - dragStart
-	mainFrame.Position = UDim2.new(
-		math.clamp(startPos.X.Scale, 0, 1),
-		math.clamp(startPos.X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - mainFrame.AbsoluteSize.X),
-		math.clamp(startPos.Y.Scale, 0, 1),
-		math.clamp(startPos.Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - mainFrame.AbsoluteSize.Y)
-	)
-end
-
 mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
 end)
 
 mainFrame.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
 end)
 
 UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
 end)
