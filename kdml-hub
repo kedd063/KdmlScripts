@@ -1,10 +1,7 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local ClipboardService = game:GetService("Clipboard") -- Roblox’ta yok ama bazı executorlar destekliyor
 
 local correctKey = "Kdml2025"
-local keyLink = "https://direct-link.net/1030745/yRmNiYKpg3bi"
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "Kdml Hub"
@@ -20,7 +17,7 @@ local keyTitle = Instance.new("TextLabel")
 keyTitle.Size = UDim2.new(1, 0, 0, 60)
 keyTitle.Position = UDim2.new(0, 0, 0, 100)
 keyTitle.BackgroundTransparency = 1
-keyTitle.Text = "Please Enter Your Key"
+keyTitle.Text = "Lütfen Key Giriniz"
 keyTitle.Font = Enum.Font.GothamBold
 keyTitle.TextSize = 32
 keyTitle.TextColor3 = Color3.fromRGB(255,255,255)
@@ -40,23 +37,13 @@ keyBox.Text = ""
 
 local submitButton = Instance.new("TextButton")
 submitButton.Size = UDim2.new(0, 120, 0, 40)
-submitButton.Position = UDim2.new(0.5, -130, 0, 230)
+submitButton.Position = UDim2.new(0.5, -60, 0, 230)
 submitButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
 submitButton.TextColor3 = Color3.fromRGB(255,255,255)
-submitButton.Text = "Submit"
+submitButton.Text = "Onayla"
 submitButton.Font = Enum.Font.GothamBold
 submitButton.TextSize = 22
 submitButton.Parent = keyFrame
-
-local receiveKeyButton = Instance.new("TextButton")
-receiveKeyButton.Size = UDim2.new(0, 120, 0, 40)
-receiveKeyButton.Position = UDim2.new(0.5, 10, 0, 230)
-receiveKeyButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-receiveKeyButton.TextColor3 = Color3.fromRGB(255,255,255)
-receiveKeyButton.Text = "Receive Key"
-receiveKeyButton.Font = Enum.Font.GothamBold
-receiveKeyButton.TextSize = 22
-receiveKeyButton.Parent = keyFrame
 
 local infoLabel = Instance.new("TextLabel")
 infoLabel.Size = UDim2.new(1, 0, 0, 30)
@@ -84,6 +71,7 @@ logoCorner.Parent = logoButton
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 320, 0, 250)
+-- Menü tam ortada açılacak:
 mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125)
 mainFrame.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
 mainFrame.Visible = false
@@ -181,6 +169,7 @@ logoButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
+local UIS = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 
 mainFrame.InputBegan:Connect(function(input)
@@ -203,8 +192,8 @@ mainFrame.InputChanged:Connect(function(input)
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
+UIS.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
         local delta = input.Position - dragStart
         mainFrame.Position = UDim2.new(
             startPos.X.Scale,
@@ -221,7 +210,7 @@ local function checkKey()
         keyFrame:Destroy()
         logoButton.Visible = true
     else
-        infoLabel.Text = "Wrong key! Please try again."
+        infoLabel.Text = "Yanlış key! Tekrar deneyin."
         keyBox.Text = ""
     end
 end
@@ -230,13 +219,5 @@ submitButton.MouseButton1Click:Connect(checkKey)
 keyBox.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         checkKey()
-    end
-end)
-
-receiveKeyButton.MouseButton1Click:Connect(function()
-    if pcall(function() ClipboardService:SetClipboard(keyLink) end) then
-        infoLabel.Text = "Key link copied to clipboard!"
-    else
-        infoLabel.Text = "Failed to copy. Please copy manually:\n" .. keyLink
     end
 end)
