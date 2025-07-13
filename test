@@ -387,7 +387,7 @@ autoCollectButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
 autoCollectButton.Font = Enum.Font.GothamBold
 autoCollectButton.TextColor3 = Color3.new(1, 1, 1)
 autoCollectButton.TextScaled = true
-autoCollectButton.Text = "Auto Collect Money"
+autoCollectButton.Text = "Auto Collect Money (demo)"
 autoCollectButton.Parent = otherStuffsFrame
 Instance.new("UICorner", autoCollectButton).CornerRadius = UDim.new(0, 10)
 
