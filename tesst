@@ -1,0 +1,118 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Ana ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Kdml Hub"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Arka plan Frame (gradient için)
+local bgFrame = Instance.new("Frame")
+bgFrame.Size = UDim2.new(1, 0, 1, 0)
+bgFrame.BackgroundColor3 = Color3.fromRGB(128, 0, 128) -- Mor başlangıç rengi
+bgFrame.Parent = screenGui
+
+-- UIGradient (mor-beyaz degrade)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)), -- Mor
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)) -- Beyaz
+}
+gradient.Rotation = 45
+gradient.Parent = bgFrame
+
+-- Ana başlık
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0, 360, 0, 50)
+title.Position = UDim2.new(0, 20, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "Kdml Hub"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 36
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = screenGui
+title.TextStrokeTransparency = 0.3
+
+-- Buton isimleri ve scriptleri
+local buttons = {
+    {
+        name = "Steal a Brainrot Script 1",
+        callback = function()
+            loadstring(game:HttpGet('https://pastefy.app/cjXdhdB7/raw'))()
+        end
+    },
+    {
+        name = "Steal a Brainrot Script 2",
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Steal%20a%20Brainrot"))()
+        end
+    },
+    {
+        name = "Kdml Scripts Steal a Brainrot Script",
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab"))()
+        end
+    },
+    {
+        name = "99 Nights İn The Forest",
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
+        end
+    }
+}
+
+-- Buton oluşturma fonksiyonu (hover ve tıklama efektli)
+local function createButton(info, index)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 360, 0, 50)
+    button.Position = UDim2.new(0, 20, 0, 70 + (index - 1) * 60)
+    button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 22
+    button.Text = info.name
+    button.Parent = screenGui
+    button.BorderSizePixel = 0
+
+    -- Yuvarlak köşeler
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = button
+
+    -- Gölge efekti için dış frame (Drop Shadow)
+    local shadow = Instance.new("ImageLabel")
+    shadow.Name = "Shadow"
+    shadow.Parent = button
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://1316045217" -- Yumuşak gölge
+    shadow.Size = UDim2.new(1, 12, 1, 12)
+    shadow.Position = UDim2.new(0, -6, 0, -6)
+    shadow.ZIndex = button.ZIndex - 1
+    shadow.ImageColor3 = Color3.fromRGB(40, 0, 80)
+    shadow.ImageTransparency = 0.6
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+
+    -- Hover efekt
+    button.MouseEnter:Connect(function()
+        button:TweenSize(UDim2.new(0, 370, 0, 55), "Out", "Quad", 0.2, true)
+        button.BackgroundColor3 = Color3.fromRGB(115, 50, 180)
+    end)
+    button.MouseLeave:Connect(function()
+        button:TweenSize(UDim2.new(0, 360, 0, 50), "Out", "Quad", 0.2, true)
+        button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+    end)
+
+    -- Tıklama efekti (küçük animasyon)
+    button.MouseButton1Click:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
+        task.wait(0.1)
+        button.BackgroundColor3 = Color3.fromRGB(115, 50, 180)
+        info.callback()
+    end)
+end
+
+-- Butonları oluştur
+for i, btnInfo in ipairs(buttons) do
+    createButton(btnInfo, i)
+end
