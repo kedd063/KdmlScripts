@@ -1,365 +1,359 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-
+local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 -- Ana GUI
-local screenGui = Instance.new("ScreenGui")
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 screenGui.Name = "KdmlGui"
-screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana Buton (menüyü aç/kapa)
+-- Ana Buton (Menüyü aç/kapa)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0, 10, 0.6, -50) -- Menü biraz daha aşağıda açılması için 0.6 yaptım
+mainButton.Position = UDim2.new(0, 10, 0.6, -50)
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
-mainButton.Image = "rbxassetid://104833147631294" -- isteğe göre değiştir
+mainButton.Image = "rbxassetid://104833147631294"
 mainButton.Name = "MainButton"
 mainButton.Parent = screenGui
 Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
 
--- Panel
-local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 400, 0, 450)
-panel.Position = UDim2.new(0, mainButton.Position.X.Offset + 110, 0, mainButton.Position.Y.Offset + mainButton.AbsoluteSize.Y/2 - 225)
-panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
-panel.Visible = false
-panel.AnchorPoint = Vector2.new(0, 0)
-panel.Parent = screenGui
-Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 15)
+-- Menü Frame
+local menuFrame = Instance.new("Frame")
+menuFrame.Size = UDim2.new(0, 350, 0, 400)
+menuFrame.Position = UDim2.new(0.25, 0, 0.5, -200)
+menuFrame.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
+menuFrame.Active = true
+menuFrame.Draggable = true
+menuFrame.Visible = false
+menuFrame.Name = "MenuFrame"
+menuFrame.Parent = screenGui
+Instance.new("UICorner", menuFrame).CornerRadius = UDim.new(0, 14)
 
--- Panel başlık çubuğu (sürüklenebilir)
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(100, 0, 140)
-titleBar.Parent = panel
+-- Gradient Arka Plan
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 150, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+gradient.Rotation = 45
+gradient.Parent = menuFrame
 
+-- Başlık
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Parent = titleBar
-titleLabel.Size = UDim2.new(1, -10, 1, 0)
-titleLabel.Position = UDim2.new(0, 5, 0, 0)
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Kdml Scripts"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextScaled = true
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 20
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = menuFrame
 
-local panelDragging = false
-local panelDragInput, panelDragStart, panelStartPos
+-- Sekmeler ve içerikleri
+local tabNames = {"Main", "Visual", "Misc", "Other Stuffs"}
+local tabs = {}
+local contents = {}
 
-local function panelUpdate(input)
-    local delta = input.Position - panelDragStart
-    local newX = math.clamp(panelStartPos.X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - panel.AbsoluteSize.X)
-    local newY = math.clamp(panelStartPos.Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - panel.AbsoluteSize.Y)
-    panel.Position = UDim2.new(0, newX, 0, newY)
+for i, name in ipairs(tabNames) do
+	local tabButton = Instance.new("TextButton")
+	tabButton.Size = UDim2.new(0.25, 0, 0, 40)
+	tabButton.Position = UDim2.new(0.25 * (i - 1), 0, 0, 50)
+	tabButton.Text = name
+	tabButton.Font = Enum.Font.Gotham
+	tabButton.TextColor3 = Color3.new(1, 1, 1)
+	tabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+	tabButton.Parent = menuFrame
+	Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
+	tabs[name] = tabButton
+
+	local contentFrame = Instance.new("Frame")
+	contentFrame.Size = UDim2.new(1, -20, 1, -100)
+	contentFrame.Position = UDim2.new(0, 10, 0, 90)
+	contentFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 120)
+	contentFrame.Visible = false
+	contentFrame.Parent = menuFrame
+	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
+	contents[name] = contentFrame
 end
 
-titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        panelDragging = true
-        panelDragStart = input.Position
-        panelStartPos = panel.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                panelDragging = false
-            end
-        end)
-    end
-end)
-
-titleBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        panelDragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == panelDragInput and panelDragging then
-        panelUpdate(input)
-    end
-end)
-
--- Sekmeler
-local tabs = {"Main", "Visual", "Misc", "Other Stuffs"}
-local tabButtons, tabFrames = {}, {}
-
-local function setActiveTab(tabName)
-    for _, tab in ipairs(tabs) do
-        tabFrames[tab].Visible = (tab == tabName)
-        tabButtons[tab].BackgroundColor3 = (tab == tabName) and Color3.fromRGB(75,0,130) or Color3.fromRGB(40,40,40)
-    end
+-- Buton oluşturma fonksiyonu
+local function createMainButton(parent, text, callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 200, 0, 40)
+	btn.Position = UDim2.new(0.5, -100, 0, #parent:GetChildren() * 50)
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextScaled = true
+	btn.BackgroundColor3 = Color3.fromRGB(90, 60, 160)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Parent = parent
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+	btn.MouseButton1Click:Connect(callback)
 end
 
-for i, tab in ipairs(tabs) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 95, 0, 30)
-    btn.Position = UDim2.new(0, (i-1)*100 + 5, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.Text = tab
-    btn.Parent = panel
-    tabButtons[tab] = btn
+-- MAIN sekmesine butonlar
 
-    btn.MouseButton1Click:Connect(function()
-        setActiveTab(tab)
-    end)
-
-    local frame = Instance.new("ScrollingFrame")
-    frame.Size = UDim2.new(1, -10, 1, -80)
-    frame.Position = UDim2.new(0, 5, 0, 70)
-    frame.BackgroundTransparency = 1
-    frame.ScrollBarThickness = 5
-    frame.Visible = false
-    frame.Parent = panel
-    tabFrames[tab] = frame
-end
-
-setActiveTab("Main") -- Başlangıç sekmesi
-
-local mainFrame = tabFrames["Main"]
-
--- Speed Boost Button
-local speedBoostBtn = Instance.new("TextButton")
-speedBoostBtn.Size = UDim2.new(0, 330, 0, 40)
-speedBoostBtn.Position = UDim2.new(0, 10, 0, 10)
-speedBoostBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-speedBoostBtn.TextColor3 = Color3.new(1,1,1)
-speedBoostBtn.Font = Enum.Font.GothamBold
-speedBoostBtn.TextSize = 18
-speedBoostBtn.Text = "Speed Boost🏃‍♂️👟"
-Instance.new("UICorner", speedBoostBtn).CornerRadius = UDim.new(0, 10)
-speedBoostBtn.Parent = mainFrame
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local boostedSpeed = 44
-
-local function applySpeedBoost()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = boostedSpeed
-end
-
-if player.Character then
-    applySpeedBoost()
-end
-
-player.CharacterAdded:Connect(function()
-    task.wait(0.1)
-    applySpeedBoost()
+-- Speed Boost
+createMainButton(contents["Main"], "Speed Boost 🏃‍♂️👟", function()
+	local boostedSpeed = 44
+	local function applySpeedBoost()
+		local char = player.Character or player.CharacterAdded:Wait()
+		local humanoid = char:WaitForChild("Humanoid")
+		humanoid.WalkSpeed = boostedSpeed
+	end
+	applySpeedBoost()
+	player.CharacterAdded:Connect(function()
+		task.wait(0.1)
+		applySpeedBoost()
+	end)
 end)
 
--- Jump Boost Button
-local jumpBoostBtn = Instance.new("TextButton")
-jumpBoostBtn.Size = UDim2.new(0, 330, 0, 40)
-jumpBoostBtn.Position = UDim2.new(0, 10, 0, 60)
-jumpBoostBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-jumpBoostBtn.TextColor3 = Color3.new(1,1,1)
-jumpBoostBtn.Font = Enum.Font.GothamBold
-jumpBoostBtn.TextSize = 18
-jumpBoostBtn.Text = "Jump Boost 🔼🙍"
-Instance.new("UICorner", jumpBoostBtn).CornerRadius = UDim.new(0, 10)
-jumpBoostBtn.Parent = mainFrame
-
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-
-local jumpHeight = 40
-local jumpCooldown = 1
-local canJump = true
-
-UIS.JumpRequest:Connect(function()
-    if canJump then
-        canJump = false
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
-        task.delay(jumpCooldown, function()
-            canJump = true
-        end)
-    end
+-- Jump Boost
+createMainButton(contents["Main"], "Jump Boost 🔼🙍", function()
+	local jumpHeight = 40
+	local jumpCooldown = 1
+	local canJump = true
+	UIS.JumpRequest:Connect(function()
+		if canJump then
+			canJump = false
+			local char = player.Character or player.CharacterAdded:Wait()
+			local hrp = char:WaitForChild("HumanoidRootPart")
+			hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
+			task.delay(jumpCooldown, function()
+				canJump = true
+			end)
+		end
+	end)
 end)
 
--- Float Button
-local floatBtn = Instance.new("TextButton")
-floatBtn.Size = UDim2.new(0, 330, 0, 40)
-floatBtn.Position = UDim2.new(0, 10, 0, 110)
-floatBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-floatBtn.TextColor3 = Color3.new(1,1,1)
-floatBtn.Font = Enum.Font.GothamBold
-floatBtn.TextSize = 18
-floatBtn.Text = "Float🕊️"
-Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(0, 10)
-floatBtn.Parent = mainFrame
+-- Float
+createMainButton(contents["Main"], "Float 🕊️", function()
+	local floatActive = false
+	local floatSpeed = 46
+	local floatTime = 5
+	local startTime = 0
 
+	local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+	gui.Name = "Float 🕊"
+	gui.ResetOnSpawn = false
 
--- Instant Steal tuşu (var olan)
--- Instant Steal tuşu
-local instantStealBtn = Instance.new("TextButton")
-instantStealBtn.Size = UDim2.new(0, 330, 0, 40)
-instantStealBtn.Position = UDim2.new(0, 10, 0, 10)
-instantStealBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-instantStealBtn.TextColor3 = Color3.new(1,1,1)
-instantStealBtn.Font = Enum.Font.GothamBold
-instantStealBtn.TextSize = 18
-instantStealBtn.Text = "Instant Steal (code: arbix hub)"
-Instance.new("UICorner", instantStealBtn).CornerRadius = UDim.new(0, 10)
-instantStealBtn.Parent = mainFrame
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 220, 0, 120)
+	frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+	frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+	frame.BorderSizePixel = 3
+	frame.Active = true
+	frame.Draggable = true
+	frame.Parent = gui
 
-instantStealBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Slowversion.lua"))()
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 30)
+	title.BackgroundTransparency = 1
+	title.Text = "Float 🕊"
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 18
+	title.TextColor3 = Color3.fromRGB(0, 170, 255)
+	title.Parent = frame
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 180, 0, 40)
+	button.Position = UDim2.new(0.5, -90, 0, 40)
+	button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+	button.TextColor3 = Color3.new(1,1,1)
+	button.TextScaled = true
+	button.Font = Enum.Font.GothamBold
+	button.Text = "Float"
+	button.Parent = frame
+
+	local countdownLabel = Instance.new("TextLabel")
+	countdownLabel.Size = UDim2.new(0, 180, 0, 25)
+	countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
+	countdownLabel.BackgroundTransparency = 1
+	countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+	countdownLabel.Font = Enum.Font.Gotham
+	countdownLabel.TextScaled = true
+	countdownLabel.Text = "Ready"
+	countdownLabel.Parent = frame
+
+	local moveConnection, gravityConnection
+	local function stopFloat()
+		floatActive = false
+		button.Text = "Float"
+		if moveConnection then moveConnection:Disconnect() end
+		if gravityConnection then gravityConnection:Disconnect() end
+	end
+
+	local function startFloat()
+		floatActive = true
+		button.Text = "Stop"
+		startTime = tick()
+		local char = player.Character or player.CharacterAdded:Wait()
+		local hrp = char:WaitForChild("HumanoidRootPart")
+
+		gravityConnection = RunService.Heartbeat:Connect(function()
+			hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+		end)
+
+		moveConnection = RunService.Heartbeat:Connect(function()
+			if not floatActive then return end
+			local elapsed = tick() - startTime
+			local remaining = floatTime - elapsed
+			countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
+			if remaining <= 0 then
+				stopFloat()
+				countdownLabel.Text = "Done"
+			else
+				local dir = workspace.CurrentCamera.CFrame.LookVector
+				local move = Vector3.new(dir.X, 0, dir.Z).Unit
+				hrp.Velocity = move * floatSpeed
+			end
+		end)
+	end
+
+	button.MouseButton1Click:Connect(function()
+		if not floatActive then startFloat() else stopFloat() end
+	end)
 end)
 
--- (İstersen buraya diğer Main tuşlarını da ekleyebilirsin, speed/jump/float vs)
+-- Instant Steal
+createMainButton(contents["Main"], "Instant Steal (code: arbix hub)", function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Slowversion.lua"))()
+end)
 
--- --- MISC sekmesi ---
-
-local miscFrame = tabFrames["Misc"]
-
-local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
-
-for i, itemName in ipairs(items) do
-    local btn = Instance.new("TextButton")
-    btn.Parent = miscFrame
-    btn.Size = UDim2.new(0, 330, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, 10 + (i-1)*45)
-    btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 18
-    btn.Text = "Buy "..itemName
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    btn.MouseButton1Click:Connect(function()
-        local rf = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        rf:InvokeServer(itemName)
-    end)
-end
-
--- --- VISUAL sekmesi ---
-
-local visualFrame = tabFrames["Visual"]
-
-local espToggleButton = Instance.new("TextButton")
-espToggleButton.Parent = visualFrame
-espToggleButton.Size = UDim2.new(0, 330, 0, 40)
-espToggleButton.Position = UDim2.new(0, 10, 0, 10)
-espToggleButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-espToggleButton.TextColor3 = Color3.new(1,1,1)
-espToggleButton.Font = Enum.Font.GothamBold
-espToggleButton.TextSize = 18
-espToggleButton.Text = "ESP: Off"
-Instance.new("UICorner", espToggleButton).CornerRadius = UDim.new(0, 10)
-
+-- Visual sekmesine ESP toggle
 local espEnabled = false
-local espConnections = {}
+local espObjects = {}
 
-local function createEsp(playerTarget)
-    if playerTarget == player then return end
-    local function addEsp(character)
-        local hrp = character:WaitForChild("HumanoidRootPart", 5)
-        if not hrp then return end
-        if hrp:FindFirstChild("ESP_Billboard") then return end
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "ESP_Billboard"
-        billboard.Adornee = hrp
-        billboard.Size = UDim2.new(0, 100, 0, 30)
-        billboard.StudsOffset = Vector3.new(0, 3, 0)
-        billboard.AlwaysOnTop = true
-        billboard.Parent = hrp
+createMainButton(contents["Visual"], "ESP", function(button)
+	espEnabled = not espEnabled
+	button.Text = espEnabled and "ESP ✅" or "ESP ❌"
 
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.TextColor3 = Color3.new(1, 0, 0)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 18
-        label.Text = playerTarget.Name
-        label.Parent = billboard
-    end
+	for _, adorn in pairs(espObjects) do
+		if adorn and adorn.Parent then
+			adorn:Destroy()
+		end
+	end
+	table.clear(espObjects)
 
-    if playerTarget.Character then
-        addEsp(playerTarget.Character)
-    end
+	if espEnabled then
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local box = Instance.new("BoxHandleAdornment")
+				box.Size = Vector3.new(4, 5, 2)
+				box.Adornee = plr.Character.HumanoidRootPart
+				box.AlwaysOnTop = true
+				box.ZIndex = 5
+				box.Color3 = Color3.fromRGB(255, 0, 0)
+				box.Transparency = 0.2
+				box.Parent = plr.Character
+				table.insert(espObjects, box)
+			end
+		end
 
-    local conn = playerTarget.CharacterAdded:Connect(addEsp)
-    table.insert(espConnections, conn)
-end
-
-local function removeAllEsp()
-    for _, other in pairs(game.Players:GetPlayers()) do
-        if other ~= player and other.Character then
-            local hrp = other.Character:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp:FindFirstChild("ESP_Billboard") then
-                hrp.ESP_Billboard:Destroy()
-            end
-        end
-    end
-    for _, conn in ipairs(espConnections) do conn:Disconnect() end
-    espConnections = {}
-end
-
-espToggleButton.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    espToggleButton.Text = espEnabled and "ESP: On" or "ESP: Off"
-    if espEnabled then
-        for _, other in pairs(game.Players:GetPlayers()) do
-            createEsp(other)
-        end
-        table.insert(espConnections, game.Players.PlayerAdded:Connect(createEsp))
-    else
-        removeAllEsp()
-    end
+		Players.PlayerAdded:Connect(function(newPlr)
+			newPlr.CharacterAdded:Connect(function(char)
+				if espEnabled then
+					task.wait(0.5)
+					local hrp = char:FindFirstChild("HumanoidRootPart")
+					if hrp then
+						local box = Instance.new("BoxHandleAdornment")
+						box.Size = Vector3.new(4, 5, 2)
+						box.Adornee = hrp
+						box.AlwaysOnTop = true
+						box.ZIndex = 5
+						box.Color3 = Color3.fromRGB(255, 0, 0)
+						box.Transparency = 0.2
+						box.Parent = char
+						table.insert(espObjects, box)
+					end
+				end
+			end)
+		end)
+	end
 end)
 
--- --- OTHER STUFFS sekmesi ---
+-- Misc sekmesine item alma butonları
+local function createMiscButton(parent, itemName)
+	createMainButton(parent, itemName, function()
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+		pcall(function()
+			net:InvokeServer(itemName)
+			print(itemName .. " satın alındı.")
+		end)
+	end)
+end
 
-local otherFrame = tabFrames["Other Stuffs"]
+local miscItems = {
+	"Trap",
+	"Invisibility Cloak",
+	"Medusa's Head",
+	"Quantum Cloner",
+	"Body Swap Potion"
+}
 
-local autoSpinToggle = Instance.new("TextButton")
-autoSpinToggle.Parent = otherFrame
-autoSpinToggle.Size = UDim2.new(0, 330, 0, 40)
-autoSpinToggle.Position = UDim2.new(0, 10, 0, 10)
-autoSpinToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-autoSpinToggle.TextColor3 = Color3.new(1,1,1)
-autoSpinToggle.Font = Enum.Font.GothamBold
-autoSpinToggle.TextSize = 18
-autoSpinToggle.Text = "Auto Candy Spin Wheel 🎡🍬 [OFF]"
-Instance.new("UICorner", autoSpinToggle).CornerRadius = UDim.new(0, 10)
+for _, item in ipairs(miscItems) do
+	createMiscButton(contents["Misc"], item)
+end
 
+-- Other Stuffs sekmesine Auto Candy Spin Wheel toggle
 local autoSpinEnabled = false
 local autoSpinLoop
 
-autoSpinToggle.MouseButton1Click:Connect(function()
-    autoSpinEnabled = not autoSpinEnabled
-    autoSpinToggle.Text = autoSpinEnabled and "Auto Candy Spin Wheel 🎡🍬 [ON]" or "Auto Candy Spin Wheel 🎡🍬 [OFF]"
-    autoSpinToggle.BackgroundColor3 = autoSpinEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
+local otherStuffsFrame = contents["Other Stuffs"]
 
-    if autoSpinEnabled then
-        autoSpinLoop = task.spawn(function()
-            while autoSpinEnabled do
-                local net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net")
-                local spinEvent = net:WaitForChild("RE/CandyEventService/Spin")
-                spinEvent:FireServer()
-                task.wait(1) -- 1 saniyede bir spin yapar, istersen burayı değiştir
-            end
-        end)
-    else
-        if autoSpinLoop then
-            task.cancel(autoSpinLoop)
-            autoSpinLoop = nil
-        end
-    end
+local autoSpinToggle = Instance.new("TextButton")
+autoSpinToggle.Size = UDim2.new(0, 280, 0, 50)
+autoSpinToggle.Position = UDim2.new(0.5, -140, 0, 0)
+autoSpinToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+autoSpinToggle.Font = Enum.Font.GothamBold
+autoSpinToggle.TextColor3 = Color3.new(1,1,1)
+autoSpinToggle.TextScaled = true
+autoSpinToggle.Text = "Auto Candy Spin Wheel 🎡🍬 [OFF]"
+autoSpinToggle.Parent = otherStuffsFrame
+Instance.new("UICorner", autoSpinToggle).CornerRadius = UDim.new(0, 10)
+
+autoSpinToggle.MouseButton1Click:Connect(function()
+	autoSpinEnabled = not autoSpinEnabled
+	autoSpinToggle.Text = autoSpinEnabled and "Auto Candy Spin Wheel 🎡🍬 [ON]" or "Auto Candy Spin Wheel 🎡🍬 [OFF]"
+	autoSpinToggle.BackgroundColor3 = autoSpinEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
+
+	if autoSpinEnabled then
+		autoSpinLoop = task.spawn(function()
+			while autoSpinEnabled do
+				local net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net")
+				local spinEvent = net:WaitForChild("RE/CandyEventService/Spin")
+				spinEvent:FireServer()
+				task.wait(1)
+			end
+		end)
+	else
+		if autoSpinLoop then
+			task.cancel(autoSpinLoop)
+			autoSpinLoop = nil
+		end
+	end
 end)
 
--- --- Menü aç/kapa
+-- Sekme geçişi
+for name, button in pairs(tabs) do
+	button.MouseButton1Click:Connect(function()
+		for otherName, frame in pairs(contents) do
+			frame.Visible = (otherName == name)
+		end
+	end)
+end
+
+-- Menü aç/kapa
+local isOpen = false
 mainButton.MouseButton1Click:Connect(function()
-    panel.Visible = not panel.Visible
+	isOpen = not isOpen
+	menuFrame.Visible = isOpen
+	if isOpen then
+		for name, frame in pairs(contents) do
+			frame.Visible = (name == "Main")
+		end
+	end
 end)
