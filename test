@@ -1,74 +1,36 @@
-local player = game.Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- ScreenGui oluştur
+local player = Players.LocalPlayer
+
+-- Ana GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KdmlGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana buton (solda)
+-- Ana Buton (menüyü aç/kapa)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
 mainButton.Position = UDim2.new(0, 10, 0.5, -50)
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
-mainButton.Image = "rbxassetid://104833147631294"
+mainButton.Image = "rbxassetid://104833147631294" -- isteğe göre değiştir
 mainButton.Name = "MainButton"
 mainButton.Parent = screenGui
 Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
 
--- Drag mekanizması (ana buton için)
-local dragging = false
-local dragInput, dragStart, startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    local newX = math.clamp(startPos.X.Offset + delta.X, 0, workspace.CurrentCamera.ViewportSize.X - mainButton.AbsoluteSize.X)
-    local newY = math.clamp(startPos.Y.Offset + delta.Y, 0, workspace.CurrentCamera.ViewportSize.Y - mainButton.AbsoluteSize.Y)
-    mainButton.Position = UDim2.new(0, newX, 0, newY)
-    panel.Position = UDim2.new(0, newX + 110, 0, newY + mainButton.AbsoluteSize.Y/2)
-end
-
-mainButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainButton.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-mainButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
-end)
-
 -- Panel
 local panel = Instance.new("Frame")
-panel.Size = UDim2.new(0, 350, 0, 400)
-panel.Position = UDim2.new(0, mainButton.Position.X.Offset + 110, 0, mainButton.Position.Y.Offset + mainButton.AbsoluteSize.Y/2)
+panel.Size = UDim2.new(0, 400, 0, 450) -- büyütüldü, other stuffs taşmasın diye
+panel.Position = UDim2.new(0, mainButton.Position.X.Offset + 110, 0, mainButton.Position.Y.Offset + mainButton.AbsoluteSize.Y/2 - 225)
 panel.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
 panel.Visible = false
 panel.AnchorPoint = Vector2.new(0, 0)
 panel.Parent = screenGui
 Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 15)
 
--- Panel draggable başlık çubuğu
+-- Panel başlık çubuğu (sürüklenebilir)
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundColor3 = Color3.fromRGB(100, 0, 140)
@@ -130,17 +92,12 @@ local function setActiveTab(tabName)
         tabFrames[tab].Visible = (tab == tabName)
         tabButtons[tab].BackgroundColor3 = (tab == tabName) and Color3.fromRGB(75,0,130) or Color3.fromRGB(40,40,40)
     end
-    if tabName == "Misc" then
-        panel.Size = UDim2.new(0, 350, 0, 400)
-    else
-        panel.Size = UDim2.new(0, 350, 0, 300)
-    end
 end
 
 for i, tab in ipairs(tabs) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 100, 0, 30)
-    btn.Position = UDim2.new(0, (i-1)*105 + 5, 0, 35)
+    btn.Size = UDim2.new(0, 95, 0, 30)
+    btn.Position = UDim2.new(0, (i-1)*100 + 5, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
     btn.TextColor3 = Color3.new(1,1,1)
     btn.Font = Enum.Font.GothamBold
@@ -149,188 +106,145 @@ for i, tab in ipairs(tabs) do
     btn.Parent = panel
     tabButtons[tab] = btn
 
-    btn.MouseButton1Click:Connect(function() setActiveTab(tab) end)
+    btn.MouseButton1Click:Connect(function()
+        setActiveTab(tab)
+    end)
 
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, -10, 1, -70)
+    local frame = Instance.new("ScrollingFrame")
+    frame.Size = UDim2.new(1, -10, 1, -80)
     frame.Position = UDim2.new(0, 5, 0, 70)
     frame.BackgroundTransparency = 1
+    frame.ScrollBarThickness = 5
     frame.Visible = false
     frame.Parent = panel
     tabFrames[tab] = frame
 end
 
-setActiveTab("Main")
+setActiveTab("Main") -- Başlangıç sekmesi
 
--- Main Sekmesi: Speed Boost, Jump Boost, Float
+-- --- MAIN sekmesi ---
 
 local mainFrame = tabFrames["Main"]
 
--- Speed Boost Button
-local speedBoostBtn = Instance.new("TextButton")
-speedBoostBtn.Size = UDim2.new(0, 330, 0, 40)
-speedBoostBtn.Position = UDim2.new(0, 10, 0, 10)
-speedBoostBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-speedBoostBtn.TextColor3 = Color3.new(1,1,1)
-speedBoostBtn.Font = Enum.Font.GothamBold
-speedBoostBtn.TextSize = 18
-speedBoostBtn.Text = "Speed Boost 🏃‍♂️👟 [OFF]"
-speedBoostBtn.Parent = mainFrame
-Instance.new("UICorner", speedBoostBtn).CornerRadius = UDim.new(0, 10)
+-- Instant Steal tuşu
+local instantStealBtn = Instance.new("TextButton")
+instantStealBtn.Size = UDim2.new(0, 330, 0, 40)
+instantStealBtn.Position = UDim2.new(0, 10, 0, 10)
+instantStealBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+instantStealBtn.TextColor3 = Color3.new(1,1,1)
+instantStealBtn.Font = Enum.Font.GothamBold
+instantStealBtn.TextSize = 18
+instantStealBtn.Text = "Instant Steal (code: arbix hub)"
+Instance.new("UICorner", instantStealBtn).CornerRadius = UDim.new(0, 10)
+instantStealBtn.Parent = mainFrame
 
-local speedBoostActive = false
-local boostedSpeed = 44
+instantStealBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Slowversion.lua"))()
+end)
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+-- (İstersen buraya diğer Main tuşlarını da ekleyebilirsin, speed/jump/float vs)
 
-local function applySpeedBoost()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = boostedSpeed
+-- --- MISC sekmesi ---
+
+local miscFrame = tabFrames["Misc"]
+
+local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
+
+for i, itemName in ipairs(items) do
+    local btn = Instance.new("TextButton")
+    btn.Parent = miscFrame
+    btn.Size = UDim2.new(0, 330, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, 10 + (i-1)*45)
+    btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.Text = "Buy "..itemName
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    btn.MouseButton1Click:Connect(function()
+        local rf = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        rf:InvokeServer(itemName)
+    end)
 end
 
-speedBoostBtn.MouseButton1Click:Connect(function()
-    speedBoostActive = not speedBoostActive
-    if speedBoostActive then
-        applySpeedBoost()
-        speedBoostBtn.Text = "Speed Boost 🏃‍♂️👟 [ON]"
-        speedBoostBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-    else
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 16 -- default speed
+-- --- VISUAL sekmesi ---
+
+local visualFrame = tabFrames["Visual"]
+
+local espToggleButton = Instance.new("TextButton")
+espToggleButton.Parent = visualFrame
+espToggleButton.Size = UDim2.new(0, 330, 0, 40)
+espToggleButton.Position = UDim2.new(0, 10, 0, 10)
+espToggleButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+espToggleButton.TextColor3 = Color3.new(1,1,1)
+espToggleButton.Font = Enum.Font.GothamBold
+espToggleButton.TextSize = 18
+espToggleButton.Text = "ESP: Off"
+Instance.new("UICorner", espToggleButton).CornerRadius = UDim.new(0, 10)
+
+local espEnabled = false
+local espConnections = {}
+
+local function createEsp(playerTarget)
+    if playerTarget == player then return end
+    local function addEsp(character)
+        local hrp = character:WaitForChild("HumanoidRootPart", 5)
+        if not hrp then return end
+        if hrp:FindFirstChild("ESP_Billboard") then return end
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESP_Billboard"
+        billboard.Adornee = hrp
+        billboard.Size = UDim2.new(0, 100, 0, 30)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.AlwaysOnTop = true
+        billboard.Parent = hrp
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Color3.new(1, 0, 0)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 18
+        label.Text = playerTarget.Name
+        label.Parent = billboard
+    end
+
+    if playerTarget.Character then
+        addEsp(playerTarget.Character)
+    end
+
+    local conn = playerTarget.CharacterAdded:Connect(addEsp)
+    table.insert(espConnections, conn)
+end
+
+local function removeAllEsp()
+    for _, other in pairs(game.Players:GetPlayers()) do
+        if other ~= player and other.Character then
+            local hrp = other.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and hrp:FindFirstChild("ESP_Billboard") then
+                hrp.ESP_Billboard:Destroy()
             end
         end
-        speedBoostBtn.Text = "Speed Boost 🏃‍♂️👟 [OFF]"
-        speedBoostBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
     end
-end)
-
-player.CharacterAdded:Connect(function()
-    if speedBoostActive then
-        task.wait(0.1)
-        applySpeedBoost()
-    end
-end)
-
--- Jump Boost Button
-local jumpBoostBtn = Instance.new("TextButton")
-jumpBoostBtn.Size = UDim2.new(0, 330, 0, 40)
-jumpBoostBtn.Position = UDim2.new(0, 10, 0, 60)
-jumpBoostBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-jumpBoostBtn.TextColor3 = Color3.new(1,1,1)
-jumpBoostBtn.Font = Enum.Font.GothamBold
-jumpBoostBtn.TextSize = 18
-jumpBoostBtn.Text = "Jump Boost 🔼🙍 [OFF]"
-jumpBoostBtn.Parent = mainFrame
-Instance.new("UICorner", jumpBoostBtn).CornerRadius = UDim.new(0, 10)
-
-local jumpBoostActive = false
-local UIS = game:GetService("UserInputService")
-local jumpHeight = 40
-local jumpCooldown = 1
-local canJump = true
-
-local function onJumpRequest()
-    if jumpBoostActive and canJump then
-        canJump = false
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
-        task.delay(jumpCooldown, function()
-            canJump = true
-        end)
-    end
+    for _, conn in ipairs(espConnections) do conn:Disconnect() end
+    espConnections = {}
 end
 
-jumpBoostBtn.MouseButton1Click:Connect(function()
-    jumpBoostActive = not jumpBoostActive
-    jumpBoostBtn.Text = jumpBoostActive and "Jump Boost 🔼🙍 [ON]" or "Jump Boost 🔼🙍 [OFF]"
-    jumpBoostBtn.BackgroundColor3 = jumpBoostActive and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
-end)
-
-UIS.JumpRequest:Connect(onJumpRequest)
-
--- Float Button
-local floatBtn = Instance.new("TextButton")
-floatBtn.Size = UDim2.new(0, 330, 0, 40)
-floatBtn.Position = UDim2.new(0, 10, 0, 110)
-floatBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-floatBtn.TextColor3 = Color3.new(1,1,1)
-floatBtn.Font = Enum.Font.GothamBold
-floatBtn.TextSize = 18
-floatBtn.Text = "Float 🕊️ [OFF]"
-floatBtn.Parent = mainFrame
-Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(0, 10)
-
-local floatActive = false
-local floatSpeed = 46
-local floatTime = 5
-local startTime = 0
-
-local moveConnection
-local gravityConnection
-
-local function stopFloat()
-    floatActive = false
-    floatBtn.Text = "Float 🕊️ [OFF]"
-    floatBtn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-
-    if moveConnection then moveConnection:Disconnect() end
-    if gravityConnection then gravityConnection:Disconnect() end
-
-    local character = player.Character
-    if character then
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.Velocity = Vector3.new(0, hrp.Velocity.Y, 0)
+espToggleButton.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espToggleButton.Text = espEnabled and "ESP: On" or "ESP: Off"
+    if espEnabled then
+        for _, other in pairs(game.Players:GetPlayers()) do
+            createEsp(other)
         end
-    end
-end
-
-local function startFloat()
-    floatActive = true
-    floatBtn.Text = "Float 🕊️ [ON]"
-    floatBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-    startTime = tick()
-
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-
-    -- Sabit havada kalma
-    gravityConnection = RunService.Heartbeat:Connect(function()
-        hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-    end)
-
-    -- Kamera yönüne göre ileri kayma ve süre kontrol
-    moveConnection = RunService.Heartbeat:Connect(function()
-        if not floatActive then return end
-
-        local elapsed = tick() - startTime
-        local remaining = floatTime - elapsed
-
-        if remaining <= 0 then
-            stopFloat()
-        else
-            local cameraDirection = workspace.CurrentCamera.CFrame.LookVector
-            local moveDirection = Vector3.new(cameraDirection.X, 0, cameraDirection.Z).Unit
-            hrp.Velocity = moveDirection * floatSpeed
-        end
-    end)
-end
-
-floatBtn.MouseButton1Click:Connect(function()
-    if not floatActive then
-        startFloat()
+        table.insert(espConnections, game.Players.PlayerAdded:Connect(createEsp))
     else
-        stopFloat()
+        removeAllEsp()
     end
 end)
 
--- Other Stuffs Sekmesi: Auto Candy Spin Wheel Toggle
+-- --- OTHER STUFFS sekmesi ---
+
 local otherFrame = tabFrames["Other Stuffs"]
 
 local autoSpinToggle = Instance.new("TextButton")
@@ -369,7 +283,7 @@ autoSpinToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Ana butona tıklayınca panel açılır/kapanır
+-- --- Menü aç/kapa
 mainButton.MouseButton1Click:Connect(function()
     panel.Visible = not panel.Visible
 end)
