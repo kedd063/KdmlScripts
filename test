@@ -12,7 +12,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Ana Buton (menüyü aç/kapa)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0, 10, 0.6, -50) -- Menü biraz daha aşağıda açılması için 0.6 yaptım
+mainButton.Position = UDim2.new(0, 10, 2, -50) -- Menü biraz daha aşağıda açılması için 0.6 yaptım
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
 mainButton.Image = "rbxassetid://104833147631294" -- isteğe göre değiştir
@@ -136,21 +136,24 @@ speedBoostBtn.Text = "Speed Boost🏃‍♂️👟"
 Instance.new("UICorner", speedBoostBtn).CornerRadius = UDim.new(0, 10)
 speedBoostBtn.Parent = mainFrame
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 local boostedSpeed = 44
+
 local function applySpeedBoost()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     humanoid.WalkSpeed = boostedSpeed
 end
 
-speedBoostBtn.MouseButton1Click:Connect(function()
-    if player.Character then
-        applySpeedBoost()
-    end
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        applySpeedBoost()
-    end)
+if player.Character then
+    applySpeedBoost()
+end
+
+player.CharacterAdded:Connect(function()
+    task.wait(0.1)
+    applySpeedBoost()
 end)
 
 -- Jump Boost Button
@@ -165,19 +168,24 @@ jumpBoostBtn.Text = "Jump Boost 🔼🙍"
 Instance.new("UICorner", jumpBoostBtn).CornerRadius = UDim.new(0, 10)
 jumpBoostBtn.Parent = mainFrame
 
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
 local jumpHeight = 40
 local jumpCooldown = 1
 local canJump = true
 
-jumpBoostBtn.MouseButton1Click:Connect(function()
-    if not canJump then return end -- Eğer cooldowndaysa çık
-    canJump = false
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
-    task.delay(jumpCooldown, function()
-        canJump = true
-    end)
+UIS.JumpRequest:Connect(function()
+    if canJump then
+        canJump = false
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = hrp.CFrame + Vector3.new(0, jumpHeight, 0)
+        task.delay(jumpCooldown, function()
+            canJump = true
+        end)
+    end
 end)
 
 -- Float Button
@@ -192,59 +200,121 @@ floatBtn.Text = "Float🕊️"
 Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(0, 10)
 floatBtn.Parent = mainFrame
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
 local floatActive = false
 local floatSpeed = 46
 local floatTime = 5
 local startTime = 0
 
+-- GUI Setup
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "Float 🕊"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 120)
+frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+frame.BorderSizePixel = 3
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Float 🕊"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(0, 170, 255)
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 180, 0, 40)
+button.Position = UDim2.new(0.5, -90, 0, 40)
+button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+button.BorderSizePixel = 0
+button.TextColor3 = Color3.new(1,1,1)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.Text = "Float"
+button.Parent = frame
+
+local countdownLabel = Instance.new("TextLabel")
+countdownLabel.Size = UDim2.new(0, 180, 0, 25)
+countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
+countdownLabel.BackgroundTransparency = 1
+countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+countdownLabel.Font = Enum.Font.Gotham
+countdownLabel.TextScaled = true
+countdownLabel.Text = "Ready"
+countdownLabel.Parent = frame
+
+-- Float logic
 local moveConnection
 local gravityConnection
 
 local function stopFloat()
-    floatActive = false
-    floatBtn.Text = "Float🕊️"
-    if moveConnection then moveConnection:Disconnect() end
-    if gravityConnection then gravityConnection:Disconnect() end
-    local character = player.Character
-    if character then
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            hrp.Velocity = Vector3.new(0, hrp.Velocity.Y, 0)
-        end
-    end
+	floatActive = false
+	button.Text = "Float"
+
+	if moveConnection then moveConnection:Disconnect() end
+	if gravityConnection then gravityConnection:Disconnect() end
+
+	local character = player.Character
+	if character then
+		local hrp = character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.Velocity = Vector3.new(0, hrp.Velocity.Y, 0)
+		end
+	end
 end
 
 local function startFloat()
-    floatActive = true
-    floatBtn.Text = "Stop Float"
-    startTime = tick()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
+	floatActive = true
+	button.Text = "Stop"
+	startTime = tick()
 
-    gravityConnection = RunService.Heartbeat:Connect(function()
-        hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-    end)
+	local character = player.Character or player.CharacterAdded:Wait()
+	local hrp = character:WaitForChild("HumanoidRootPart")
 
-    moveConnection = RunService.Heartbeat:Connect(function()
-        if not floatActive then return end
-        local elapsed = tick() - startTime
-        local remaining = floatTime - elapsed
-        if remaining <= 0 then
-            stopFloat()
-        else
-            local cameraDirection = workspace.CurrentCamera.CFrame.LookVector
-            local moveDirection = Vector3.new(cameraDirection.X, 0, cameraDirection.Z).Unit
-            hrp.Velocity = moveDirection * floatSpeed
-        end
-    end)
+	-- Sabit havada kalma
+	gravityConnection = RunService.Heartbeat:Connect(function()
+		hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+	end)
+
+	-- Kamera yönüne göre ileri kayma
+	moveConnection = RunService.Heartbeat:Connect(function()
+		if not floatActive then return end
+
+		-- Süre kontrol
+		local elapsed = tick() - startTime
+		local remaining = floatTime - elapsed
+		countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
+
+		if remaining <= 0 then
+			stopFloat()
+		else
+			local cameraDirection = workspace.CurrentCamera.CFrame.LookVector
+			local moveDirection = Vector3.new(cameraDirection.X, 0, cameraDirection.Z).Unit
+			hrp.Velocity = moveDirection * floatSpeed
+		end
+	end)
 end
 
-floatBtn.MouseButton1Click:Connect(function()
-    if not floatActive then
-        startFloat()
-    else
-        stopFloat()
-    end
+-- Buton Tıklama
+button.MouseButton1Click:Connect(function()
+	if not floatActive then
+		startFloat()
+	else
+		stopFloat()
+		countdownLabel.Text = "Stopped"
+	end
 end)
 
 -- Instant Steal tuşu (var olan)
