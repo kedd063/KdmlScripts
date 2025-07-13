@@ -1,37 +1,83 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- Ana GUI
+local correctKey = "Kdml2025"
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "Kdml Hub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Logo butonu (sağ alt köşe)
+local keyFrame = Instance.new("Frame")
+keyFrame.Size = UDim2.new(1,0,1,0)
+keyFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+keyFrame.Parent = screenGui
+
+local keyTitle = Instance.new("TextLabel")
+keyTitle.Size = UDim2.new(1, 0, 0, 60)
+keyTitle.Position = UDim2.new(0, 0, 0, 100)
+keyTitle.BackgroundTransparency = 1
+keyTitle.Text = "Lütfen Key Giriniz"
+keyTitle.Font = Enum.Font.GothamBold
+keyTitle.TextSize = 32
+keyTitle.TextColor3 = Color3.fromRGB(255,255,255)
+keyTitle.Parent = keyFrame
+
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0, 300, 0, 40)
+keyBox.Position = UDim2.new(0.5, -150, 0, 170)
+keyBox.ClearTextOnFocus = false
+keyBox.PlaceholderText = "Key"
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 24
+keyBox.TextColor3 = Color3.fromRGB(0,0,0)
+keyBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+keyBox.Parent = keyFrame
+keyBox.Text = ""
+
+local submitButton = Instance.new("TextButton")
+submitButton.Size = UDim2.new(0, 120, 0, 40)
+submitButton.Position = UDim2.new(0.5, -60, 0, 230)
+submitButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+submitButton.TextColor3 = Color3.fromRGB(255,255,255)
+submitButton.Text = "Onayla"
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 22
+submitButton.Parent = keyFrame
+
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(1, 0, 0, 30)
+infoLabel.Position = UDim2.new(0, 0, 0, 280)
+infoLabel.BackgroundTransparency = 1
+infoLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+infoLabel.Text = ""
+infoLabel.Font = Enum.Font.Gotham
+infoLabel.TextSize = 20
+infoLabel.Parent = keyFrame
+
 local logoButton = Instance.new("ImageButton")
 logoButton.Size = UDim2.new(0, 60, 0, 60)
-logoButton.Position = UDim2.new(1, -70, 1, -70) -- sağ alt köşe
+logoButton.Position = UDim2.new(1, -70, 1, -70)
 logoButton.AnchorPoint = Vector2.new(1, 1)
 logoButton.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
 logoButton.BorderSizePixel = 0
 logoButton.Image = "rbxassetid://104833147631294"
 logoButton.Parent = screenGui
+logoButton.Visible = false
 
 local logoCorner = Instance.new("UICorner")
-logoCorner.CornerRadius = UDim.new(1, 0) -- tamamen yuvarlak
+logoCorner.CornerRadius = UDim.new(1, 0)
 logoCorner.Parent = logoButton
 
--- Menü Frame (başlangıçta gizli, ortada)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 320, 0, 250)
-mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125) -- ortada
-mainFrame.AnchorPoint = Vector2.new(0, 0)
+-- Menü tam ortada açılacak:
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125)
 mainFrame.BackgroundColor3 = Color3.fromRGB(128, 0, 128)
 mainFrame.Visible = false
 mainFrame.Parent = screenGui
 mainFrame.Active = true
 
--- Gradient
 local gradient = Instance.new("UIGradient")
 gradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),
@@ -40,12 +86,10 @@ gradient.Color = ColorSequence.new{
 gradient.Rotation = 45
 gradient.Parent = mainFrame
 
--- Yuvarlak köşeler
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = mainFrame
 
--- Başlık
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 0)
@@ -57,7 +101,6 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Parent = mainFrame
 title.TextStrokeTransparency = 0.3
 
--- Buton verileri
 local buttons = {
     {
         name = "Steal a Brainrot Script 1",
@@ -85,7 +128,6 @@ local buttons = {
     }
 }
 
--- Buton oluşturucu
 local function createButton(info, index)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(0.9, 0, 0, 45)
@@ -102,7 +144,6 @@ local function createButton(info, index)
     corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = button
 
-    -- Hover efekti
     button.MouseEnter:Connect(function()
         button:TweenSize(UDim2.new(0.92, 0, 0, 48), "Out", "Quad", 0.2, true)
         button.BackgroundColor3 = Color3.fromRGB(115, 50, 180)
@@ -112,7 +153,6 @@ local function createButton(info, index)
         button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
     end)
 
-    -- Tıklama
     button.MouseButton1Click:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
         task.wait(0.1)
@@ -121,17 +161,14 @@ local function createButton(info, index)
     end)
 end
 
--- Butonları oluştur
 for i, info in ipairs(buttons) do
     createButton(info, i)
 end
 
--- Menü görünürlüğünü toggle et
 logoButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Menü hareket ettirilebilir
 local UIS = game:GetService("UserInputService")
 local dragging, dragInput, dragStart, startPos
 
@@ -164,5 +201,23 @@ UIS.InputChanged:Connect(function(input)
             startPos.Y.Scale,
             startPos.Y.Offset + delta.Y
         )
+    end
+end)
+
+local function checkKey()
+    local enteredKey = keyBox.Text
+    if enteredKey == correctKey then
+        keyFrame:Destroy()
+        logoButton.Visible = true
+    else
+        infoLabel.Text = "Yanlış key! Tekrar deneyin."
+        keyBox.Text = ""
+    end
+end
+
+submitButton.MouseButton1Click:Connect(checkKey)
+keyBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        checkKey()
     end
 end)
