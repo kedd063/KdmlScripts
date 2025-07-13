@@ -1,60 +1,50 @@
--- Gerekli servisler
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+-- Gui + Auto Collect Script
+local player = game.Players.LocalPlayer
 
--- GUI Oluştur
-local gui = Instance.new("ScreenGui")
-gui.Name = "TP_Bypass_GUI"
-gui.Parent = player:WaitForChild("PlayerGui")
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "AutoCollectGui"
 
--- Buton Oluştur
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 160, 0, 50)
-button.Position = UDim2.new(0, 20, 0.85, 0)
-button.BackgroundColor3 = Color3.fromRGB(90, 0, 180)
-button.TextColor3 = Color3.new(1, 1, 1)
+-- Create Toggle Button
+local button = Instance.new("TextButton", screenGui)
+button.Size = UDim2.new(0, 200, 0, 50)
+button.Position = UDim2.new(0, 20, 0, 100)
+button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.Font = Enum.Font.GothamBold
 button.TextSize = 20
-button.Text = "TP Inside (Safe)"
-button.Parent = gui
+button.Text = "Auto Collect: OFF"
+button.BorderSizePixel = 0
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = button
+-- Auto Collect Logic
+local running = false
 
--- Soft Bypass TP Fonksiyonu
-local function softBypassTP()
-	local character = player.Character or player.CharacterAdded:Wait()
-	local hrp = character:WaitForChild("HumanoidRootPart")
-	local humanoid = character:WaitForChild("Humanoid")
-
-	-- Yön ve hedef pozisyon
-	local direction = workspace.CurrentCamera.CFrame.LookVector
-	local goal = hrp.Position + (direction * 5)
-	goal = Vector3.new(goal.X, hrp.Position.Y, goal.Z)
-
-	-- Hızı artır, sanki yürüyormuş gibi yap
-	local originalSpeed = humanoid.WalkSpeed
-	humanoid.WalkSpeed = 100
-	humanoid:Move(direction, true)
-
-	-- 0.2 saniye sonra hızlıca hedefe kay
-	task.wait(0.2)
-	humanoid.WalkSpeed = originalSpeed
-	humanoid:Move(Vector3.zero, false)
-
-	-- Velocity'yi sıfırla (server daha az fark etsin)
-	hrp.Velocity = Vector3.zero
-
-	-- Yavaşça pozisyonu değiştir
-	pcall(function()
-		hrp.CFrame = CFrame.new(goal)
-	end)
+local function startCollecting()
+    running = true
+    button.Text = "Auto Collect: ON"
+    while running do
+        for i = 1, 21 do
+            local args = { i }
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Packages")
+                :WaitForChild("Net")
+                :WaitForChild("RE/PlotService/ClaimCoins")
+                :FireServer(unpack(args))
+            task.wait(0.1)
+        end
+        task.wait(1)
+    end
 end
 
--- Butona bağla
-button.MouseButton1Click:Connect(softBypassTP)
+local function stopCollecting()
+    running = false
+    button.Text = "Auto Collect: OFF"
+end
+
+button.MouseButton1Click:Connect(function()
+    if running then
+        stopCollecting()
+    else
+        startCollecting()
+    end
+end)
