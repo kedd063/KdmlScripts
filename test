@@ -12,7 +12,7 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 -- Ana Buton (menüyü aç/kapa)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0, 10, 2, -50) -- Menü biraz daha aşağıda açılması için 0.6 yaptım
+mainButton.Position = UDim2.new(0, 10, 0.6, -50) -- Menü biraz daha aşağıda açılması için 0.6 yaptım
 mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
 mainButton.Image = "rbxassetid://104833147631294" -- isteğe göre değiştir
