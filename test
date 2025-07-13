@@ -5,39 +5,55 @@ local player = Players.LocalPlayer
 -- GUI oluştur
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TpInsideGui"
-screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = false
+screenGui.Parent = player:WaitForChild("PlayerGui")  -- Bu kısım olmazsa görünmez!
 
 -- Buton oluştur
 local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 150, 0, 50)
-button.Position = UDim2.new(0, 20, 0.7, 0)
+button.Size = UDim2.new(0, 160, 0, 50)
+button.Position = UDim2.new(0, 20, 0.8, 0)
 button.BackgroundColor3 = Color3.fromRGB(130, 90, 255)
 button.TextColor3 = Color3.new(1, 1, 1)
 button.Font = Enum.Font.GothamBold
 button.TextSize = 20
 button.Text = "TP Inside"
+button.Name = "TpInsideButton"
 button.Parent = screenGui
-button.AutoButtonColor = true
-button.AnchorPoint = Vector2.new(0, 0)
-Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = button
 
 -- Fonksiyon: NoClip + Tween
 local function wallTP()
-	local character = player.Character
-	if not character then return end
-
+	local character = player.Character or player.CharacterAdded:Wait()
 	local hrp = character:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
 	-- NoClip aç/kapat
 	local function setNoClip(state)
 		for _, part in ipairs(character:GetDescendants()) do
-			if part:IsA("BasePart") and part.CanCollide ~= not state then
+			if part:IsA("BasePart") then
 				part.CanCollide = not state
 			end
 		end
 	end
 
-	-- Hedef pozisyon
-	local lookVector =
+	local lookVector = workspace.CurrentCamera.CFrame.LookVector
+	local targetPos = hrp.Position + lookVector * 5
+	targetPos = Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z)
+
+	setNoClip(true)
+
+	local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Linear)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+	tween:Play()
+
+	tween.Completed:Connect(function()
+		setNoClip(false)
+	end)
+end
+
+-- Butona tıklanınca çalıştır
+button.MouseButton1Click:Connect(wallTP)
