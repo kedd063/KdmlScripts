@@ -152,19 +152,40 @@ end
 -- MAIN sekmesine butonlar
 
 -- Speed Boost
-createMainButton(contents["Main"], "Speed Boost 🏃‍♂️👟", function()
-	local boostedSpeed = 48
-	local function applySpeedBoost()
-		local char = player.Character or player.CharacterAdded:Wait()
-		local humanoid = char:WaitForChild("Humanoid")
-		humanoid.WalkSpeed = boostedSpeed
+local speedBoostActive = false
+local boostedSpeed = 48
+local defaultSpeed = 34 -- Varsayılan hız
+
+createMainButton(contents["Main"], "Speed Boost ❌", function(btn)
+	speedBoostActive = not speedBoostActive
+
+	local char = player.Character or player.CharacterAdded:Wait()
+	local humanoid = char:WaitForChild("Humanoid", 5)
+	if humanoid then
+		if speedBoostActive then
+			humanoid.WalkSpeed = boostedSpeed
+			btn.Text = "Speed Boost ✅"
+			btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		else
+			humanoid.WalkSpeed = defaultSpeed
+			btn.Text = "Speed Boost ❌"
+			btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+		end
 	end
-	applySpeedBoost()
-	player.CharacterAdded:Connect(function()
-		task.wait(0.1)
-		applySpeedBoost()
-	end)
 end)
+
+-- Karakter değiştiğinde hız ayarını koru
+player.CharacterAdded:Connect(function(char)
+	local humanoid = char:WaitForChild("Humanoid", 5)
+	if humanoid then
+		if speedBoostActive then
+			humanoid.WalkSpeed = boostedSpeed
+		else
+			humanoid.WalkSpeed = defaultSpeed
+		end
+	end
+end)
+
 
 -- Jump Boost
 createMainButton(contents["Main"], "Jump Boost 🔼🙍", function()
