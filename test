@@ -69,7 +69,7 @@ for i, name in ipairs(tabNames) do
 
 	local contentFrame = Instance.new("Frame")
 	contentFrame.Size = UDim2.new(1, -40, 1, -110)
-        contentFrame.Position = UDim2.new(0, 20, 0, 80)
+        contentFrame.Position = UDim2.new(0, 10, 0, 110)
 	contentFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 120)
 	contentFrame.Visible = false
 	contentFrame.Parent = menuFrame
@@ -128,35 +128,16 @@ end)
 local jumpBoostEnabled = false
 local jumpBoostConnection = nil
 
-createMainButton(contents["Main"], "Jump Boost 🔼 [OFF]", function(btn)
-    jumpBoostEnabled = not jumpBoostEnabled
-    btn.Text = jumpBoostEnabled and "Jump Boost 🔼 [ON]" or "Jump Boost 🔼 [OFF]"
+createMainButton(contents["Main"], "Jump Boost 🔼🙍", function()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
 
-    if jumpBoostEnabled then
-        local function onJump(active)
-            if active then
-                local character = player.Character or player.CharacterAdded:Wait()
-                local rootPart = character:WaitForChild("HumanoidRootPart")
-                rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
-            end
+    humanoid.Jumping:Connect(function(active)
+        if active then
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
         end
-
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:WaitForChild("Humanoid")
-
-        jumpBoostConnection = humanoid.Jumping:Connect(onJump)
-
-        player.CharacterAdded:Connect(function(char)
-            if jumpBoostConnection then jumpBoostConnection:Disconnect() end
-            humanoid = char:WaitForChild("Humanoid")
-            jumpBoostConnection = humanoid.Jumping:Connect(onJump)
-        end)
-    else
-        if jumpBoostConnection then
-            jumpBoostConnection:Disconnect()
-            jumpBoostConnection = nil
-        end
-    end
+    end)
 end)
 
 
