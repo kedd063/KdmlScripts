@@ -83,7 +83,6 @@ local buttons = {
     }
 }
 
--- Buton oluşturucu
 local function createButton(info, index)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(0.9, 0, 0, 45)
@@ -100,7 +99,6 @@ local function createButton(info, index)
     corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = button
 
-    -- Hover efekti
     button.MouseEnter:Connect(function()
         button:TweenSize(UDim2.new(0.92, 0, 0, 48), "Out", "Quad", 0.2, true)
         button.BackgroundColor3 = Color3.fromRGB(115, 50, 180)
@@ -110,7 +108,6 @@ local function createButton(info, index)
         button.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
     end)
 
-    -- Tıklama
     button.MouseButton1Click:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
         task.wait(0.1)
@@ -119,17 +116,15 @@ local function createButton(info, index)
     end)
 end
 
--- Butonları oluştur
 for i, info in ipairs(buttons) do
     createButton(info, i)
 end
 
--- Menü aç/kapa fonksiyonu
 logoButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Menü hareket ettirme (drag)
+-- Drag hareketi
 local dragging = false
 local dragInput
 local dragStart
