@@ -1,211 +1,89 @@
--- Settings
-local correctKey = "test3131"  -- Buraya doğru keyi yaz
-local discordURL = "https://discord.gg/scVsN9E5YN"
-local receiveKeyLink = "https://direct-link.net/1030745/yRmNiYKpg3bi"
-
--- Services
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Create ScreenGui
+-- GUI Oluştur
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KdmlKeySystem"
+screenGui.Name = "KdmlHub"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = game.CoreGui
+screenGui.Parent = playerGui
 
--- Main frame
+-- Ana Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 180)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-mainFrame.BorderSizePixel = 0
-mainFrame.AnchorPoint = Vector2.new(0.5,0.5)
+mainFrame.Size = UDim2.new(0, 300, 0, 200)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+mainFrame.BackgroundColor3 = Color3.fromRGB(170, 120, 255)
 mainFrame.Parent = screenGui
-mainFrame.ClipsDescendants = true
-mainFrame.Active = true
-mainFrame.Draggable = true
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
--- Title
+-- Gradyan Arkaplan
+local gradient = Instance.new("UIGradient", mainFrame)
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(170, 120, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+gradient.Rotation = 45
+
+-- Başlık
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 35)
-title.BackgroundColor3 = Color3.fromRGB(45,45,45)
-title.BorderSizePixel = 0
-title.Text = "Kdml Scripts Key System"
-title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Size = UDim2.new(1, 0, 0, 28)
+title.BackgroundTransparency = 1
+title.Text = "Kdml Hub"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+title.TextSize = 18
+title.TextColor3 = Color3.new(1, 1, 1)
 title.Parent = mainFrame
 
--- Key textbox
-local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(0.7, -10, 0, 40)
-keyBox.Position = UDim2.new(0, 10, 0, 60)
-keyBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-keyBox.BorderSizePixel = 0
-keyBox.PlaceholderText = "Enter your key here"
-keyBox.TextColor3 = Color3.fromRGB(255,255,255)
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 18
-keyBox.ClearTextOnFocus = false
-keyBox.Parent = mainFrame
-
--- Verify button
-local verifyBtn = Instance.new("TextButton")
-verifyBtn.Size = UDim2.new(0.3, -10, 0, 40)
-verifyBtn.Position = UDim2.new(0.7, 10, 0, 60)
-verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255) -- Mavi (Discord teması)
-verifyBtn.BorderSizePixel = 0
-verifyBtn.Text = "Verify"
-verifyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-verifyBtn.Font = Enum.Font.GothamBold
-verifyBtn.TextSize = 20
-verifyBtn.Parent = mainFrame
-verifyBtn.AutoButtonColor = false
-
--- Verify hover effect
-verifyBtn.MouseEnter:Connect(function()
-    verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 135, 210)
-end)
-verifyBtn.MouseLeave:Connect(function()
-    verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+-- Sürükleme
+local dragging, dragStart, startPos = false
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
 end)
 
--- Discord button
-local discordBtn = Instance.new("TextButton")
-discordBtn.Size = UDim2.new(0.45, -10, 0, 40)
-discordBtn.Position = UDim2.new(0, 10, 0, 110)
-discordBtn.BackgroundColor3 = Color3.fromRGB(114, 137, 218) -- Discord renk
-discordBtn.BorderSizePixel = 0
-discordBtn.Text = "Discord"
-discordBtn.TextColor3 = Color3.fromRGB(255,255,255)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 20
-discordBtn.Parent = mainFrame
-discordBtn.AutoButtonColor = false
-
-discordBtn.MouseEnter:Connect(function()
-    discordBtn.BackgroundColor3 = Color3.fromRGB(80, 110, 170)
-end)
-discordBtn.MouseLeave:Connect(function()
-    discordBtn.BackgroundColor3 = Color3.fromRGB(114, 137, 218)
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
 end)
 
-discordBtn.MouseButton1Click:Connect(function()
-    -- Open discord link
-    pcall(function()
-        if syn then -- Synapse destek
-            syn.request({
-                Url = discordURL,
-                Method = "GET"
-            })
-        end
-        if setclipboard then
-            setclipboard(discordURL)
-        end
-        local success, err = pcall(function()
-            game:GetService("GuiService"):OpenBrowserWindow(discordURL)
-        end)
-    end)
-end)
+-- Buton Oluşturma
+local function createButton(text, yOffset, scriptUrl)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.9, 0, 0, 30)
+	button.Position = UDim2.new(0.05, 0, 0, yOffset)
+	button.BackgroundColor3 = Color3.fromRGB(110, 80, 200)
+	button.Text = text
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Font = Enum.Font.GothamBold
+	button.TextScaled = true
+	button.Parent = mainFrame
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
--- Receive Key button
-local receiveBtn = Instance.new("TextButton")
-receiveBtn.Size = UDim2.new(0.45, -10, 0, 40)
-receiveBtn.Position = UDim2.new(0.55, 10, 0, 110)
-receiveBtn.BackgroundColor3 = Color3.fromRGB(220, 20, 60) -- Kırmızı
-receiveBtn.BorderSizePixel = 0
-receiveBtn.Text = "Receive Key Link"
-receiveBtn.TextColor3 = Color3.fromRGB(255,255,255)
-receiveBtn.Font = Enum.Font.GothamBold
-receiveBtn.TextSize = 16
-receiveBtn.Parent = mainFrame
-receiveBtn.AutoButtonColor = false
-
-receiveBtn.MouseEnter:Connect(function()
-    receiveBtn.BackgroundColor3 = Color3.fromRGB(180, 15, 45)
-end)
-receiveBtn.MouseLeave:Connect(function()
-    receiveBtn.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
-end)
-
-receiveBtn.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard(receiveKeyLink)
-        showNotification("Receive Key Link copied!")
-    else
-        showNotification("Clipboard not supported!")
-    end
-end)
-
--- Notification frame (sağ altta)
-local notifFrame = Instance.new("Frame")
-notifFrame.Size = UDim2.new(0, 300, 0, 50)
-notifFrame.Position = UDim2.new(1, -310, 1, -60)
-notifFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-notifFrame.BorderSizePixel = 0
-notifFrame.AnchorPoint = Vector2.new(0, 0)
-notifFrame.Visible = false
-notifFrame.Parent = screenGui
-notifFrame.ClipsDescendants = true
-notifFrame.ZIndex = 10
-notifFrame.Rotation = -10
-
-local notifText = Instance.new("TextLabel")
-notifText.Size = UDim2.new(1, -20, 1, 0)
-notifText.Position = UDim2.new(0, 10, 0, 0)
-notifText.BackgroundTransparency = 1
-notifText.TextColor3 = Color3.fromRGB(255,255,255)
-notifText.TextWrapped = true
-notifText.TextXAlignment = Enum.TextXAlignment.Left
-notifText.Font = Enum.Font.GothamBold
-notifText.TextSize = 18
-notifText.Text = "Join Our Discord Server! discord.gg/scVsN9E5YN"
-notifText.Parent = notifFrame
-
--- Notification tween function
-function showNotification(text)
-    notifText.Text = text
-    notifFrame.Visible = true
-    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tweenIn = TweenService:Create(notifFrame, tweenInfo, {Position = UDim2.new(1, -310, 1, -70), Rotation = 0})
-    tweenIn:Play()
-    tweenIn.Completed:Wait()
-    wait(10)
-    local tweenOut = TweenService:Create(notifFrame, tweenInfo, {Position = UDim2.new(1, -310, 1, -60), Rotation = -10})
-    tweenOut:Play()
-    tweenOut.Completed:Wait()
-    notifFrame.Visible = false
+	button.MouseButton1Click:Connect(function()
+		pcall(function()
+			loadstring(game:HttpGet(scriptUrl))()
+		end)
+	end)
 end
 
--- Error message label (altında textbox)
-local errorLabel = Instance.new("TextLabel")
-errorLabel.Size = UDim2.new(1, -20, 0, 25)
-errorLabel.Position = UDim2.new(0, 10, 0, 105)
-errorLabel.BackgroundTransparency = 1
-errorLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-errorLabel.Font = Enum.Font.GothamBold
-errorLabel.TextSize = 16
-errorLabel.Text = ""
-errorLabel.TextWrapped = true
-errorLabel.TextXAlignment = Enum.TextXAlignment.Center
-errorLabel.Parent = mainFrame
-
--- Verify button logic
-verifyBtn.MouseButton1Click:Connect(function()
-    local enteredKey = keyBox.Text
-    if enteredKey == correctKey then
-        errorLabel.Text = ""
-        showNotification("Correct Key! Loading script...")
-        wait(0.8)
-        screenGui:Destroy() -- GUI kapansın
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tesst"))()
-    else
-        errorLabel.Text = "Incorrect Key!"
-        showNotification("Incorrect Key! Try again.")
-    end
-end)
-
--- Başlangıç notification
-showNotification("Join Our Discord Server! discord.gg/scVsN9E5YN")
+-- 4 Küçük Buton
+createButton("Script 1", 35, "https://pastefy.app/cjXdhdB7/raw")
+createButton("Script 2", 70, "https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Steal%20a%20Brainrot")
+createButton("Script 3", 105, "https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab")
+createButton("Script 4", 140, "https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua")
