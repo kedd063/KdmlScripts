@@ -3,7 +3,7 @@ local player = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local ClipboardService = game:GetService("Clipboard") -- Roblox’ta yok ama bazı executorlar destekliyor
 
-local correctKey = "kdmlhub063"
+local correctKey = "Kdml2025"
 local keyLink = "https://direct-link.net/1030745/yRmNiYKpg3bi"
 
 local screenGui = Instance.new("ScreenGui")
