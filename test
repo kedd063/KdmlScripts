@@ -91,25 +91,20 @@ end
 
 -- Yeni buton oluşturma fonksiyonu
 local function createMainButton(parent, text, callback)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 200, 0, 40)
-	local buttonCount = countButtons(parent)
-	btn.Position = UDim2.new(0.5, -100, 0, (buttonCount - 1) * 50)
-	btn.Text = text
-	btn.Font = Enum.Font.GothamBold
-	btn.TextScaled = true
-	btn.BackgroundColor3 = Color3.fromRGB(90, 60, 160)
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.Parent = parent
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-	btn.MouseButton1Click:Connect(function()
-		callback(btn)
-	end)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 30) -- Sabit boyut
+    btn.Position = UDim2.new(0, 10, 0, (#parent:GetChildren() - 1) * 35)
+    btn.Text = text
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BorderSizePixel = 0
+    btn.Parent = parent
 
-	-- Content frame yüksekliğini buton sayısına göre ayarla:
-	local newHeight = (buttonCount * 50) + 50
-	parent.Size = UDim2.new(1, -20, 0, newHeight)
+    btn.MouseButton1Click:Connect(callback)
 end
+
 
 
 -- MAIN sekmesine butonlar
