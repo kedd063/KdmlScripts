@@ -226,51 +226,92 @@ end)
 local espEnabled = false
 local espObjects = {}
 
-createMainButton(contents["Visual"], "ESP", function(button)
-	espEnabled = not espEnabled
-	button.Text = espEnabled and "ESP ✅" or "ESP ❌"
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-	for _, adorn in pairs(espObjects) do
-		if adorn and adorn.Parent then
-			adorn:Destroy()
-		end
+local player = Players.LocalPlayer
+local espEnabled = false
+local espFolder = Instance.new("Folder", player.PlayerGui)
+espFolder.Name = "ESPFolder"
+
+-- Kutu rengi (lavanta moru)
+local boxColor = Color3.fromRGB(180, 150, 255)
+
+local function createESPForPlayer(targetPlayer)
+	if targetPlayer == player then return end
+
+	local function onCharacterAdded(char)
+		-- Önce varsa temizle
+		local existing = espFolder:FindFirstChild(targetPlayer.Name)
+		if existing then existing:Destroy() end
+
+		local hrp = char:WaitForChild("HumanoidRootPart", 5)
+		if not hrp then return end
+
+		-- BoxHandleAdornment kutu
+		local box = Instance.new("BoxHandleAdornment")
+		box.Name = targetPlayer.Name .. "_Box"
+		box.Size = Vector3.new(4, 5, 2)
+		box.Adornee = hrp
+		box.AlwaysOnTop = true
+		box.ZIndex = 5
+		box.Color3 = boxColor
+		box.Transparency = 0.4
+		box.Parent = espFolder
+
+		-- BillboardGui isim etiketi
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = targetPlayer.Name .. "_Billboard"
+		billboard.Adornee = hrp
+		billboard.Size = UDim2.new(0, 150, 0, 50)
+		billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = espFolder
+
+		local bg = Instance.new("Frame")
+		bg.BackgroundColor3 = Color3.new(0, 0, 0)
+		bg.BackgroundTransparency = 0.5
+		bg.Size = UDim2.new(1, 0, 1, 0)
+		bg.Parent = billboard
+
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Size = UDim2.new(1, 0, 1, 0)
+		nameLabel.Font = Enum.Font.GothamBold
+		nameLabel.TextSize = 20
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		nameLabel.TextStrokeTransparency = 0
+		nameLabel.Text = targetPlayer.Name
+		nameLabel.Parent = bg
 	end
-	table.clear(espObjects)
 
+	if targetPlayer.Character then
+		onCharacterAdded(targetPlayer.Character)
+	end
+	targetPlayer.CharacterAdded:Connect(onCharacterAdded)
+end
+
+local function enableESP()
+	espEnabled = true
+	for _, plr in pairs(Players:GetPlayers()) do
+		createESPForPlayer(plr)
+	end
+	Players.PlayerAdded:Connect(createESPForPlayer)
+end
+
+local function disableESP()
+	espEnabled = false
+	espFolder:ClearAllChildren()
+end
+
+-- Toggle buton fonksiyonuna bağlama örneği:
+createMainButton(contents["Visual"], "ESP", function(button)
 	if espEnabled then
-		for _, plr in ipairs(Players:GetPlayers()) do
-			if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-				local box = Instance.new("BoxHandleAdornment")
-				box.Size = Vector3.new(4, 5, 2)
-				box.Adornee = plr.Character.HumanoidRootPart
-				box.AlwaysOnTop = true
-				box.ZIndex = 5
-				box.Color3 = Color3.fromRGB(255, 0, 0)
-				box.Transparency = 0.2
-				box.Parent = plr.Character
-				table.insert(espObjects, box)
-			end
-		end
-
-		Players.PlayerAdded:Connect(function(newPlr)
-			newPlr.CharacterAdded:Connect(function(char)
-				if espEnabled then
-					task.wait(0.5)
-					local hrp = char:FindFirstChild("HumanoidRootPart")
-					if hrp then
-						local box = Instance.new("BoxHandleAdornment")
-						box.Size = Vector3.new(4, 5, 2)
-						box.Adornee = hrp
-						box.AlwaysOnTop = true
-						box.ZIndex = 5
-						box.Color3 = Color3.fromRGB(255, 0, 0)
-						box.Transparency = 0.2
-						box.Parent = char
-						table.insert(espObjects, box)
-					end
-				end
-			end)
-		end)
+		disableESP()
+		button.Text = "ESP ❌"
+	else
+		enableESP()
+		button.Text = "ESP ✅"
 	end
 end)
 
