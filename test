@@ -238,14 +238,24 @@ createMainButton(contents["Main"], "İnstant Steal (code: arbix hub)", function(
 end)
 
 
--- Visual sekmesine ESP toggle ekleniyor
-local visualContent = contents["Visual"]
+-- Visual sekmesine ESP toggle butonu ve ESP fonksiyonları
 
+local espToggle = Instance.new("TextButton")
+espToggle.Size = UDim2.new(0, 200, 0, 40)
+espToggle.Position = UDim2.new(0, 10, 0, 10)
+espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+espToggle.TextColor3 = Color3.new(1, 1, 1)
+espToggle.Font = Enum.Font.GothamBold
+espToggle.TextSize = 16
+espToggle.Text = "ESP: OFF"
+espToggle.Parent = contents["Visual"]
+Instance.new("UICorner", espToggle).CornerRadius = UDim.new(0, 6)
+
+local espEnabled = false
 local espObjects = {}
 
 local function createNameTag(character, playerName)
     if not character or not character:FindFirstChild("Head") then return end
-
     local head = character.Head
 
     local billboard = Instance.new("BillboardGui")
@@ -275,10 +285,10 @@ local function applyHighlight(character)
     local highlight = Instance.new("Highlight")
     highlight.Name = "ESP_Highlight"
     highlight.Adornee = character
-    highlight.FillColor = Color3.fromRGB(170, 0, 255) -- Hafif mor
+    highlight.FillColor = Color3.fromRGB(170, 0, 255)
     highlight.FillTransparency = 0.5
     highlight.OutlineTransparency = 0.7
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- duvar arkası görünürlük
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = character
 
     return highlight
@@ -319,15 +329,14 @@ espToggle.MouseButton1Click:Connect(function()
     if espEnabled then
         espToggle.Text = "ESP: ON"
         espToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        print("ESP Activated")
         enableESP()
     else
         espToggle.Text = "ESP: OFF"
         espToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        print("ESP Deactivated")
         disableESP()
     end
 end)
+
 
 
 
