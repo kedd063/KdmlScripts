@@ -340,3 +340,19 @@ mainButton.MouseButton1Click:Connect(function()
 end)
 
 return screenGui
+
+-- sekmeler arası geçiş
+
+for name, button in pairs(tabs) do
+    button.MouseButton1Click:Connect(function()
+        for _, f in pairs(contents) do
+            f.Visible = false
+        end
+        for _, b in pairs(tabs) do
+            b.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+        end
+        contents[name].Visible = true
+        button.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
+    end)
+end
+
