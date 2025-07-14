@@ -432,14 +432,24 @@ end)
 -- 3. Brainrot God ESP
 local brainrotGodToggle = createToggleButton("BrainrotGod", "OP Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
 local brainrotGodEnabled = false
+
 local modelNames2 = {
+    -- Orijinal modeller
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
     "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
-    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino,
-"Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
-    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
-    "Garamam and Madundung", "Las Tralaleritas
+    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino",
+
+    -- Eklenen modeller
+    "Chimpanzini Spiderini",
+    "Los Tralaleritos",
+    "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini",
+    "Graipuss Medussi",
+    "La Grande Combinasion",
+    "Garamam and Madundung",
+    "Las Tralaleritas"
 }
+
 local brainrotGodConnection
 
 local function addBrainrotGodESP(model)
@@ -465,57 +475,8 @@ local function addBrainrotGodESP(model)
     if not model:FindFirstChild("ESPBox") then
         local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
         if primaryPart then
-            local box = Instance.new("BoxHandleAdornment")
-            box.Name = "ESPBox"
-            box.Adornee = primaryPart
-            box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-            box.Color3 = Color3.fromRGB(255, 0, 0)
-            box.AlwaysOnTop = true
-            box.ZIndex = 10
-            box.Transparency = 0.5
-            box.Parent = primaryPart
-        end
-    end
-end
+            local box
 
-local function enableOPBrainrotsESP()
-    brainrotGodConnection = RunService.RenderStepped:Connect(function()
-        for _, model in pairs(workspace:GetChildren()) do
-            if table.find(modelNames2, model.Name) then
-                addBrainrotGodESP(model)
-            end
-        end
-    end)
-end
-
-local function disableOPBrainrotsESP()
-    if brainrotGodConnection then
-        brainrotGodConnection:Disconnect()
-        brainrotGodConnection = nil
-    end
-    for _, model in pairs(workspace:GetChildren()) do
-        if model:FindFirstChild("ESPBox") then model.ESPBox:Destroy() end
-        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-        if head then
-            for _, gui in pairs(head:GetChildren()) do
-                if gui:IsA("BillboardGui") then gui:Destroy() end
-            end
-        end
-    end
-end
-
-brainrotGodToggle.MouseButton1Click:Connect(function()
-    brainrotGodEnabled = not brainrotGodEnabled
-    if brainrotGodEnabled then
-        brainrotGodToggle.Text = "OP Brainrots: ON"
-        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        enableBrainrotGodESP()
-    else
-        brainrotGodToggle.Text = "OP Brainrots: OFF"
-        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        disableOPBrainrotsESP()
-    end
-end)
 
 
 
