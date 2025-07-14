@@ -22,19 +22,28 @@ local function createKeyInputGui()
     frame.Parent = gui
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
 
+    -- Title Icon
+    local titleIcon = Instance.new("ImageLabel")
+    titleIcon.Size = UDim2.new(0, 24, 0, 24)
+    titleIcon.Position = UDim2.new(0, 10, 0, 10)
+    titleIcon.BackgroundTransparency = 1
+    titleIcon.Image = "rbxassetid://77684173042541"
+    titleIcon.Parent = frame
+
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Size = UDim2.new(1, -40, 0, 40)
+    title.Position = UDim2.new(0, 40, 0, 10)
     title.BackgroundTransparency = 1
-    title.Text = "🔐 Enter Access Key"
+    title.Text = "Enter Access Key"
     title.Font = Enum.Font.GothamBold
     title.TextSize = 24
     title.TextColor3 = Color3.fromRGB(0, 170, 255)
+    title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = frame
 
     local textbox = Instance.new("TextBox")
     textbox.Size = UDim2.new(0, 300, 0, 40)
-    textbox.Position = UDim2.new(0.5, -150, 0, 50)
+    textbox.Position = UDim2.new(0.5, -150, 0, 60)
     textbox.PlaceholderText = "Enter Key Here"
     textbox.ClearTextOnFocus = true
     textbox.Font = Enum.Font.GothamBold
@@ -74,9 +83,18 @@ local function createKeyInputGui()
     discordButton.TextColor3 = Color3.new(1,1,1)
     discordButton.Font = Enum.Font.GothamBold
     discordButton.TextSize = 18
-    discordButton.Text = "📌 Our Discord Server"
+    discordButton.TextXAlignment = Enum.TextXAlignment.Left
+    discordButton.Text = "Our Discord Server"
     discordButton.Parent = frame
     Instance.new("UICorner", discordButton).CornerRadius = UDim.new(0, 12)
+
+    -- Discord Icon inside button
+    local discordIcon = Instance.new("ImageLabel")
+    discordIcon.Size = UDim2.new(0, 20, 0, 20)
+    discordIcon.Position = UDim2.new(0, 10, 0.5, -10)
+    discordIcon.BackgroundTransparency = 1
+    discordIcon.Image = "rbxassetid://80918621663609"
+    discordIcon.Parent = discordButton
 
     local messageLabel = Instance.new("TextLabel")
     messageLabel.Size = UDim2.new(1, -20, 0, 20)
@@ -85,10 +103,19 @@ local function createKeyInputGui()
     messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     messageLabel.TextScaled = true
     messageLabel.Font = Enum.Font.GothamBold
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Left
     messageLabel.Text = ""
     messageLabel.Parent = frame
 
-    return gui, frame, textbox, submitButton, linkButton, discordButton, messageLabel
+    -- Message Icon (✅ or ❌)
+    local messageIcon = Instance.new("ImageLabel")
+    messageIcon.Size = UDim2.new(0, 20, 0, 20)
+    messageIcon.Position = UDim2.new(0, 10, 0.5, -10)
+    messageIcon.BackgroundTransparency = 1
+    messageIcon.Parent = messageLabel
+    messageIcon.Visible = false
+
+    return gui, frame, textbox, submitButton, linkButton, discordButton, messageLabel, messageIcon
 end
 
 local function shakeFrame(frame)
@@ -100,20 +127,24 @@ local function shakeFrame(frame)
     tween1.Completed:Wait()
     tween2:Play()
     tween2.Completed:Wait()
-    frame.Position = UDim2.new(0.5, -170, 0.5, -120)
+    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 end
 
-local keyGui, keyFrame, keyTextbox, keySubmit, linkButton, discordButton, keyMessage = createKeyInputGui()
+local keyGui, keyFrame, keyTextbox, keySubmit, linkButton, discordButton, keyMessage, keyMessageIcon = createKeyInputGui()
 
 keySubmit.MouseButton1Click:Connect(function()
     local enteredKey = keyTextbox.Text
     if enteredKey == keyCode then
-        keyMessage.Text = "✅ Correct Key! Loading Script..."
+        keyMessage.Text = "Correct Key! Loading Script..."
+        keyMessageIcon.Image = "rbxassetid://92941793943536" -- ✅ icon
+        keyMessageIcon.Visible = true
         wait(1)
         keyGui:Destroy()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-key"))()
     else
-        keyMessage.Text = "❌ Incorrect Key! Try again."
+        keyMessage.Text = "Incorrect Key! Try again."
+        keyMessageIcon.Image = "rbxassetid://97098273678928" -- ❌ icon
+        keyMessageIcon.Visible = true
         shakeFrame(keyFrame)
         keyTextbox.Text = ""
     end
@@ -121,12 +152,14 @@ end)
 
 linkButton.MouseButton1Click:Connect(function()
     setClipboard(keyLink)
-    keyMessage.Text = "✅ Key link copied to clipboard!"
+    keyMessage.Text = "Key link copied to clipboard!"
+    keyMessageIcon.Visible = false
 end)
 
 discordButton.MouseButton1Click:Connect(function()
     setClipboard(discordLink)
-    keyMessage.Text = "✅ Discord link copied to clipboard!"
+    keyMessage.Text = "Discord link copied to clipboard!"
+    keyMessageIcon.Visible = false
 end)
 
 keyTextbox.FocusLost:Connect(function(enterPressed)
