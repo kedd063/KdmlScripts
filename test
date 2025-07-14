@@ -4,10 +4,11 @@ local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 -- Ana GUI
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "KdmlGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana Buton (Menüyü aç/kapa)
 local mainButton = Instance.new("ImageButton")
 mainButton.Size = UDim2.new(0, 100, 0, 100)
 mainButton.Position = UDim2.new(0, 10, 0.6, -50)
@@ -15,8 +16,23 @@ mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
 mainButton.Image = "rbxassetid://104833147631294"
 mainButton.Name = "MainButton"
+mainButton.Active = true
+mainButton.Selectable = true
 mainButton.Parent = screenGui
 Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
+
+-- Menü aç/kapa
+local isOpen = false
+mainButton.MouseButton1Click:Connect(function()
+	print("Main button clicked")  -- İstersen kaldırabilirsin
+	isOpen = not isOpen
+	menuFrame.Visible = isOpen
+	if isOpen then
+		for name, frame in pairs(contents) do
+			frame.Visible = (name == "Main")
+		end
+	end
+end)
 
 -- Menü Frame
 local menuFrame = Instance.new("Frame")
