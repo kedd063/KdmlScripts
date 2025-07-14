@@ -357,7 +357,7 @@ visualTab.Visible = true
 -- 1. Secret Brainrots ESP Toggle
 local secretBrainrotsToggle = Instance.new("TextButton")
 secretBrainrotsToggle.Size = UDim2.new(0, 220, 0, 40)
-secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 60)
+secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 20)  -- biraz yukarı aldım ki üstte yer açsın
 secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 secretBrainrotsToggle.TextColor3 = Color3.new(1, 1, 1)
 secretBrainrotsToggle.Font = Enum.Font.GothamBold
