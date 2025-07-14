@@ -340,7 +340,6 @@ espToggle.MouseButton1Click:Connect(function()
 end)
 
 -- 2. Secret Brainrots ESP
--- 2. Secret Brainrots ESP
 local secretBrainrotsToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50), 2)
 local secretBrainrotsEnabled = false
 local modelNames = {
