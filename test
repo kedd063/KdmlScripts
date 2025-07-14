@@ -340,14 +340,14 @@ espToggle.MouseButton1Click:Connect(function()
 end)
 
 -- 2. Secret Brainrots ESP
-local brainrotGodToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
-local brainrotGodEnabled = false
+local secretBrainrotsToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
+local secretBrainrotsEnabled = false
 local modelNames2 = {
     "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
     "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
     "Garamam and Madundung", "Las Tralaleritas"
 }
-local brainrotGodConnection
+local secretBrainrotsConnection
 
 local function addSecretBrainrotsESP(model)
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
@@ -386,7 +386,7 @@ local function addSecretBrainrotsESP(model)
 end
 
 local function enableSecretBrainrotESP()
-    brainrotGodConnection = RunService.RenderStepped:Connect(function()
+    secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
             if table.find(modelNames2, model.Name) then
                 addSecretBrainrotsESP(model)
@@ -396,9 +396,9 @@ local function enableSecretBrainrotESP()
 end
 
 local function disableSecretBrainrotsESP()
-    if brainrotGodConnection then
-        brainrotGodConnection:Disconnect()
-        brainrotGodConnection = nil
+    if secretBrainrotsConnection then
+        secretBrainrotsConnection:Disconnect()
+        secretBrainrotsConnection = nil
     end
     for _, model in pairs(workspace:GetChildren()) do
         if model:FindFirstChild("ESPBox") then model.ESPBox:Destroy() end
@@ -411,16 +411,16 @@ local function disableSecretBrainrotsESP()
     end
 end
 
-brainrotGodToggle.MouseButton1Click:Connect(function()
-    brainrotGodEnabled = not brainrotGodEnabled
-    if brainrotGodEnabled then
-        brainrotGodToggle.Text = "Secret Brainrot ESP: ON"
-        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        enableBrainrotGodESP()
+secretBrainrotsToggle.MouseButton1Click:Connect(function()
+    secretBrainrotsEnabled = not secretBrainrotsEnabled
+    if secretBrainrotsEnabled then
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: ON"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        enableSecretBrainrotESP()
     else
-        brainrotGodToggle.Text = "Secret Brainrot ESP: OFF"
-        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        disableBrainrotGodESP()
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        disableSecretBrainrotsESP()
     end
 end)
 
