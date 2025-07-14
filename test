@@ -1,441 +1,136 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UIS = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local keyCode = "test"
+local keyLink = "https://link-center.net/1030745/6fB15CyVWc9r"
+local discordLink = "https://discord.gg/scVsN9E5YN"
 
--- Ana GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KdmlGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+local playerGui = player:WaitForChild("PlayerGui")
+local setClipboard = setclipboard or toclipboard or function() end
 
-local mainButton = Instance.new("ImageButton")
-mainButton.Size = UDim2.new(0, 100, 0, 100)
-mainButton.Position = UDim2.new(0, 10, 0.6, -50)
-mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainButton.AnchorPoint = Vector2.new(0, 0.5)
-mainButton.Image = "rbxassetid://104833147631294"
-mainButton.Name = "MainButton"
-mainButton.Active = true
-mainButton.Selectable = true
-mainButton.Parent = screenGui
-Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
+local function createKeyInputGui()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "KeyInputGui"
+    gui.ResetOnSpawn = false
+    gui.Parent = playerGui
 
--- Menü aç/kapa
-local isOpen = false
-mainButton.MouseButton1Click:Connect(function()
-	print("Main button clicked")  -- İstersen kaldırabilirsin
-	isOpen = not isOpen
-	menuFrame.Visible = isOpen
-	if isOpen then
-		for name, frame in pairs(contents) do
-			frame.Visible = (name == "Main")
-		end
-	end
-end)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 340, 0, 240)
+    frame.Position = UDim2.new(0.5, -170, 0.5, -120)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    frame.BorderSizePixel = 0
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.Parent = gui
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
 
--- Menü Frame
-local menuFrame = Instance.new("Frame")
-menuFrame.Size = UDim2.new(0, 280, 0, 350)  -- küçültüldü
-menuFrame.Position = UDim2.new(0.3, 0, 0.5, -175)  -- konum ayarlandı
-menuFrame.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
-menuFrame.Active = true
-menuFrame.Draggable = true
-menuFrame.Visible = false
-menuFrame.Name = "MenuFrame"
-menuFrame.Parent = screenGui
-Instance.new("UICorner", menuFrame).CornerRadius = UDim.new(0, 14)
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Position = UDim2.new(0, 0, 0, 10)
+    title.BackgroundTransparency = 1
+    title.Text = "🔐 Enter Access Key"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 24
+    title.TextColor3 = Color3.fromRGB(0, 170, 255)
+    title.Parent = frame
 
--- Gradient Arka Plan
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 150, 255)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-}
-gradient.Rotation = 45
-gradient.Parent = menuFrame
+    local textbox = Instance.new("TextBox")
+    textbox.Size = UDim2.new(0, 300, 0, 40)
+    textbox.Position = UDim2.new(0.5, -150, 0, 50)
+    textbox.PlaceholderText = "Enter Key Here"
+    textbox.ClearTextOnFocus = true
+    textbox.Font = Enum.Font.GothamBold
+    textbox.TextSize = 20
+    textbox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    textbox.TextColor3 = Color3.new(1,1,1)
+    textbox.BorderSizePixel = 0
+    textbox.Parent = frame
+    Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 12)
 
--- Başlık
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 50)
-titleLabel.Position = UDim2.new(0, 0, 0, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Kdml Scripts"
-titleLabel.TextColor3 = Color3.new(1, 1, 1)
-titleLabel.TextScaled = true
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.Parent = menuFrame
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0, 140, 0, 35)
+    submitButton.Position = UDim2.new(0, 20, 0, 110)
+    submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    submitButton.TextColor3 = Color3.new(1,1,1)
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.TextSize = 20
+    submitButton.Text = "Submit"
+    submitButton.Parent = frame
+    Instance.new("UICorner", submitButton).CornerRadius = UDim.new(0, 12)
 
--- Sekmeler ve içerikleri
-local tabNames = {"Main", "Visual", "Misc", "Other Stuffs"}
-local tabs = {}
-local contents = {}
+    local linkButton = Instance.new("TextButton")
+    linkButton.Size = UDim2.new(0, 140, 0, 35)
+    linkButton.Position = UDim2.new(0, 180, 0, 110)
+    linkButton.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+    linkButton.TextColor3 = Color3.new(1,1,1)
+    linkButton.Font = Enum.Font.GothamBold
+    linkButton.TextSize = 18
+    linkButton.Text = "Get Key Link"
+    linkButton.Parent = frame
+    Instance.new("UICorner", linkButton).CornerRadius = UDim.new(0, 12)
 
-for i, name in ipairs(tabNames) do
-	local tabButton = Instance.new("TextButton")
-	tabButton.Size = UDim2.new(0.25, 0, 0, 40)
-	tabButton.Position = UDim2.new(0.25 * (i - 1), 0, 0, 50)
-	tabButton.Text = name
-	tabButton.Font = Enum.Font.Gotham
-	tabButton.TextColor3 = Color3.new(1, 1, 1)
-	tabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
-	tabButton.Parent = menuFrame
-	Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
-	tabs[name] = tabButton
+    local discordButton = Instance.new("TextButton")
+    discordButton.Size = UDim2.new(0, 300, 0, 35)
+    discordButton.Position = UDim2.new(0.5, -150, 0, 160)
+    discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    discordButton.TextColor3 = Color3.new(1,1,1)
+    discordButton.Font = Enum.Font.GothamBold
+    discordButton.TextSize = 18
+    discordButton.Text = "📌 Our Discord Server"
+    discordButton.Parent = frame
+    Instance.new("UICorner", discordButton).CornerRadius = UDim.new(0, 12)
 
-	local contentFrame = Instance.new("Frame")
-	contentFrame.Size = UDim2.new(1, -40, 1, -110)
-        contentFrame.Position = UDim2.new(0, 10, 0, 110)
-	contentFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 120)
-	contentFrame.Visible = false
-	contentFrame.Parent = menuFrame
-	Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
-	contents[name] = contentFrame
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(1, -20, 0, 20)
+    messageLabel.Position = UDim2.new(0, 10, 1, -30)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    messageLabel.TextScaled = true
+    messageLabel.Font = Enum.Font.GothamBold
+    messageLabel.Text = ""
+    messageLabel.Parent = frame
+
+    return gui, frame, textbox, submitButton, linkButton, discordButton, messageLabel
 end
 
--- Buton oluşturma fonksiyonu
--- Buton sayısını sayan yardımcı fonksiyon
-local function countButtons(parent)
-	local count = 0
-	for _, child in ipairs(parent:GetChildren()) do
-		if child:IsA("TextButton") then
-			count += 1
-		end
-	end
-	return count
+local function shakeFrame(frame)
+    local tweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 4, true)
+    local tween1 = TweenService:Create(frame, tweenInfo, {Position = frame.Position + UDim2.new(0, 10, 0, 0)})
+    local tween2 = TweenService:Create(frame, tweenInfo, {Position = frame.Position - UDim2.new(0, 10, 0, 0)})
+
+    tween1:Play()
+    tween1.Completed:Wait()
+    tween2:Play()
+    tween2.Completed:Wait()
+    frame.Position = UDim2.new(0.5, -170, 0.5, -120)
 end
 
--- Yeni buton oluşturma fonksiyonu
-local function createMainButton(parent, text, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 0, 30) -- Sabit boyut
-    btn.Position = UDim2.new(0, 10, 0, (#parent:GetChildren() - 1) * 35)
-    btn.Text = text
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 16
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BorderSizePixel = 0
-    btn.Parent = parent
+local keyGui, keyFrame, keyTextbox, keySubmit, linkButton, discordButton, keyMessage = createKeyInputGui()
 
-    btn.MouseButton1Click:Connect(callback)
-end
-
-
-
--- MAIN sekmesine butonlar
-
--- Speed Boost
-createMainButton(contents["Main"], "Speed Boost 🏃‍♂️👟", function()
-	local boostedSpeed = 48
-	local function applySpeedBoost()
-		local char = player.Character or player.CharacterAdded:Wait()
-		local humanoid = char:WaitForChild("Humanoid")
-		humanoid.WalkSpeed = boostedSpeed
-	end
-	applySpeedBoost()
-	player.CharacterAdded:Connect(function()
-		task.wait(0.1)
-		applySpeedBoost()
-	end)
-end)
-
--- Jump Boost
-local jumpBoostEnabled = false
-local jumpBoostConnection = nil
-
-createMainButton(contents["Main"], "Jump Boost 🔼🙍", function()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-
-    humanoid.Jumping:Connect(function(active)
-        if active then
-            local rootPart = character:WaitForChild("HumanoidRootPart")
-            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
-        end
-    end)
-end)
-
-
-
--- Float
-createMainButton(contents["Main"], "Float 🕊️", function()
-	local floatActive = false
-	local floatSpeed = 46
-	local floatTime = 5
-	local startTime = 0
-
-	local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-	gui.Name = "Float 🕊"
-	gui.ResetOnSpawn = false
-
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(0, 220, 0, 120)
-	frame.Position = UDim2.new(0.5, -110, 0.7, 0)
-	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-	frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-	frame.BorderSizePixel = 3
-	frame.Active = true
-	frame.Draggable = true
-	frame.Parent = gui
-
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 0, 30)
-	title.BackgroundTransparency = 1
-	title.Text = "Float 🕊"
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 18
-	title.TextColor3 = Color3.fromRGB(0, 170, 255)
-	title.Parent = frame
-
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(0, 180, 0, 40)
-	button.Position = UDim2.new(0.5, -90, 0, 40)
-	button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-	button.TextColor3 = Color3.new(1,1,1)
-	button.TextScaled = true
-	button.Font = Enum.Font.GothamBold
-	button.Text = "Float"
-	button.Parent = frame
-
-	local countdownLabel = Instance.new("TextLabel")
-	countdownLabel.Size = UDim2.new(0, 180, 0, 25)
-	countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
-	countdownLabel.BackgroundTransparency = 1
-	countdownLabel.TextColor3 = Color3.new(1, 1, 1)
-	countdownLabel.Font = Enum.Font.Gotham
-	countdownLabel.TextScaled = true
-	countdownLabel.Text = "Ready"
-	countdownLabel.Parent = frame
-
-	local moveConnection, gravityConnection
-	local function stopFloat()
-		floatActive = false
-		button.Text = "Float"
-		if moveConnection then moveConnection:Disconnect() end
-		if gravityConnection then gravityConnection:Disconnect() end
-	end
-
-	local function startFloat()
-		floatActive = true
-		button.Text = "Stop"
-		startTime = tick()
-		local char = player.Character or player.CharacterAdded:Wait()
-		local hrp = char:WaitForChild("HumanoidRootPart")
-
-		gravityConnection = RunService.Heartbeat:Connect(function()
-			hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-		end)
-
-		moveConnection = RunService.Heartbeat:Connect(function()
-			if not floatActive then return end
-			local elapsed = tick() - startTime
-			local remaining = floatTime - elapsed
-			countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
-			if remaining <= 0 then
-				stopFloat()
-				countdownLabel.Text = "Done"
-			else
-				local dir = workspace.CurrentCamera.CFrame.LookVector
-				local move = Vector3.new(dir.X, 0, dir.Z).Unit
-				hrp.Velocity = move * floatSpeed
-			end
-		end)
-	end
-
-	button.MouseButton1Click:Connect(function()
-		if not floatActive then startFloat() else stopFloat() end
-	end)
-end)
-
--- Main sekmesine Instant Steal tuşu
-createMainButton(contents["Main"], "İnstant Steal (code: arbix hub)", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ArbixHubs/Arbix-Hub/refs/heads/main/Arbix"))()
-end)
-
-
--- Visual sekmesine ESP toggle butonu ve ESP fonksiyonları
-
-local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(0, 200, 0, 40)
-espToggle.Position = UDim2.new(0, 10, 0, 10)
-espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-espToggle.TextColor3 = Color3.new(1, 1, 1)
-espToggle.Font = Enum.Font.GothamBold
-espToggle.TextSize = 16
-espToggle.Text = "ESP: OFF"
-espToggle.Parent = contents["Visual"]
-Instance.new("UICorner", espToggle).CornerRadius = UDim.new(0, 6)
-
-local espEnabled = false
-local espObjects = {}
-
-local function createNameTag(character, playerName)
-    if not character or not character:FindFirstChild("Head") then return end
-    local head = character.Head
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP_NameTag"
-    billboard.Adornee = head
-    billboard.Size = UDim2.new(0, 100, 0, 30)
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = head
-
-    local label = Instance.new("TextLabel")
-    label.BackgroundTransparency = 1
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextStrokeTransparency = 0
-    label.Font = Enum.Font.GothamBold
-    label.TextScaled = true
-    label.Text = playerName
-    label.Parent = billboard
-
-    return billboard
-end
-
-local function applyHighlight(character)
-    if not character then return end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_Highlight"
-    highlight.Adornee = character
-    highlight.FillColor = Color3.fromRGB(170, 0, 255)
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0.7
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = character
-
-    return highlight
-end
-
-local function enableESP()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character then
-            local nameTag = createNameTag(plr.Character, plr.Name)
-            local highlight = applyHighlight(plr.Character)
-            espObjects[plr] = {nameTag = nameTag, highlight = highlight}
-
-            plr.CharacterAdded:Connect(function(char)
-                if espEnabled then
-                    if espObjects[plr] then
-                        if espObjects[plr].nameTag then espObjects[plr].nameTag:Destroy() end
-                        if espObjects[plr].highlight then espObjects[plr].highlight:Destroy() end
-                    end
-                    local nt = createNameTag(char, plr.Name)
-                    local hl = applyHighlight(char)
-                    espObjects[plr] = {nameTag = nt, highlight = hl}
-                end
-            end)
-        end
-    end
-end
-
-local function disableESP()
-    for plr, objs in pairs(espObjects) do
-        if objs.nameTag and objs.nameTag.Parent then objs.nameTag:Destroy() end
-        if objs.highlight and objs.highlight.Parent then objs.highlight:Destroy() end
-    end
-    espObjects = {}
-end
-
-espToggle.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    if espEnabled then
-        espToggle.Text = "ESP: ON"
-        espToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        enableESP()
+keySubmit.MouseButton1Click:Connect(function()
+    local enteredKey = keyTextbox.Text
+    if enteredKey == keyCode then
+        keyMessage.Text = "✅ Correct Key! Loading Script..."
+        wait(1)
+        keyGui:Destroy()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-key"))()
     else
-        espToggle.Text = "ESP: OFF"
-        espToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        disableESP()
+        keyMessage.Text = "❌ Incorrect Key! Try again."
+        shakeFrame(keyFrame)
+        keyTextbox.Text = ""
     end
 end)
 
-
-
-
--- Misc sekmesine item alma butonları
-local function createMiscButton(parent, itemName)
-	createMainButton(parent, itemName, function()
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-		pcall(function()
-			net:InvokeServer(itemName)
-			print(itemName .. " satın alındı.")
-		end)
-	end)
-end
-
-local miscItems = {
-	"Trap",
-	"Invisibility Cloak",
-	"Medusa's Head",
-	"Quantum Cloner",
-	"Body Swap Potion"
-}
-
-for _, item in ipairs(miscItems) do
-	createMiscButton(contents["Misc"], item)
-end
-
--- Other Stuffs sekmesine Auto Candy Spin Wheel toggle
-local autoSpinEnabled = false
-local autoSpinLoop
-
-local otherStuffsFrame = contents["Other Stuffs"]
-
-local autoSpinToggle = Instance.new("TextButton")
-autoSpinToggle.Size = UDim2.new(0, 280, 0, 50)
-autoSpinToggle.Position = UDim2.new(0.5, -140, 0, 0)
-autoSpinToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-autoSpinToggle.Font = Enum.Font.GothamBold
-autoSpinToggle.TextColor3 = Color3.new(1,1,1)
-autoSpinToggle.TextScaled = true
-autoSpinToggle.Text = "Auto Candy Spin Wheel 🎡🍬 [OFF]"
-autoSpinToggle.Parent = otherStuffsFrame
-Instance.new("UICorner", autoSpinToggle).CornerRadius = UDim.new(0, 10)
-
-autoSpinToggle.MouseButton1Click:Connect(function()
-	autoSpinEnabled = not autoSpinEnabled
-	autoSpinToggle.Text = autoSpinEnabled and "Auto Candy Spin Wheel 🎡🍬 [ON]" or "Auto Candy Spin Wheel 🎡🍬 [OFF]"
-	autoSpinToggle.BackgroundColor3 = autoSpinEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
-
-	if autoSpinEnabled then
-		autoSpinLoop = task.spawn(function()
-			while autoSpinEnabled do
-				local net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net")
-				local spinEvent = net:WaitForChild("RE/CandyEventService/Spin")
-				spinEvent:FireServer()
-				task.wait(1)
-			end
-		end)
-	else
-		if autoSpinLoop then
-			task.cancel(autoSpinLoop)
-			autoSpinLoop = nil
-		end
-	end
+linkButton.MouseButton1Click:Connect(function()
+    setClipboard(keyLink)
+    keyMessage.Text = "✅ Key link copied to clipboard!"
 end)
 
--- Sekme geçişi
-for name, button in pairs(tabs) do
-	button.MouseButton1Click:Connect(function()
-		for otherName, frame in pairs(contents) do
-			frame.Visible = (otherName == name)
-		end
-	end)
-end
+discordButton.MouseButton1Click:Connect(function()
+    setClipboard(discordLink)
+    keyMessage.Text = "✅ Discord link copied to clipboard!"
+end)
 
--- Menü aç/kapa
-local isOpen = false
-mainButton.MouseButton1Click:Connect(function()
-	isOpen = not isOpen
-	menuFrame.Visible = isOpen
-	if isOpen then
-		for name, frame in pairs(contents) do
-			frame.Visible = (name == "Main")
-		end
-	end
+keyTextbox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        keySubmit:Activate()
+    end
 end)
