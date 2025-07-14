@@ -232,8 +232,6 @@ createMainButton(contents["Main"], "İnstant Steal (key: render and arbix hub)",
 end)
 
 -- Visual sekmesine ESP toggle butonu ve fonksiyonları
-
--- Normal ESP Toggle
 local espToggle = Instance.new("TextButton")
 espToggle.Size = UDim2.new(0, 200, 0, 40)
 espToggle.Position = UDim2.new(0, 10, 0, 10)
@@ -242,7 +240,7 @@ espToggle.TextColor3 = Color3.new(1, 1, 1)
 espToggle.Font = Enum.Font.GothamBold
 espToggle.TextSize = 16
 espToggle.Text = "ESP: OFF"
-espToggle.Parent = visualTab
+espToggle.Parent = contents["Visual"]
 Instance.new("UICorner", espToggle).CornerRadius = UDim.new(0, 6)
 
 local espEnabled = false
@@ -258,7 +256,6 @@ local function createNameTag(character, playerName)
     billboard.Size = UDim2.new(0, 100, 0, 30)
     billboard.StudsOffset = Vector3.new(0, 2, 0)
     billboard.AlwaysOnTop = true
-    billboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     billboard.Parent = head
 
     local label = Instance.new("TextLabel")
@@ -269,7 +266,6 @@ local function createNameTag(character, playerName)
     label.Font = Enum.Font.GothamBold
     label.TextScaled = true
     label.Text = playerName
-    label.ZIndex = 10
     label.Parent = billboard
 
     return billboard
@@ -282,8 +278,8 @@ local function applyHighlight(character)
     highlight.Name = "ESP_Highlight"
     highlight.Adornee = character
     highlight.FillColor = Color3.fromRGB(170, 0, 255)
-    highlight.FillTransparency = 0.7 -- Daha şeffaf yaptık
-    highlight.OutlineTransparency = 0.9
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0.7
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = character
 
@@ -333,10 +329,35 @@ espToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Secret Brainrots ESP Toggle
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Eğer contents["Visual"] yoksa veya görünür değilse örnek oluştur
+local screenGui = playerGui:FindFirstChild("MainGui") or Instance.new("ScreenGui")
+screenGui.Name = "MainGui"
+screenGui.Parent = playerGui
+
+local visualTab = contents and contents["Visual"] or screenGui:FindFirstChild("Visual")
+
+if not visualTab then
+    visualTab = Instance.new("Frame")
+    visualTab.Name = "Visual"
+    visualTab.Size = UDim2.new(0, 250, 0, 180)
+    visualTab.Position = UDim2.new(0, 50, 0, 50)
+    visualTab.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    visualTab.Parent = screenGui
+end
+
+visualTab.Visible = true
+
+-- 1. Secret Brainrots ESP Toggle
 local secretBrainrotsToggle = Instance.new("TextButton")
 secretBrainrotsToggle.Size = UDim2.new(0, 220, 0, 40)
-secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 60)
+secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 20)
 secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 secretBrainrotsToggle.TextColor3 = Color3.new(1, 1, 1)
 secretBrainrotsToggle.Font = Enum.Font.GothamBold
@@ -359,40 +380,36 @@ local modelNames = {
 
 local function addSecretBrainrotsESP(model)
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-    if head then
-        if not head:FindFirstChildOfClass("BillboardGui") then
-            local billboard = Instance.new("BillboardGui")
-            billboard.Size = UDim2.new(0, 200, 0, 60)
-            billboard.Adornee = head
-            billboard.AlwaysOnTop = true
-            billboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            billboard.Parent = head
+    if head and not head:FindFirstChildOfClass("BillboardGui") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 200, 0, 60)
+        billboard.Adornee = head
+        billboard.AlwaysOnTop = true
+        billboard.Parent = head
 
-            local label = Instance.new("TextLabel")
-            label.Size = UDim2.new(1, 0, 1, 0)
-            label.BackgroundTransparency = 1
-            label.Text = model.Name
-            label.TextColor3 = Color3.fromRGB(0, 255, 0)
-            label.TextStrokeTransparency = 0
-            label.TextScaled = true
-            label.Font = Enum.Font.SourceSansBold
-            label.ZIndex = 10
-            label.Parent = billboard
-        end
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = model.Name
+        label.TextColor3 = Color3.fromRGB(0, 255, 0)
+        label.TextStrokeTransparency = 0
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.Parent = billboard
+    end
 
-        if not model:FindFirstChild("ESPBox") then
-            local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-            if primaryPart then
-                local box = Instance.new("BoxHandleAdornment")
-                box.Name = "ESPBox"
-                box.Adornee = primaryPart
-                box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-                box.Color3 = Color3.fromRGB(0, 255, 0)
-                box.AlwaysOnTop = true
-                box.ZIndex = 10
-                box.Transparency = 0.3 -- Daha görünür yaptık
-                box.Parent = primaryPart
-            end
+    if not model:FindFirstChild("ESPBox") then
+        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+        if primaryPart then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Adornee = primaryPart
+            box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
+            box.Color3 = Color3.fromRGB(0, 255, 0)
+            box.AlwaysOnTop = true
+            box.ZIndex = 10
+            box.Transparency = 0.5
+            box.Parent = primaryPart
         end
     end
 end
@@ -401,7 +418,7 @@ local secretBrainrotsConnection
 
 local function enableSecretBrainrotsESP()
     secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
-        for _, model in pairs(Workspace:GetChildren()) do
+        for _, model in pairs(workspace:GetChildren()) do
             for _, name in pairs(modelNames) do
                 if model.Name == name then
                     addSecretBrainrotsESP(model)
@@ -416,7 +433,7 @@ local function disableSecretBrainrotsESP()
         secretBrainrotsConnection:Disconnect()
         secretBrainrotsConnection = nil
     end
-    for _, model in pairs(Workspace:GetChildren()) do
+    for _, model in pairs(workspace:GetChildren()) do
         if model:FindFirstChild("ESPBox") then
             model.ESPBox:Destroy()
         end
@@ -444,7 +461,7 @@ secretBrainrotsToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Brainrot God ESP Toggle
+-- 2. Brainrot God ESP Toggle
 local brainrotGodToggle = Instance.new("TextButton")
 brainrotGodToggle.Size = UDim2.new(0, 220, 0, 40)
 brainrotGodToggle.Position = UDim2.new(0, 10, 0, 110)
@@ -478,7 +495,6 @@ local function addBrainrotGodESP(model)
             billboard.Size = UDim2.new(0, 200, 0, 60)
             billboard.Adornee = head
             billboard.AlwaysOnTop = true
-            billboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             billboard.Parent = head
 
             local label = Instance.new("TextLabel")
@@ -489,7 +505,6 @@ local function addBrainrotGodESP(model)
             label.TextStrokeTransparency = 0
             label.TextScaled = true
             label.Font = Enum.Font.SourceSansBold
-            label.ZIndex = 10
             label.Parent = billboard
         end
 
@@ -502,7 +517,7 @@ local function addBrainrotGodESP(model)
             box.Color3 = Color3.fromRGB(0, 170, 255)
             box.AlwaysOnTop = true
             box.ZIndex = 10
-            box.Transparency = 0.3 -- Daha görünür
+            box.Transparency = 0.5
             box.Parent = primaryPart
         end
     end
@@ -512,7 +527,7 @@ local brainrotGodConnection
 
 local function enableBrainrotGodESP()
     brainrotGodConnection = RunService.RenderStepped:Connect(function()
-        for _, model in pairs(Workspace:GetChildren()) do
+        for _, model in pairs(workspace:GetChildren()) do
             for _, name in pairs(modelNames2) do
                 if model.Name == name then
                     addBrainrotGodESP(model)
@@ -527,7 +542,7 @@ local function disableBrainrotGodESP()
         brainrotGodConnection:Disconnect()
         brainrotGodConnection = nil
     end
-    for _, model in pairs(Workspace:GetChildren()) do
+    for _, model in pairs(workspace:GetChildren()) do
         if model:FindFirstChild("ESPBox") then
             model.ESPBox:Destroy()
         end
