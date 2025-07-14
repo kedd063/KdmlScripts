@@ -1,60 +1,58 @@
--- 🚩 Gerekli servisler
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game.Workspace
+local player = Players.LocalPlayer
 
--- 🔹 Visual sekmene eklemek için yeni buton
-local lockTimerESPButton = Instance.new("TextButton")
-lockTimerESPButton.Size = UDim2.new(0, 220, 0, 40)
-lockTimerESPButton.Position = UDim2.new(0, 10, 0, 210) -- Diğer butonların altına yerleştir
-lockTimerESPButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-lockTimerESPButton.TextColor3 = Color3.new(1, 1, 1)
-lockTimerESPButton.Font = Enum.Font.GothamBold
-lockTimerESPButton.TextSize = 16
-lockTimerESPButton.Text = "Lock Timer ESP: OFF"
-lockTimerESPButton.Parent = visualTab -- senin visual sekmen
-Instance.new("UICorner", lockTimerESPButton).CornerRadius = UDim.new(0, 6)
+-- GUI oluştur
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "LockTimerESP_GUI"
 
--- 🔹 Durum değişkenleri
-local lockTimerESPEnabled = false
-local lockTimerESPConnection
-local activeLockTimerESPParts = {}
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 250, 0, 100)
+frame.Position = UDim2.new(0, 50, 0, 50)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
--- 🔹 ESP metni oluşturucu
-local function createLockTimerESP(target, text)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.Adornee = target
-    billboard.AlwaysOnTop = true
-    billboard.Parent = target
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Lock Timer ESP"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.new(1,1,1)
+title.BackgroundTransparency = 1
+title.Parent = frame
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(255, 0, 0)
-    label.TextStrokeTransparency = 0
-    label.TextScaled = true
-    label.Font = Enum.Font.GothamBold
-    label.Parent = billboard
+-- Toggle Butonu
+local toggle = Instance.new("TextButton")
+toggle.Size = UDim2.new(0, 200, 0, 40)
+toggle.Position = UDim2.new(0.5, -100, 0, 40)
+toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+toggle.TextColor3 = Color3.new(1, 1, 1)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextSize = 16
+toggle.Text = "ESP: OFF"
+toggle.Parent = frame
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
 
-    table.insert(activeLockTimerESPParts, billboard)
-end
+-- Toggle mantığı
+local espEnabled = false
+local espConnection
+local activeESP = {}
 
--- 🔹 Tüm Lock Timer ESP öğelerini temizle
-local function clearLockTimerESP()
-    for _, esp in ipairs(activeLockTimerESPParts) do
-        if esp and esp.Parent then
-            esp:Destroy()
+local function clearESP()
+    for _, gui in pairs(activeESP) do
+        if gui and gui.Parent then
+            gui:Destroy()
         end
     end
-    activeLockTimerESPParts = {}
+    activeESP = {}
 end
 
--- 🔹 Lock Timer ESP'yi aktif et
-local function enableLockTimerESP()
-    lockTimerESPConnection = RunService.RenderStepped:Connect(function()
-        clearLockTimerESP()
-
+local function enableESP()
+    espConnection = RunService.RenderStepped:Connect(function()
+        clearESP()
         local plots = Workspace:FindFirstChild("Plots")
         if not plots then return end
 
@@ -65,10 +63,24 @@ local function enableLockTimerESP()
                 if main then
                     local billboardGui = main:FindFirstChild("BillboardGui")
                     if billboardGui then
-                        local remainingLabel = billboardGui:FindFirstChild("RemainingTime")
-                        if remainingLabel and remainingLabel:IsA("TextLabel") then
-                            local target = main:IsA("BasePart") and main or plotBlock
-                            createLockTimerESP(target, remainingLabel.Text)
+                        local label = billboardGui:FindFirstChild("RemainingTime")
+                        if label and label:IsA("TextLabel") then
+                            local billboard = Instance.new("BillboardGui")
+                            billboard.Size = UDim2.new(0, 200, 0, 50)
+                            billboard.Adornee = main
+                            billboard.AlwaysOnTop = true
+                            billboard.Parent = main
+
+                            local textLabel = Instance.new("TextLabel")
+                            textLabel.Size = UDim2.new(1, 0, 1, 0)
+                            textLabel.BackgroundTransparency = 1
+                            textLabel.Text = label.Text
+                            textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                            textLabel.TextScaled = true
+                            textLabel.Font = Enum.Font.GothamBold
+                            textLabel.Parent = billboard
+
+                            table.insert(activeESP, billboard)
                         end
                     end
                 end
@@ -77,25 +89,23 @@ local function enableLockTimerESP()
     end)
 end
 
--- 🔹 Lock Timer ESP'yi kapat
-local function disableLockTimerESP()
-    if lockTimerESPConnection then
-        lockTimerESPConnection:Disconnect()
-        lockTimerESPConnection = nil
+local function disableESP()
+    if espConnection then
+        espConnection:Disconnect()
+        espConnection = nil
     end
-    clearLockTimerESP()
+    clearESP()
 end
 
--- 🔹 Buton tıklama toggle mantığı
-lockTimerESPButton.MouseButton1Click:Connect(function()
-    lockTimerESPEnabled = not lockTimerESPEnabled
-    if lockTimerESPEnabled then
-        lockTimerESPButton.Text = "Lock Timer ESP: ON"
-        lockTimerESPButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-        enableLockTimerESP()
+toggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        toggle.Text = "ESP: ON"
+        toggle.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        enableESP()
     else
-        lockTimerESPButton.Text = "Lock Timer ESP: OFF"
-        lockTimerESPButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        disableLockTimerESP()
+        toggle.Text = "ESP: OFF"
+        toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        disableESP()
     end
 end)
