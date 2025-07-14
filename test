@@ -231,8 +231,7 @@ createMainButton(contents["Main"], "İnstant Steal (key: render and arbix hub)",
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ArbixHubs/Arbix-Hub/refs/heads/main/Arbix"))() 
 end)
 
--- Visual sekmesine ESP toggle butonu ve fonksiyonları
-
+-- Buton oluşturma fonksiyonu, her butonu "Visual" sekmesine ekliyoruz
 local function createToggleButton(name, defaultText, colorOff)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -242,9 +241,8 @@ local function createToggleButton(name, defaultText, colorOff)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 16
     btn.Text = defaultText
-    btn.Parent = visualTab
+    btn.Parent = contents["Visual"]  -- Butonlar burada gözükmesi için "Visual" sekmesine ekleniyor
     btn.LayoutOrder = 0
-    btn.Parent = contents["Visual"]
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     return btn
 end
@@ -445,7 +443,7 @@ local function addBrainrotGodESP(model)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = model.Name
-        label.TextColor3 = Color3.fromRGB(0, 170, 255)
+        label.TextColor3 = Color3.fromRGB(0, 255, 0)
         label.TextStrokeTransparency = 0
         label.TextScaled = true
         label.Font = Enum.Font.SourceSansBold
@@ -459,7 +457,7 @@ local function addBrainrotGodESP(model)
             box.Name = "ESPBox"
             box.Adornee = primaryPart
             box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-            box.Color3 = Color3.fromRGB(0, 170, 255)
+            box.Color3 = Color3.fromRGB(0, 255, 0)
             box.AlwaysOnTop = true
             box.ZIndex = 10
             box.Transparency = 0.5
@@ -498,7 +496,7 @@ brainrotGodToggle.MouseButton1Click:Connect(function()
     brainrotGodEnabled = not brainrotGodEnabled
     if brainrotGodEnabled then
         brainrotGodToggle.Text = "Brainrot God ESP: ON"
-        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
         enableBrainrotGodESP()
     else
         brainrotGodToggle.Text = "Brainrot God ESP: OFF"
@@ -506,6 +504,7 @@ brainrotGodToggle.MouseButton1Click:Connect(function()
         disableBrainrotGodESP()
     end
 end)
+
 
 
 
