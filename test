@@ -22,28 +22,19 @@ local function createKeyInputGui()
     frame.Parent = gui
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
 
-    -- Title Icon
-    local titleIcon = Instance.new("ImageLabel")
-    titleIcon.Size = UDim2.new(0, 24, 0, 24)
-    titleIcon.Position = UDim2.new(0, 10, 0, 10)
-    titleIcon.BackgroundTransparency = 1
-    titleIcon.Image = "rbxassetid://77684173042541"
-    titleIcon.Parent = frame
-
     local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, -40, 0, 40)
-    title.Position = UDim2.new(0, 40, 0, 10)
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Position = UDim2.new(0, 0, 0, 10)
     title.BackgroundTransparency = 1
     title.Text = "Enter Access Key"
     title.Font = Enum.Font.GothamBold
     title.TextSize = 24
     title.TextColor3 = Color3.fromRGB(0, 170, 255)
-    title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = frame
 
     local textbox = Instance.new("TextBox")
     textbox.Size = UDim2.new(0, 300, 0, 40)
-    textbox.Position = UDim2.new(0.5, -150, 0, 60)
+    textbox.Position = UDim2.new(0.5, -150, 0, 50)
     textbox.PlaceholderText = "Enter Key Here"
     textbox.ClearTextOnFocus = true
     textbox.Font = Enum.Font.GothamBold
@@ -77,47 +68,36 @@ local function createKeyInputGui()
     Instance.new("UICorner", linkButton).CornerRadius = UDim.new(0, 12)
 
     local discordButton = Instance.new("TextButton")
-    discordButton.Size = UDim2.new(0, 300, 0, 35)
+    discordButton.Size = UDim2.new(0, 280, 0, 35) -- biraz genişlettim decal için yer açtım
     discordButton.Position = UDim2.new(0.5, -150, 0, 160)
     discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
     discordButton.TextColor3 = Color3.new(1,1,1)
     discordButton.Font = Enum.Font.GothamBold
     discordButton.TextSize = 18
-    discordButton.TextXAlignment = Enum.TextXAlignment.Left
     discordButton.Text = "Our Discord Server"
     discordButton.Parent = frame
     Instance.new("UICorner", discordButton).CornerRadius = UDim.new(0, 12)
 
-    -- Discord Icon inside button
-    local discordButton = Instance.new("TextButton")
-discordButton.Size = UDim2.new(0, 300, 0, 35)
-discordButton.Position = UDim2.new(0.5, -150, 0, 160)
-discordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-discordButton.TextColor3 = Color3.new(1,1,1)
-discordButton.Font = Enum.Font.GothamBold
-discordButton.TextSize = 18
-discordButton.Text = "Our Discord Server   "
-discordButton.Parent = frame
-Instance.new("UICorner", discordButton).CornerRadius = UDim.new(0, 12)
+    -- Discord buton decal (butonun sağında, metnin sonunda)
+    local discordDecal = Instance.new("ImageLabel")
+    discordDecal.Size = UDim2.new(0, 20, 0, 20)
+    discordDecal.BackgroundTransparency = 1
+    discordDecal.Image = "rbxassetid://80918621663609"
+    discordDecal.Parent = frame
+    -- Konumu butonun pozisyonuna göre ayarla
+    discordDecal.Position = UDim2.new(0.5, 135, 0, 167) -- 135 ve 167 = discordButton'un sağında biraz sağ ve aşağı hizalı
 
--- İkonu metnin sonuna ekleme için ImageLabel
-local discordIcon = Instance.new("ImageLabel")
-discordIcon.Size = UDim2.new(0, 24, 0, 24)
-discordIcon.Position = UDim2.new(1, -28, 0.5, -12) -- Butonun sağ ucuna, ortalanmış
-discordIcon.BackgroundTransparency = 1
-discordIcon.Image = "rbxassetid://80918621663609" -- verdiğin decal ID
-discordIcon.Parent = discordButton
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(1, -40, 0, 20)
+    messageLabel.Position = UDim2.new(0, 10, 1, -30)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    messageLabel.TextScaled = true
+    messageLabel.Font = Enum.Font.GothamBold
+    messageLabel.Text = ""
+    messageLabel.Parent = frame
 
-
-    -- Message Icon (✅ or ❌)
-    local messageIcon = Instance.new("ImageLabel")
-    messageIcon.Size = UDim2.new(0, 20, 0, 20)
-    messageIcon.Position = UDim2.new(0, 10, 0.5, -10)
-    messageIcon.BackgroundTransparency = 1
-    messageIcon.Parent = messageLabel
-    messageIcon.Visible = false
-
-    return gui, frame, textbox, submitButton, linkButton, discordButton, messageLabel, messageIcon
+    return gui, frame, textbox, submitButton, linkButton, discordButton, discordDecal, messageLabel
 end
 
 local function shakeFrame(frame)
@@ -129,24 +109,34 @@ local function shakeFrame(frame)
     tween1.Completed:Wait()
     tween2:Play()
     tween2.Completed:Wait()
-    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    frame.Position = UDim2.new(0.5, -170, 0.5, -120)
 end
 
-local keyGui, keyFrame, keyTextbox, keySubmit, linkButton, discordButton, keyMessage, keyMessageIcon = createKeyInputGui()
+local keyGui, keyFrame, keyTextbox, keySubmit, linkButton, discordButton, discordDecal, keyMessage = createKeyInputGui()
 
 keySubmit.MouseButton1Click:Connect(function()
     local enteredKey = keyTextbox.Text
     if enteredKey == keyCode then
+        -- ✅ Correct Key! Loading Script... decal ile
         keyMessage.Text = "Correct Key! Loading Script..."
-        keyMessageIcon.Image = "rbxassetid://92941793943536" -- ✅ icon
-        keyMessageIcon.Visible = true
+        local checkDecal = Instance.new("ImageLabel")
+        checkDecal.Size = UDim2.new(0, 20, 0, 20)
+        checkDecal.BackgroundTransparency = 1
+        checkDecal.Image = "rbxassetid://92941793943536"
+        checkDecal.Position = UDim2.new(1, 5, 0, 0)
+        checkDecal.Parent = keyMessage
         wait(1)
         keyGui:Destroy()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-key"))()
     else
+        -- ❌ Incorrect Key! Try again. decal ile
         keyMessage.Text = "Incorrect Key! Try again."
-        keyMessageIcon.Image = "rbxassetid://97098273678928" -- ❌ icon
-        keyMessageIcon.Visible = true
+        local crossDecal = Instance.new("ImageLabel")
+        crossDecal.Size = UDim2.new(0, 20, 0, 20)
+        crossDecal.BackgroundTransparency = 1
+        crossDecal.Image = "rbxassetid://97098273678928"
+        crossDecal.Position = UDim2.new(1, 5, 0, 0)
+        crossDecal.Parent = keyMessage
         shakeFrame(keyFrame)
         keyTextbox.Text = ""
     end
@@ -155,13 +145,11 @@ end)
 linkButton.MouseButton1Click:Connect(function()
     setClipboard(keyLink)
     keyMessage.Text = "Key link copied to clipboard!"
-    keyMessageIcon.Visible = false
 end)
 
 discordButton.MouseButton1Click:Connect(function()
     setClipboard(discordLink)
     keyMessage.Text = "Discord link copied to clipboard!"
-    keyMessageIcon.Visible = false
 end)
 
 keyTextbox.FocusLost:Connect(function(enterPressed)
