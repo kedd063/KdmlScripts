@@ -228,7 +228,7 @@ end, "92502257917367") -- Float decal ID
 
 -- Instant Steal
 createMainButton(contents["Main"], "İnstant Steal (code: arbix hub)", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ArbixHubs/Arbix-Hub/refs/heads/main/Arbix"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/ArbixHubBEST.lua"))()
 end)
 
 -- Visual sekmesine ESP toggle butonu ve fonksiyonları
