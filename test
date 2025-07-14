@@ -238,29 +238,35 @@ createMainButton(contents["Main"], "İnstant Steal (code: arbix hub)", function(
 end)
 
 
--- Visual sekmesine ESP toggle
-local espButton = Instance.new("TextButton")
-espButton.Size = UDim2.new(0, 220, 0, 40)
-espButton.Position = UDim2.new(0, 15, 0, 10)
-espButton.Text = "ESP: OFF"
-espButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-espButton.TextColor3 = Color3.new(1, 1, 1)
-espButton.Parent = visualContent
+-- Visual sekmesine ESP toggle ekleniyor
+local visualContent = contents["Visual"]
+
+local espToggle = Instance.new("TextButton")
+espToggle.Size = UDim2.new(0, 220, 0, 40)
+espToggle.Position = UDim2.new(0, 15, 0, 10)
+espToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+espToggle.TextColor3 = Color3.new(1, 1, 1)
+espToggle.TextScaled = true
+espToggle.Font = Enum.Font.GothamBold
+espToggle.Text = "ESP: OFF"
+espToggle.Parent = visualContent
+
+Instance.new("UICorner", espToggle).CornerRadius = UDim.new(0, 10)
 
 local espEnabled = false
 
-espButton.MouseButton1Click:Connect(function()
+espToggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
-        espButton.Text = "ESP: ON"
-        espButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        -- BURAYA kendi ESP açma kodunu ekle
-        print("ESP Açıldı")
+        espToggle.Text = "ESP: ON"
+        espToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- yeşil
+        print("ESP Activated")
+        -- ESP açma kodunu buraya ekleyebilirsin
     else
-        espButton.Text = "ESP: OFF"
-        espButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        -- BURAYA kendi ESP kapama kodunu ekle
-        print("ESP Kapatıldı")
+        espToggle.Text = "ESP: OFF"
+        espToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- kırmızı
+        print("ESP Deactivated")
+        -- ESP kapama kodunu buraya ekleyebilirsin
     end
 end)
 
