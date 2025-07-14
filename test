@@ -329,6 +329,154 @@ espToggle.MouseButton1Click:Connect(function()
     end
 end)
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Eğer contents["Visual"] yoksa veya görünür değilse örnek oluştur
+local screenGui = playerGui:FindFirstChild("MainGui") or Instance.new("ScreenGui")
+screenGui.Name = "MainGui"
+screenGui.Parent = playerGui
+
+local visualTab = contents and contents["Visual"] or screenGui:FindFirstChild("Visual")
+
+if not visualTab then
+    visualTab = Instance.new("Frame")
+    visualTab.Name = "Visual"
+    visualTab.Size = UDim2.new(0, 250, 0, 180)
+    visualTab.Position = UDim2.new(0, 50, 0, 50)
+    visualTab.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    visualTab.Parent = screenGui
+end
+
+visualTab.Visible = true
+
+-- 1. Secret Brainrots ESP Toggle
+local secretBrainrotsToggle = Instance.new("TextButton")
+secretBrainrotsToggle.Size = UDim2.new(0, 220, 0, 40)
+secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 20)  -- biraz yukarı aldım ki üstte yer açsın
+secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+secretBrainrotsToggle.TextColor3 = Color3.new(1, 1, 1)
+secretBrainrotsToggle.Font = Enum.Font.GothamBold
+secretBrainrotsToggle.TextSize = 16
+secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
+secretBrainrotsToggle.Parent = visualTab
+Instance.new("UICorner", secretBrainrotsToggle).CornerRadius = UDim.new(0, 6)
+
+-- (Buraya secretBrainrots toggle ile ilgili diğer kodlar geliyor, seninki aynen kalabilir)
+
+-- 2. Brainrot God ESP Toggle
+local brainrotGodToggle = Instance.new("TextButton")
+brainrotGodToggle.Size = UDim2.new(0, 220, 0, 40)
+brainrotGodToggle.Position = UDim2.new(0, 10, 0, 110)
+brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+brainrotGodToggle.TextColor3 = Color3.new(1, 1, 1)
+brainrotGodToggle.Font = Enum.Font.GothamBold
+brainrotGodToggle.TextSize = 16
+brainrotGodToggle.Text = "Brainrot God ESP: OFF"
+brainrotGodToggle.Parent = visualTab
+Instance.new("UICorner", brainrotGodToggle).CornerRadius = UDim.new(0, 6)
+
+local brainrotGodEnabled = false
+local modelNames2 = {
+    "Tralalero Tralala",
+    "Cocofanto Elefanto",
+    "Matteo",
+    "Odin Din Din Dun",
+    "Girafa Celestre",
+    "Orcalero Orcala",
+    "Trenostruzzo Turbo 3000",
+    "Tigroligre Frutonni",
+    "Statutino Libertino",
+    "Gattatino Nyanino"
+}
+
+local function addBrainrotGodESP(model)
+    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+    if head and not model:FindFirstChild("ESPBox") then
+        if not head:FindFirstChildOfClass("BillboardGui") then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Size = UDim2.new(0, 200, 0, 60)
+            billboard.Adornee = head
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = model.Name
+            label.TextColor3 = Color3.fromRGB(0, 255, 255)
+            label.TextStrokeTransparency = 0
+            label.TextScaled = true
+            label.Font = Enum.Font.SourceSansBold
+            label.Parent = billboard
+        end
+
+        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+        if primaryPart then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Adornee = model
+            box.Size = model:GetExtentsSize()
+            box.Color3 = Color3.fromRGB(0, 170, 255)
+            box.AlwaysOnTop = true
+            box.ZIndex = 10
+            box.Transparency = 0.5
+            box.Parent = model
+        end
+    end
+end
+
+local brainrotGodConnection
+
+local function enableBrainrotGodESP()
+    brainrotGodConnection = RunService.RenderStepped:Connect(function()
+        for _, model in pairs(Workspace:GetChildren()) do
+            for _, name in pairs(modelNames2) do
+                if model.Name == name then
+                    addBrainrotGodESP(model)
+                end
+            end
+        end
+    end)
+end
+
+local function disableBrainrotGodESP()
+    if brainrotGodConnection then
+        brainrotGodConnection:Disconnect()
+        brainrotGodConnection = nil
+    end
+    -- ESP temizleme
+    for _, model in pairs(Workspace:GetChildren()) do
+        if model:FindFirstChild("ESPBox") then
+            model.ESPBox:Destroy()
+        end
+        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+        if head then
+            for _, gui in pairs(head:GetChildren()) do
+                if gui:IsA("BillboardGui") then
+                    gui:Destroy()
+                end
+            end
+        end
+    end
+end
+
+brainrotGodToggle.MouseButton1Click:Connect(function()
+    brainrotGodEnabled = not brainrotGodEnabled
+    if brainrotGodEnabled then
+        brainrotGodToggle.Text = "Brainrot God ESP: ON"
+        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        enableBrainrotGodESP()
+    else
+        brainrotGodToggle.Text = "Brainrot God ESP: OFF"
+        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        disableBrainrotGodESP()
+    end
+end)
 
 
 -- Misc sekmesi için buton oluşturma fonksiyonu
