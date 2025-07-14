@@ -340,15 +340,17 @@ espToggle.MouseButton1Click:Connect(function()
 end)
 
 -- 2. Secret Brainrots ESP
-local secretBrainrotsToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
+-- 2. Secret Brainrots ESP
+local secretBrainrotsToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50), 2)
 local secretBrainrotsEnabled = false
-local modelNames2 = {
+local modelNames = {
     "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
     "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
     "Garamam and Madundung", "Las Tralaleritas"
 }
 local secretBrainrotsConnection
 
+-- Secret Brainrots ESP ekleme fonksiyonu
 local function addSecretBrainrotsESP(model)
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
     if head and not head:FindFirstChildOfClass("BillboardGui") then
@@ -362,7 +364,7 @@ local function addSecretBrainrotsESP(model)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = model.Name
-        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        label.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Yeşil renk
         label.TextStrokeTransparency = 0
         label.TextScaled = true
         label.Font = Enum.Font.SourceSansBold
@@ -376,7 +378,7 @@ local function addSecretBrainrotsESP(model)
             box.Name = "ESPBox"
             box.Adornee = primaryPart
             box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-            box.Color3 = Color3.fromRGB(255, 0, 0)
+            box.Color3 = Color3.fromRGB(0, 255, 0)  -- Yeşil renk
             box.AlwaysOnTop = true
             box.ZIndex = 10
             box.Transparency = 0.5
@@ -385,16 +387,18 @@ local function addSecretBrainrotsESP(model)
     end
 end
 
-local function enableSecretBrainrotESP()
+-- Secret Brainrots ESP'yi etkinleştiren fonksiyon
+local function enableSecretBrainrotsESP()
     secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
-            if table.find(modelNames2, model.Name) then
+            if table.find(modelNames, model.Name) then
                 addSecretBrainrotsESP(model)
             end
         end
     end)
 end
 
+-- Secret Brainrots ESP'yi devre dışı bırakma fonksiyonu
 local function disableSecretBrainrotsESP()
     if secretBrainrotsConnection then
         secretBrainrotsConnection:Disconnect()
@@ -411,18 +415,20 @@ local function disableSecretBrainrotsESP()
     end
 end
 
+-- Secret Brainrots ESP toggle butonuna tıklama olayı
 secretBrainrotsToggle.MouseButton1Click:Connect(function()
     secretBrainrotsEnabled = not secretBrainrotsEnabled
     if secretBrainrotsEnabled then
         secretBrainrotsToggle.Text = "Secret Brainrots ESP: ON"
-        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        enableSecretBrainrotESP()
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)  -- Yeşil renk
+        enableSecretBrainrotsESP()
     else
         secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
-        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Gri renk
         disableSecretBrainrotsESP()
     end
 end)
+
 
 -- 3. Brainrot God ESP
 local brainrotGodToggle = createToggleButton("BrainrotGod", "Brainrot God ESP: OFF", Color3.fromRGB(50, 50, 50))
