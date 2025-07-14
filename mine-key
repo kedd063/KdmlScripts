@@ -329,6 +329,33 @@ espToggle.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Misc sekmesi için buton oluşturma fonksiyonu
+local function createMiscButton(parent, itemName)
+    createMainButton(parent, itemName, function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        pcall(function()
+            net:InvokeServer(itemName)
+            print(itemName .. " satın alındı.")
+        end)
+    end)
+end
+
+-- Satın alınabilir itemler
+local miscItems = {
+    "Trap",
+    "Invisibility Cloak",
+    "Medusa's Head",
+    "Quantum Cloner",
+    "Body Swap Potion"
+}
+
+-- Misc sekmesine butonları ekle
+for _, item in ipairs(miscItems) do
+    createMiscButton(contents["Misc"], item)
+end
+
+
 -- other stuffs auto wheel candy spin bunu ben yazdım muhaha
 
 -- Other Stuffs sekmesine Auto Spin toggle butonu
