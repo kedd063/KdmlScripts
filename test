@@ -16,18 +16,15 @@ mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 mainButton.AnchorPoint = Vector2.new(0, 0.5)
 mainButton.Image = "rbxassetid://104833147631294"
 mainButton.Name = "MainButton"
-mainButton.Active = true
-mainButton.Selectable = true
 mainButton.Parent = screenGui
 Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
 
 -- Menü Frame
 local menuFrame = Instance.new("Frame")
 menuFrame.Size = UDim2.new(0, 280, 0, 350)
-menuFrame.Position = UDim2.new(0.3, 0, 0.5, -175)
+menuFrame.Position = UDim2.new(0.5, -140, 0.4, 0) -- Daha ortalanmış pozisyon
 menuFrame.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
 menuFrame.Active = true
-menuFrame.Draggable = true
 menuFrame.Visible = false
 menuFrame.Name = "MenuFrame"
 menuFrame.Parent = screenGui
@@ -207,24 +204,56 @@ createMainButton(contents["Main"], "Float", function()
 
         moveConnection = RunService.Heartbeat:Connect(function()
             if not floatActive then return end
-            local elapsed = tick() - startTime
-            local remaining = floatTime - elapsed
-            countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
-            if remaining <= 0 then
-                stopFloat()
-                countdownLabel.Text = "Done"
-            else
-                local dir = workspace.CurrentCamera.CFrame.LookVector
-                local move = Vector3.new(dir.X, 0, dir.Z).Unit
-                hrp.Velocity = move * floatSpeed
+            local input = UIS:GetKeysPressed()
+            local direction = Vector3.new()
+            for _, key in pairs(input) do
+                if key.KeyCode == Enum.KeyCode.W then direction = direction + hrp.CFrame.LookVector end
+                if key.KeyCode == Enum.KeyCode.S then direction = direction - hrp.CFrame.LookVector end
+                if key.KeyCode == Enum.KeyCode.A then direction = direction - hrp.CFrame.RightVector end
+                if key.KeyCode == Enum.KeyCode.D then direction = direction + hrp.CFrame.RightVector end
             end
+            hrp.Velocity = Vector3.new(direction.X * floatSpeed, hrp.Velocity.Y, direction.Z * floatSpeed)
+        end)
+
+        task.spawn(function()
+            while tick() - startTime < floatTime and floatActive do
+                countdownLabel.Text = "Time Left: "..math.floor(floatTime - (tick() - startTime)).."s"
+                task.wait(1)
+            end
+            stopFloat()
+            countdownLabel.Text = "Ready"
         end)
     end
 
     button.MouseButton1Click:Connect(function()
-        if not floatActive then startFloat() else stopFloat() end
+        if floatActive then
+            stopFloat()
+        else
+            startFloat()
+        end
     end)
-end, "92502257917367") -- Float decal ID
+end, "10713531459") -- Float decal ID
+
+-- Menü açma / kapama
+local menuOpen = false
+mainButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    menuFrame.Visible = menuOpen
+end)
+
+-- Sekme butonları için görünürlük kontrolü
+for name, tabButton in pairs(tabs) do
+    tabButton.MouseButton1Click:Connect(function()
+        for _, contentFrame in pairs(contents) do
+            contentFrame.Visible = false
+        end
+        contents[name].Visible = true
+    end)
+end
+
+-- Başlangıçta ilk sekme aktif olsun
+contents["Main"].Visible = true
+
 
 -- Instant Steal
 createMainButton(contents["Main"], "İnstant Steal (key: kdml scripts)", function()
