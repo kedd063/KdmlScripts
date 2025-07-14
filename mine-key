@@ -373,19 +373,19 @@ Instance.new("UICorner", autoSpinToggle).CornerRadius = UDim.new(0, 6)
 local autoSpinEnabled = false
 local autoSpinLoop
 
--- Buton içine decal ekleme (istersen)
+-- Buton içine decal ekleme (metnin biraz altına hizalı)
 local decalImage1 = Instance.new("ImageLabel")
 decalImage1.Size = UDim2.new(0, 30, 0, 30)
-decalImage1.Position = UDim2.new(0, 5, 0.5, -15)
+decalImage1.Position = UDim2.new(0, 5, 0.5, -5) -- -15 yerine -5
 decalImage1.BackgroundTransparency = 1
-decalImage1.Image = "rbxassetid://92502257917367"
+decalImage1.Image = "rbxassetid://77845674263775"
 decalImage1.Parent = autoSpinToggle
 
 local decalImage2 = Instance.new("ImageLabel")
 decalImage2.Size = UDim2.new(0, 30, 0, 30)
-decalImage2.Position = UDim2.new(0, 40, 0.5, -15)
+decalImage2.Position = UDim2.new(0, 40, 0.5, -5) -- -15 yerine -5
 decalImage2.BackgroundTransparency = 1
-decalImage2.Image = "rbxassetid://77845674263775"
+decalImage2.Image = "rbxassetid://88138256630909"
 decalImage2.Parent = autoSpinToggle
 
 autoSpinToggle.MouseButton1Click:Connect(function()
@@ -409,6 +409,7 @@ autoSpinToggle.MouseButton1Click:Connect(function()
         end
     end
 end)
+
 
 
 -- Başlangıçta "Main" sekmesi aktif olsun
