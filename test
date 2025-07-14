@@ -357,7 +357,7 @@ visualTab.Visible = true
 -- 1. Secret Brainrots ESP Toggle
 local secretBrainrotsToggle = Instance.new("TextButton")
 secretBrainrotsToggle.Size = UDim2.new(0, 220, 0, 40)
-secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 20)  -- biraz yukarı aldım ki üstte yer açsın
+secretBrainrotsToggle.Position = UDim2.new(0, 10, 0, 60)
 secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 secretBrainrotsToggle.TextColor3 = Color3.new(1, 1, 1)
 secretBrainrotsToggle.Font = Enum.Font.GothamBold
@@ -366,7 +366,101 @@ secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
 secretBrainrotsToggle.Parent = visualTab
 Instance.new("UICorner", secretBrainrotsToggle).CornerRadius = UDim.new(0, 6)
 
--- (Buraya secretBrainrots toggle ile ilgili diğer kodlar geliyor, seninki aynen kalabilir)
+local secretBrainrotsEnabled = false
+local modelNames = {
+    "Chimpanzini Spiderini",
+    "Los Tralaleritos",
+    "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini",
+    "Graipuss Medussi",
+    "La Grande Combinasion",
+    "Garamam and Madundung",
+    "Las Tralaleritas"
+}
+
+local function addSecretBrainrotsESP(model)
+    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+    if head and not head:FindFirstChildOfClass("BillboardGui") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 200, 0, 60)
+        billboard.Adornee = head
+        billboard.AlwaysOnTop = true
+        billboard.Parent = head
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = model.Name
+        label.TextColor3 = Color3.fromRGB(0, 255, 0)
+        label.TextStrokeTransparency = 0
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.Parent = billboard
+    end
+
+    if not model:FindFirstChild("ESPBox") then
+        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+        if primaryPart then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Adornee = model
+            box.Size = model:GetExtentsSize()
+            box.Color3 = Color3.fromRGB(0, 255, 0)
+            box.AlwaysOnTop = true
+            box.ZIndex = 10
+            box.Transparency = 0.5
+            box.Parent = model
+        end
+    end
+end
+
+local secretBrainrotsConnection
+
+local function enableSecretBrainrotsESP()
+    secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
+        for _, model in pairs(Workspace:GetChildren()) do
+            for _, name in pairs(modelNames) do
+                if model.Name == name then
+                    addSecretBrainrotsESP(model)
+                end
+            end
+        end
+    end)
+end
+
+local function disableSecretBrainrotsESP()
+    if secretBrainrotsConnection then
+        secretBrainrotsConnection:Disconnect()
+        secretBrainrotsConnection = nil
+    end
+    -- ESPleri temizle
+    for _, model in pairs(Workspace:GetChildren()) do
+        if model:FindFirstChild("ESPBox") then
+            model.ESPBox:Destroy()
+        end
+        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+        if head then
+            for _, gui in pairs(head:GetChildren()) do
+                if gui:IsA("BillboardGui") then
+                    gui:Destroy()
+                end
+            end
+        end
+    end
+end
+
+secretBrainrotsToggle.MouseButton1Click:Connect(function()
+    secretBrainrotsEnabled = not secretBrainrotsEnabled
+    if secretBrainrotsEnabled then
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: ON"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        enableSecretBrainrotsESP()
+    else
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        disableSecretBrainrotsESP()
+    end
+end)
 
 -- 2. Brainrot God ESP Toggle
 local brainrotGodToggle = Instance.new("TextButton")
