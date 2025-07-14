@@ -3,25 +3,29 @@ local RunService = game:GetService("RunService")
 local Workspace = game.Workspace
 local player = Players.LocalPlayer
 
--- GUI oluştur
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "LockTimerESP_GUI"
+-- === GUI ===
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "LockTimerESP_GUI"
 
+-- Panel
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 250, 0, 100)
 frame.Position = UDim2.new(0, 50, 0, 50)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Parent = screenGui
 
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 8)
+
+-- Başlık
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
 title.Text = "Lock Timer ESP"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
-title.TextColor3 = Color3.new(1,1,1)
-title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1, 1, 1)
 title.Parent = frame
 
 -- Toggle Butonu
@@ -34,9 +38,11 @@ toggle.Font = Enum.Font.GothamBold
 toggle.TextSize = 16
 toggle.Text = "ESP: OFF"
 toggle.Parent = frame
-Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
 
--- Toggle mantığı
+local toggleCorner = Instance.new("UICorner", toggle)
+toggleCorner.CornerRadius = UDim.new(0, 6)
+
+-- === ESP Logic ===
 local espEnabled = false
 local espConnection
 local activeESP = {}
@@ -75,7 +81,8 @@ local function enableESP()
                             textLabel.Size = UDim2.new(1, 0, 1, 0)
                             textLabel.BackgroundTransparency = 1
                             textLabel.Text = label.Text
-                            textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                            textLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                            textLabel.TextStrokeTransparency = 0
                             textLabel.TextScaled = true
                             textLabel.Font = Enum.Font.GothamBold
                             textLabel.Parent = billboard
@@ -97,6 +104,7 @@ local function disableESP()
     clearESP()
 end
 
+-- Toggle Butonu Bağla
 toggle.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
