@@ -366,6 +366,7 @@ secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
 secretBrainrotsToggle.Parent = visualTab
 Instance.new("UICorner", secretBrainrotsToggle).CornerRadius = UDim.new(0, 6)
 
+
 local function addSecretBrainrotsESP(model)
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
     if head then
@@ -394,7 +395,8 @@ local function addSecretBrainrotsESP(model)
             local box = Instance.new("BoxHandleAdornment")
             box.Name = "ESPBox"
             box.Adornee = primaryPart
-            box.Size = model:GetExtentsSize()
+            -- Kutunun boyutunu PrimaryPart boyutuna göre ayarla ve biraz büyüt
+            box.Size = primaryPart.Size * Vector3.new(1.1, 1.5, 1.1)
             box.Color3 = Color3.fromRGB(0, 255, 0)
             box.AlwaysOnTop = true
             box.ZIndex = 10
@@ -403,6 +405,7 @@ local function addSecretBrainrotsESP(model)
         end
     end
 end
+
 
 
 -- 2. Brainrot God ESP Toggle
