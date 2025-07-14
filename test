@@ -234,7 +234,7 @@ end)
 
 -- Main sekmesine Instant Steal tuşu
 createMainButton(contents["Main"], "İnstant Steal (code: arbix hub)", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brianrot/refs/heads/main/Slowversion.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ArbixHubs/Arbix-Hub/refs/heads/main/Arbix"))()
 end)
 
 
