@@ -227,8 +227,8 @@ createMainButton(contents["Main"], "Float", function()
 end, "92502257917367") -- Float decal ID
 
 -- Instant Steal
-createMainButton(contents["Main"], "İnstant Steal (key: render and arbix hub)", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ArbixHubs/Arbix-Hub/refs/heads/main/Arbix"))() 
+createMainButton(contents["Main"], "İnstant Steal (key: kdml scripts)", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/ins"))() 
 end)
 
 -- Buton oluşturma fonksiyonu, her butonu "Visual" sekmesine ekliyoruz
