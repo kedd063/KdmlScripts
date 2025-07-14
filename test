@@ -244,6 +244,7 @@ local function createToggleButton(name, defaultText, colorOff)
     btn.Text = defaultText
     btn.Parent = visualTab
     btn.LayoutOrder = 0
+    btn.Parent = contents["Visual"]
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     return btn
 end
