@@ -430,7 +430,7 @@ end)
 
 
 -- 3. Brainrot God ESP
-local brainrotGodToggle = createToggleButton("BrainrotGod", "Brainrot God ESP: OFF", Color3.fromRGB(50, 50, 50))
+local brainrotGodToggle = createToggleButton("BrainrotGod", "OP Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
 local brainrotGodEnabled = false
 local modelNames2 = {
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
@@ -478,7 +478,7 @@ local function addBrainrotGodESP(model)
     end
 end
 
-local function enableBrainrotGodESP()
+local function enableOPBrainrotsESP()
     brainrotGodConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
             if table.find(modelNames2, model.Name) then
@@ -488,7 +488,7 @@ local function enableBrainrotGodESP()
     end)
 end
 
-local function disableBrainrotGodESP()
+local function disableOPBrainrotsESP()
     if brainrotGodConnection then
         brainrotGodConnection:Disconnect()
         brainrotGodConnection = nil
@@ -507,13 +507,13 @@ end
 brainrotGodToggle.MouseButton1Click:Connect(function()
     brainrotGodEnabled = not brainrotGodEnabled
     if brainrotGodEnabled then
-        brainrotGodToggle.Text = "Brainrot God ESP: ON"
+        brainrotGodToggle.Text = "OP Brainrots: ON"
         brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         enableBrainrotGodESP()
     else
-        brainrotGodToggle.Text = "Brainrot God ESP: OFF"
+        brainrotGodToggle.Text = "OP Brainrots: OFF"
         brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        disableBrainrotGodESP()
+        disableOPBrainrotsESP()
     end
 end)
 
