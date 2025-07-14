@@ -345,8 +345,8 @@ local secretBrainrotsEnabled = false
 local modelNames = {
     "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
     "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
-    "Garamam and Madundung", "Las Tralaleritas"
-}
+    "Garamam and Madundung", "Las Tralaleritas}
+
 local secretBrainrotsConnection
 
 -- Secret Brainrots ESP ekleme fonksiyonu
@@ -435,7 +435,10 @@ local brainrotGodEnabled = false
 local modelNames2 = {
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
     "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
-    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino"
+    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino,
+"Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+    "Garamam and Madundung", "Las Tralaleritas
 }
 local brainrotGodConnection
 
