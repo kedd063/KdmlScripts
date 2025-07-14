@@ -332,15 +332,6 @@ end)
 tabs["Main"].BackgroundColor3 = Color3.fromRGB(140, 90, 255)
 contents["Main"].Visible = true
 
--- Menü açma/kapatma
-local menuOpen = false
-mainButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    menuFrame.Visible = menuOpen
-end)
-
-return screenGui
-
 -- sekmeler arası geçiş
 
 for name, button in pairs(tabs) do
@@ -356,3 +347,13 @@ for name, button in pairs(tabs) do
     end)
 end
 
+
+
+-- Menü açma/kapatma
+local menuOpen = false
+mainButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    menuFrame.Visible = menuOpen
+end)
+
+return screenGui
