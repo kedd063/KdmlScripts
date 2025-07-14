@@ -15,7 +15,7 @@ local function createKeyInputGui()
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 340, 0, 240)
-    frame.Position = UDim2.new(0.5, -170, 0.5, -120)
+    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
     frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     frame.BorderSizePixel = 0
     frame.AnchorPoint = Vector2.new(0.5, 0.5)
