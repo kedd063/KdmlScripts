@@ -431,7 +431,7 @@ end)
 
 
 -- 3. Brainrot God ESP
-local brainrotGodToggle = createToggleButton("BrainrotGod", "Brainrot God ESP: OFF", Color3.fromRGB(50, 50, 50))
+local brainrotGodToggle = createToggleButton("OP Brainrots", "OP Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
 local brainrotGodEnabled = false
 local modelNames2 = {
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
@@ -447,7 +447,7 @@ local modelNames2 = {
 
 local brainrotGodConnection
 
-local function addBrainrotGodESP(model)
+local function addOPBrainrotsESP(model)
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
     if head and not head:FindFirstChildOfClass("BillboardGui") then
         local billboard = Instance.new("BillboardGui")
@@ -483,7 +483,7 @@ local function addBrainrotGodESP(model)
     end
 end
 
-local function enableBrainrotGodESP()
+local function enableOPBrainrotsESP()
     brainrotGodConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
             if table.find(modelNames2, model.Name) then
@@ -493,7 +493,7 @@ local function enableBrainrotGodESP()
     end)
 end
 
-local function disableBrainrotGodESP()
+local function disableOPBrainrotsESP()
     if brainrotGodConnection then
         brainrotGodConnection:Disconnect()
         brainrotGodConnection = nil
@@ -510,13 +510,13 @@ local function disableBrainrotGodESP()
 end
 
 brainrotGodToggle.MouseButton1Click:Connect(function()
-    brainrotGodEnabled = not brainrotGodEnabled
+    brainrotGodEnabled = not OPBrainrotsEnabled
     if brainrotGodEnabled then
-        brainrotGodToggle.Text = "Brainrot God ESP: ON"
+        brainrotGodToggle.Text = "OP Brainrots ESP: ON"
         brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         enableBrainrotGodESP()
     else
-        brainrotGodToggle.Text = "Brainrot God ESP: OFF"
+        brainrotGodToggle.Text = "OP Brainrots ESP: OFF"
         brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         disableBrainrotGodESP()
     end
