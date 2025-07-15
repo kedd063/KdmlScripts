@@ -1,1 +1,653 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
 
+-- Ana GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KdmlGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local mainButton = Instance.new("ImageButton")
+mainButton.Size = UDim2.new(0, 100, 0, 100)
+mainButton.Position = UDim2.new(0, 10, 0.6, -50)
+mainButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainButton.AnchorPoint = Vector2.new(0, 0.5)
+mainButton.Image = "rbxassetid://104833147631294"
+mainButton.Name = "MainButton"
+mainButton.Active = true
+mainButton.Selectable = true
+mainButton.Parent = screenGui
+Instance.new("UICorner", mainButton).CornerRadius = UDim.new(0, 20)
+
+-- Menü Frame
+local menuFrame = Instance.new("Frame")
+menuFrame.Size = UDim2.new(0, 280, 0, 350)
+menuFrame.Position = UDim2.new(0.3, 0, 0.5, -175)
+menuFrame.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
+menuFrame.Active = true
+menuFrame.Draggable = true
+menuFrame.Visible = false
+menuFrame.Name = "MenuFrame"
+menuFrame.Parent = screenGui
+Instance.new("UICorner", menuFrame).CornerRadius = UDim.new(0, 14)
+
+-- Gradient Arka Plan
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 150, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+gradient.Rotation = 45
+gradient.Parent = menuFrame
+
+-- Başlık
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Kdml Scripts"
+titleLabel.TextColor3 = Color3.new(1, 1, 1)
+titleLabel.TextScaled = true
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Parent = menuFrame
+
+-- Sekmeler ve içerikleri
+local tabNames = {"Main", "Visual", "Misc", "Other Stuffs"}
+local tabs = {}
+local contents = {}
+
+for i, name in ipairs(tabNames) do
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(0.25, 0, 0, 40)
+    tabButton.Position = UDim2.new(0.25 * (i - 1), 0, 0, 50)
+    tabButton.Text = name
+    tabButton.Font = Enum.Font.Gotham
+    tabButton.TextColor3 = Color3.new(1, 1, 1)
+    tabButton.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+    tabButton.Parent = menuFrame
+    Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
+    tabs[name] = tabButton
+
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -40, 1, -110)
+    contentFrame.Position = UDim2.new(0, 10, 0, 110)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(80, 60, 120)
+    contentFrame.Visible = false
+    contentFrame.Parent = menuFrame
+    Instance.new("UICorner", contentFrame).CornerRadius = UDim.new(0, 6)
+    contents[name] = contentFrame
+end
+
+-- Buton oluşturma fonksiyonu (decalId opsiyonel)
+local function createMainButton(parent, text, callback, decalId)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 200, 0, 30)
+    btn.Position = UDim2.new(0, 10, 0, (#parent:GetChildren() - 1) * 35)
+    btn.Text = text
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BorderSizePixel = 0
+    btn.Parent = parent
+
+    if decalId then
+        local imageLabel = Instance.new("ImageLabel")
+        imageLabel.Size = UDim2.new(0, 24, 0, 24)
+        imageLabel.Position = UDim2.new(1, -30, 0.5, -12)
+        imageLabel.BackgroundTransparency = 1
+        imageLabel.Image = "rbxassetid://"..decalId
+        imageLabel.Parent = btn
+    end
+
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- MAIN sekmesine butonlar
+
+-- Speed Boost
+createMainButton(contents["Main"], "Speed Boost", function()
+    local boostedSpeed = 48
+    local function applySpeedBoost()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = boostedSpeed
+    end
+    applySpeedBoost()
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        applySpeedBoost()
+    end)
+end, "99553077312278") -- Speed Boost decal ID
+
+-- Jump Boost
+createMainButton(contents["Main"], "Jump Boost", function()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    humanoid.Jumping:Connect(function(active)
+        if active then
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
+        end
+    end)
+end, "90602373838483") -- Jump Boost decal ID
+
+-- Float
+createMainButton(contents["Main"], "Float", function()
+    local floatActive = false
+    local floatSpeed = 46
+    local floatTime = 5
+    local startTime = 0
+
+    local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    gui.Name = "Float"
+    gui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 220, 0, 120)
+    frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+    frame.BorderSizePixel = 3
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = gui
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.BackgroundTransparency = 1
+    title.Text = "Float"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextColor3 = Color3.fromRGB(0, 170, 255)
+    title.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 180, 0, 40)
+    button.Position = UDim2.new(0.5, -90, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    button.TextColor3 = Color3.new(1,1,1)
+    button.TextScaled = true
+    button.Font = Enum.Font.GothamBold
+    button.Text = "Float"
+    button.Parent = frame
+
+    local countdownLabel = Instance.new("TextLabel")
+    countdownLabel.Size = UDim2.new(0, 180, 0, 25)
+    countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
+    countdownLabel.BackgroundTransparency = 1
+    countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+    countdownLabel.Font = Enum.Font.Gotham
+    countdownLabel.TextScaled = true
+    countdownLabel.Text = "Ready"
+    countdownLabel.Parent = frame
+
+    local moveConnection, gravityConnection
+    local function stopFloat()
+        floatActive = false
+        button.Text = "Float"
+        if moveConnection then moveConnection:Disconnect() end
+        if gravityConnection then gravityConnection:Disconnect() end
+    end
+
+    local function startFloat()
+        floatActive = true
+        button.Text = "Stop"
+        startTime = tick()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        gravityConnection = RunService.Heartbeat:Connect(function()
+            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+        end)
+
+        moveConnection = RunService.Heartbeat:Connect(function()
+            if not floatActive then return end
+            local elapsed = tick() - startTime
+            local remaining = floatTime - elapsed
+            countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
+            if remaining <= 0 then
+                stopFloat()
+                countdownLabel.Text = "Done"
+            else
+                local dir = workspace.CurrentCamera.CFrame.LookVector
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hrp.Velocity = move * floatSpeed
+            end
+        end)
+    end
+
+    button.MouseButton1Click:Connect(function()
+        if not floatActive then startFloat() else stopFloat() end
+    end)
+end, "92502257917367") -- Float decal ID
+
+-- Instant Steal
+createMainButton(contents["Main"], "İnstant Steal (key: kdml scripts)", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/ins"))() 
+end)
+
+-- Buton oluşturma fonksiyonu, her butonu "Visual" sekmesine ekliyoruz
+local function createToggleButton(name, defaultText, colorOff)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(1, -20, 0, 40)
+    btn.BackgroundColor3 = colorOff
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
+    btn.Text = defaultText
+    btn.Parent = contents["Visual"]  -- Butonlar burada gözükmesi için "Visual" sekmesine ekleniyor
+    btn.LayoutOrder = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+    -- Buton sayısını kontrol etme
+    print("Visual içindeki buton sayısı: ", #contents["Visual"]:GetChildren())
+    
+    return btn
+end
+
+-- 1. ESP Toggle
+local espToggle = createToggleButton("ESPButton", "ESP: OFF", Color3.fromRGB(50, 50, 50))
+local espEnabled = false
+local espObjects = {}
+
+local function createNameTag(character, playerName)
+    if not character or not character:FindFirstChild("Head") then return end
+    local head = character.Head
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_NameTag"
+    billboard.Adornee = head
+    billboard.Size = UDim2.new(0, 100, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = head
+
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextStrokeTransparency = 0
+    label.Font = Enum.Font.GothamBold
+    label.TextScaled = true
+    label.Text = playerName
+    label.Parent = billboard
+
+    return billboard
+end
+
+local function applyHighlight(character)
+    if not character then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = character
+    highlight.FillColor = Color3.fromRGB(170, 0, 255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0.7
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = character
+
+    return highlight
+end
+
+local function enableESP()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local nameTag = createNameTag(plr.Character, plr.Name)
+            local highlight = applyHighlight(plr.Character)
+            espObjects[plr] = {nameTag = nameTag, highlight = highlight}
+
+            plr.CharacterAdded:Connect(function(char)
+                if espEnabled then
+                    if espObjects[plr] then
+                        if espObjects[plr].nameTag then espObjects[plr].nameTag:Destroy() end
+                        if espObjects[plr].highlight then espObjects[plr].highlight:Destroy() end
+                    end
+                    local nt = createNameTag(char, plr.Name)
+                    local hl = applyHighlight(char)
+                    espObjects[plr] = {nameTag = nt, highlight = hl}
+                end
+            end)
+        end
+    end
+end
+
+local function disableESP()
+    for _, objs in pairs(espObjects) do
+        if objs.nameTag then objs.nameTag:Destroy() end
+        if objs.highlight then objs.highlight:Destroy() end
+    end
+    espObjects = {}
+end
+
+espToggle.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        espToggle.Text = "ESP: ON"
+        espToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        enableESP()
+    else
+        espToggle.Text = "ESP: OFF"
+        espToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        disableESP()
+    end
+end)
+
+-- 2. Secret Brainrots ESP
+-- 2. Secret Brainrots ESP
+local secretBrainrotsToggle = createToggleButton("SecretBrainrots", "Secret Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50), 2)
+local secretBrainrotsEnabled = false
+local modelNames = {
+    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+    "Garamam and Madundung", "Las Tralaleritas"
+}
+local secretBrainrotsConnection
+
+-- Secret Brainrots ESP ekleme fonksiyonu
+local function addSecretBrainrotsESP(model)
+    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+    if head and not head:FindFirstChildOfClass("BillboardGui") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 200, 0, 60)
+        billboard.Adornee = head
+        billboard.AlwaysOnTop = true
+        billboard.Parent = head
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = model.Name
+        label.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Yeşil renk
+        label.TextStrokeTransparency = 0
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.Parent = billboard
+    end
+
+    if not model:FindFirstChild("ESPBox") then
+        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+        if primaryPart then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Adornee = primaryPart
+            box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
+            box.Color3 = Color3.fromRGB(0, 255, 0)  -- Yeşil renk
+            box.AlwaysOnTop = true
+            box.ZIndex = 10
+            box.Transparency = 0.5
+            box.Parent = primaryPart
+        end
+    end
+end
+
+-- Secret Brainrots ESP'yi etkinleştiren fonksiyon
+local function enableSecretBrainrotsESP()
+    secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
+        for _, model in pairs(workspace:GetChildren()) do
+            if table.find(modelNames, model.Name) then
+                addSecretBrainrotsESP(model)
+            end
+        end
+    end)
+end
+
+-- Secret Brainrots ESP'yi devre dışı bırakma fonksiyonu
+local function disableSecretBrainrotsESP()
+    if secretBrainrotsConnection then
+        secretBrainrotsConnection:Disconnect()
+        secretBrainrotsConnection = nil
+    end
+    for _, model in pairs(workspace:GetChildren()) do
+        if model:FindFirstChild("ESPBox") then model.ESPBox:Destroy() end
+        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+        if head then
+            for _, gui in pairs(head:GetChildren()) do
+                if gui:IsA("BillboardGui") then gui:Destroy() end
+            end
+        end
+    end
+end
+
+-- Secret Brainrots ESP toggle butonuna tıklama olayı
+secretBrainrotsToggle.MouseButton1Click:Connect(function()
+    secretBrainrotsEnabled = not secretBrainrotsEnabled
+    if secretBrainrotsEnabled then
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: ON"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(0, 170, 0)  -- Yeşil renk
+        enableSecretBrainrotsESP()
+    else
+        secretBrainrotsToggle.Text = "Secret Brainrots ESP: OFF"
+        secretBrainrotsToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Gri renk
+        disableSecretBrainrotsESP()
+    end
+end)
+
+
+-- 3. Brainrot God ESP
+local brainrotGodToggle = createToggleButton("OP Brainrots", "Brainrot God ESP: OFF", Color3.fromRGB(50, 50, 50))
+local brainrotGodEnabled = false
+
+local modelNames2 = {
+    "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
+    "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
+    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino"
+}
+
+local specialModels = {
+    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+    "Garamam and Madundung", "Las Tralaleritas"
+}
+
+local brainrotGodConnection
+
+local function addBrainrotGodESP(model)
+    local isSpecial = table.find(specialModels, model.Name) ~= nil
+
+    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+    if head and not head:FindFirstChildOfClass("BillboardGui") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Size = UDim2.new(0, 200, 0, 60)
+        billboard.Adornee = head
+        billboard.AlwaysOnTop = true
+        billboard.Parent = head
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = model.Name
+        label.TextStrokeTransparency = 0
+        label.TextScaled = true
+        label.Font = Enum.Font.SourceSansBold
+        label.Parent = billboard
+
+        label.TextColor3 = isSpecial and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 0, 0)
+    end
+
+    if not model:FindFirstChild("ESPBox") then
+        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+        if primaryPart then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Name = "ESPBox"
+            box.Adornee = primaryPart
+            box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
+            box.Color3 = isSpecial and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 0, 0)
+            box.AlwaysOnTop = true
+            box.ZIndex = 10
+            box.Transparency = 0.5
+            box.Parent = primaryPart
+        end
+    end
+end
+
+local function enableBrainrotGodESP()
+    brainrotGodConnection = RunService.RenderStepped:Connect(function()
+        for _, model in pairs(workspace:GetChildren()) do
+            if table.find(modelNames2, model.Name) or table.find(specialModels, model.Name) then
+                addBrainrotGodESP(model)
+            end
+        end
+    end)
+end
+
+local function disableBrainrotGodESP()
+    if brainrotGodConnection then
+        brainrotGodConnection:Disconnect()
+        brainrotGodConnection = nil
+    end
+
+    for _, model in pairs(workspace:GetChildren()) do
+        -- Tüm BasePart’lerdeki BoxHandleAdornment’ları temizle
+        for _, part in pairs(model:GetDescendants()) do
+            if part:IsA("BoxHandleAdornment") then
+                part:Destroy()
+            end
+        end
+
+        -- BillboardGui temizle
+        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+        if head then
+            for _, gui in pairs(head:GetChildren()) do
+                if gui:IsA("BillboardGui") then
+                    gui:Destroy()
+                end
+            end
+        end
+    end
+end
+
+brainrotGodToggle.MouseButton1Click:Connect(function()
+    brainrotGodEnabled = not brainrotGodEnabled
+    if brainrotGodEnabled then
+        brainrotGodToggle.Text = "OP Brainrots: ON"
+        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        enableBrainrotGodESP()
+    else
+        brainrotGodToggle.Text = "OP Brainrots: OFF"
+        brainrotGodToggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        disableBrainrotGodESP()
+    end
+end)
+
+
+
+
+-- Misc sekmesi için buton oluşturma fonksiyonu
+local function createMiscButton(parent, itemName)
+    createMainButton(parent, itemName, function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        pcall(function()
+            net:InvokeServer(itemName)
+            print(itemName .. " satın alındı.")
+        end)
+    end)
+end
+
+-- Satın alınabilir itemler
+local miscItems = {
+    "Trap",
+    "Invisibility Cloak",
+    "Medusa's Head",
+    "Quantum Cloner",
+    "Body Swap Potion"
+}
+
+-- Misc sekmesine butonları ekle
+for _, item in ipairs(miscItems) do
+    createMiscButton(contents["Misc"], item)
+end
+
+
+-- other stuffs auto wheel candy spin bunu ben yazdım muhaha
+
+-- Other Stuffs sekmesine Auto Spin toggle butonu
+local autoSpinToggle = Instance.new("TextButton")
+autoSpinToggle.Size = UDim2.new(0, 250, 0, 40)
+autoSpinToggle.Position = UDim2.new(0, 10, 0, 10)
+autoSpinToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+autoSpinToggle.TextColor3 = Color3.new(1, 1, 1)
+autoSpinToggle.Font = Enum.Font.GothamBold
+autoSpinToggle.TextSize = 16
+autoSpinToggle.Text = "    Auto Candy Spin Wheel [OFF]"
+autoSpinToggle.Parent = contents["Other Stuffs"]
+Instance.new("UICorner", autoSpinToggle).CornerRadius = UDim.new(0, 6)
+
+local autoSpinEnabled = false
+local autoSpinLoop
+
+-- Buton içine decal ekleme (metnin biraz altına hizalı)
+local decalImage1 = Instance.new("ImageLabel")
+decalImage1.Size = UDim2.new(0, 30, 0, 30)
+decalImage1.Position = UDim2.new(0, 5, 0.5, -5) -- -15 yerine -5
+decalImage1.BackgroundTransparency = 1
+decalImage1.Image = "rbxassetid://77845674263775"
+decalImage1.Parent = autoSpinToggle
+
+local decalImage2 = Instance.new("ImageLabel")
+decalImage2.Size = UDim2.new(0, 30, 0, 30)
+decalImage2.Position = UDim2.new(0, 40, 0.5, -5) -- -15 yerine -5
+decalImage2.BackgroundTransparency = 1
+decalImage2.Image = "rbxassetid://88138256630909"
+decalImage2.Parent = autoSpinToggle
+
+autoSpinToggle.MouseButton1Click:Connect(function()
+    autoSpinEnabled = not autoSpinEnabled
+    autoSpinToggle.Text = autoSpinEnabled and "    Auto Candy Spin Wheel [ON]" or "    Auto Candy Spin Wheel [OFF]"
+    autoSpinToggle.BackgroundColor3 = autoSpinEnabled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(75, 0, 130)
+
+    if autoSpinEnabled then
+        autoSpinLoop = task.spawn(function()
+            while autoSpinEnabled do
+                local net = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net")
+                local spinEvent = net:WaitForChild("RE/CandyEventService/Spin")
+                spinEvent:FireServer()
+                task.wait(1)
+            end
+        end)
+    else
+        if autoSpinLoop then
+            task.cancel(autoSpinLoop)
+            autoSpinLoop = nil
+        end
+    end
+end)
+
+
+
+-- Başlangıçta "Main" sekmesi aktif olsun
+tabs["Main"].BackgroundColor3 = Color3.fromRGB(140, 90, 255)
+contents["Main"].Visible = true
+
+-- sekmeler arası geçiş
+
+for name, button in pairs(tabs) do
+    button.MouseButton1Click:Connect(function()
+        for _, f in pairs(contents) do
+            f.Visible = false
+        end
+        for _, b in pairs(tabs) do
+            b.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+        end
+        contents[name].Visible = true
+        button.BackgroundColor3 = Color3.fromRGB(140, 90, 255)
+    end)
+end
+
+
+
+-- Menü açma/kapatma
+local menuOpen = false
+mainButton.MouseButton1Click:Connect(function()
+    menuFrame.Visible = not menuFrame.Visible
+end)
+
+
+return screenGui
