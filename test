@@ -433,11 +433,19 @@ end)
 -- 3. Brainrot God ESP
 local brainrotGodToggle = createToggleButton("BrainrotGod", "Brainrot God ESP: OFF", Color3.fromRGB(50, 50, 50))
 local brainrotGodEnabled = false
+
 local modelNames2 = {
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
     "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
     "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino"
 }
+
+local blackESPModels = {
+    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+    "Garamam and Madundung", "Las Tralaleritas"
+}
+
 local brainrotGodConnection
 
 local function addBrainrotGodESP(model)
@@ -453,7 +461,13 @@ local function addBrainrotGodESP(model)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = model.Name
-        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        
+        if table.find(blackESPModels, model.Name) then
+            label.TextColor3 = Color3.fromRGB(0, 0, 0) -- Siyah yazı
+        else
+            label.TextColor3 = Color3.fromRGB(255, 0, 0) -- Kırmızı yazı
+        end
+        
         label.TextStrokeTransparency = 0
         label.TextScaled = true
         label.Font = Enum.Font.SourceSansBold
@@ -467,7 +481,13 @@ local function addBrainrotGodESP(model)
             box.Name = "ESPBox"
             box.Adornee = primaryPart
             box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-            box.Color3 = Color3.fromRGB(255, 0, 0)
+            
+            if table.find(blackESPModels, model.Name) then
+                box.Color3 = Color3.fromRGB(0, 0, 0) -- Siyah kutu
+            else
+                box.Color3 = Color3.fromRGB(255, 0, 0) -- Kırmızı kutu
+            end
+            
             box.AlwaysOnTop = true
             box.ZIndex = 10
             box.Transparency = 0.5
@@ -479,7 +499,7 @@ end
 local function enableBrainrotGodESP()
     brainrotGodConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
-            if table.find(modelNames2, model.Name) then
+            if table.find(modelNames2, model.Name) or table.find(blackESPModels, model.Name) then
                 addBrainrotGodESP(model)
             end
         end
@@ -514,7 +534,6 @@ brainrotGodToggle.MouseButton1Click:Connect(function()
         disableBrainrotGodESP()
     end
 end)
-
 
 
 
