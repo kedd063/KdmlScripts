@@ -626,8 +626,8 @@ end
 -- Menü açma/kapatma
 local menuOpen = false
 mainButton.MouseButton1Click:Connect(function()
-    menuOpen = not menuOpen
-    menuFrame.Visible = menuOpen
+    menuFrame.Visible = not menuFrame.Visible
 end)
+
 
 return screenGui
