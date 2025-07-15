@@ -431,11 +431,11 @@ end)
 -- 3. Brainrot God ESP
 local brainrotGodToggle = createToggleButton("OP Brainrots", "OP Brainrots ESP: OFF", Color3.fromRGB(50, 50, 50))
 local brainrotGodEnabled = false
+-- Tüm model isimleri (eski + yeni)
 local modelNames2 = {
     "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
     "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
     "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino",
-    
     -- Yeni eklenenler:
     "Draculino Vampironi", "Polpettone Magicono", "Panthero Nebuloni",
     "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
@@ -443,9 +443,19 @@ local modelNames2 = {
     "Garamam and Madundung", "Las Tralaleritas"
 }
 
+-- Sadece yeni eklenenler
+local newModels = {
+    ["Draculino Vampironi"] = true, ["Polpettone Magicono"] = true, ["Panthero Nebuloni"] = true,
+    ["Chimpanzini Spiderini"] = true, ["Los Tralaleritos"] = true, ["La Vacca Saturno Saturnita"] = true,
+    ["Torrtuginni Dragonfruitini"] = true, ["Graipuss Medussi"] = true, ["La Grande Combinasion"] = true,
+    ["Garamam and Madundung"] = true, ["Las Tralaleritas"] = true
+}
+
 local brainrotGodConnection
 
+-- ESP ekleme fonksiyonu
 local function addOPBrainrotsESP(model)
+    local isNew = newModels[model.Name] == true
     local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
     if head and not head:FindFirstChildOfClass("BillboardGui") then
         local billboard = Instance.new("BillboardGui")
@@ -458,29 +468,29 @@ local function addOPBrainrotsESP(model)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = model.Name
-        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        label.TextColor3 = isNew and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
         label.TextStrokeTransparency = 0
         label.TextScaled = true
         label.Font = Enum.Font.SourceSansBold
         label.Parent = billboard
     end
 
-    if not model:FindFirstChild("ESPBox") then
-        local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-        if primaryPart then
-            local box = Instance.new("BoxHandleAdornment")
-            box.Name = "ESPBox"
-            box.Adornee = primaryPart
-            box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
-            box.Color3 = Color3.fromRGB(255, 0, 0)
-            box.AlwaysOnTop = true
-            box.ZIndex = 10
-            box.Transparency = 0.5
-            box.Parent = primaryPart
-        end
+    -- Box ESP
+    local primaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+    if primaryPart and not primaryPart:FindFirstChild("ESPBox") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Name = "ESPBox"
+        box.Adornee = primaryPart
+        box.Size = primaryPart.Size * Vector3.new(1.1, 1.3, 1.1)
+        box.Color3 = isNew and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
+        box.Transparency = 0.5
+        box.Parent = primaryPart
     end
 end
 
+-- ESP aktif et
 local function enableOPBrainrotsESP()
     brainrotGodConnection = RunService.RenderStepped:Connect(function()
         for _, model in pairs(workspace:GetChildren()) do
@@ -491,22 +501,36 @@ local function enableOPBrainrotsESP()
     end)
 end
 
+-- ESP kapat
 local function disableOPBrainrotsESP()
     if brainrotGodConnection then
         brainrotGodConnection:Disconnect()
         brainrotGodConnection = nil
     end
+
     for _, model in pairs(workspace:GetChildren()) do
-        if model:FindFirstChild("ESPBox") then model.ESPBox:Destroy() end
-        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-        if head then
-            for _, gui in pairs(head:GetChildren()) do
-                if gui:IsA("BillboardGui") then gui:Destroy() end
+        if table.find(modelNames2, model.Name) then
+            -- Tüm kutuları sil
+            for _, descendant in pairs(model:GetDescendants()) do
+                if descendant:IsA("BoxHandleAdornment") and descendant.Name == "ESPBox" then
+                    descendant:Destroy()
+                end
+            end
+
+            -- Tüm BillboardGui'leri sil
+            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if head then
+                for _, gui in pairs(head:GetChildren()) do
+                    if gui:IsA("BillboardGui") then
+                        gui:Destroy()
+                    end
+                end
             end
         end
     end
 end
 
+-- Toggle bağlantısı
 brainrotGodToggle.MouseButton1Click:Connect(function()
     brainrotGodEnabled = not brainrotGodEnabled
     if brainrotGodEnabled then
@@ -519,22 +543,6 @@ brainrotGodToggle.MouseButton1Click:Connect(function()
         disableOPBrainrotsESP()
     end
 end)
-
-
-
-
-
--- Misc sekmesi için buton oluşturma fonksiyonu
-local function createMiscButton(parent, itemName)
-    createMainButton(parent, itemName, function()
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        pcall(function()
-            net:InvokeServer(itemName)
-            print(itemName .. " satın alındı.")
-        end)
-    end)
-end
 
 -- Satın alınabilir itemler
 local miscItems = {
