@@ -644,10 +644,14 @@ local LocalPlayer = Players.LocalPlayer
 
 local PlaceId = game.PlaceId
 local JobId = game.JobId
+
 local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"
 
-local visitedServers = {}
+-- Teleport parametresinden önceki ziyaret edilen sunucular alınır
+local teleportData = TeleportService:GetLocalPlayerTeleportData()
+local visitedServers = teleportData and teleportData.Visited or {}
 
+-- Sunucu listesi çekme
 local function getServers(cursor)
     local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
     if cursor then
@@ -664,6 +668,7 @@ local function getServers(cursor)
     end
 end
 
+-- Server Hop
 local function serverHop()
     local cursor = nil
 
@@ -675,45 +680,51 @@ local function serverHop()
         end
 
         local targetServer = nil
+        local minPlayers = math.huge
 
         for _, server in ipairs(servers.data) do
-            if server.id ~= JobId and not table.find(visitedServers, server.id) then
-                -- 1 ile 5 oyuncu arası kontrolü
-                if server.playing >= 1 and server.playing <= 5 then
+            local notCurrent = server.id ~= JobId
+            local notVisited = not table.find(visitedServers, server.id)
+            local hasFreeSlot = server.playing < server.maxPlayers
+
+            if notCurrent and notVisited and hasFreeSlot then
+                if server.playing < minPlayers then
+                    minPlayers = server.playing
                     targetServer = server.id
-                    break
                 end
             end
         end
 
         if targetServer then
-            print("Sunucu bulundu: "..targetServer..", teleport ediliyor...")
-            table.insert(visitedServers, targetServer)
-            TeleportService:TeleportToPlaceInstance(PlaceId, targetServer, LocalPlayer, {RunScript = true})
-            return -- teleport başladı, döngü sonlanıyor
+            print("Bulunan yeni sunucu: " .. targetServer)
+            table.insert(visitedServers, JobId) -- Şu anki sunucuyu ekliyoruz
+            TeleportService:TeleportToPlaceInstance(PlaceId, targetServer, LocalPlayer, { RunScript = true, Visited = visitedServers })
+            return
         else
             cursor = servers.nextPageCursor
             if not cursor then
                 warn("Uygun yeni sunucu bulunamadı, liste temizleniyor.")
                 visitedServers = {}
-                -- Döngü devam edecek, baştan aramaya devam eder
             end
         end
     end
 end
 
-serverHopButton.MouseButton1Click:Connect(serverHop)
-
--- Teleport sonrası script çalıştırma
-local teleportData = TeleportService:GetLocalPlayerTeleportData()
+-- Teleport sonrası script tekrar çalıştır
 if teleportData and teleportData.RunScript then
     local success, err = pcall(function()
         loadstring(game:HttpGet(RAW_SCRIPT_URL))()
     end)
     if not success then
-        warn("Raw script çalıştırma hatası: ".. tostring(err))
+        warn("Raw script çalıştırma hatası: " .. tostring(err))
     end
 end
+
+serverHopButton.MouseButton1Click:Connect(function()
+    serverHop()
+end)
+
+
 
 -- FPS Boost Butonu
 local fpsBoostButton = Instance.new("TextButton")
@@ -837,13 +848,13 @@ local function createLabel(text, positionY)
     return label
 end
 
-local usernameLabel = createLabel("Kullanıcı Adı: " .. player.Name, 0)
-local userIdLabel = createLabel("Kullanıcı ID: " .. player.UserId, 22)
+local usernameLabel = createLabel("User Name: " .. player.Name, 0)
+local userIdLabel = createLabel("User ID: " .. player.UserId, 22)
 
 -- Oynama süresini göster (local süre, örnek olarak)
 local startTime = os.time()
 
-local playTimeLabel = createLabel("Oynama Süresi: 0s", 44)
+local playTimeLabel = createLabel("Play Time: 0s", 44)
 
 -- Oynama süresini güncelleme
 spawn(function()
