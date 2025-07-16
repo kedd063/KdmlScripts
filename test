@@ -718,17 +718,26 @@ end
 -- FPS Boost Butonu
 local fpsBoostButton = Instance.new("TextButton")
 fpsBoostButton.Size = UDim2.new(0, 250, 0, 40)
-fpsBoostButton.Position = UDim2.new(0, 10, 0, 110) -- Sabit pozisyon
 fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 fpsBoostButton.TextColor3 = Color3.new(1,1,1)
 fpsBoostButton.Font = Enum.Font.GothamBold
 fpsBoostButton.TextSize = 16
 fpsBoostButton.Text = "FPS Boost [OFF]"
-fpsBoostButton.Parent = contents["Other Stuffs"] -- Burada nil değilse görünür
+fpsBoostButton.Parent = contents["Other Stuffs"]
 Instance.new("UICorner", fpsBoostButton).CornerRadius = UDim.new(0, 6)
 
--- FPS Boost fonksiyonu
+-- ServerHopButton'ın pozisyonuna göre fpsBoostButton pozisyonu ayarlanıyor
+fpsBoostButton.Position = UDim2.new(0, 10, 0, serverHopButton.Position.Y.Offset + serverHopButton.Size.Y.Offset + 10)
+
+-- Ayrıca UI yüklenince serverHopButton.AbsolutePosition hesaplanmamış olabilir, 
+-- bunu oyun başladığında veya kısa bir wait ile de ayarlamak daha sağlıklı olur:
+task.defer(function()
+    fpsBoostButton.Position = UDim2.new(0, 10, 0, serverHopButton.Position.Y.Offset + serverHopButton.Size.Y.Offset + 10)
+end)
+
+-- FPS Boost fonksiyonu (eski kodun aynısı)
 local lighting = game:GetService("Lighting")
+
 local fpsBoostEnabled = false
 local originalSettings = {}
 
@@ -803,8 +812,8 @@ local function createLabel(text, positionY)
     return label
 end
 
-local usernameLabel = createLabel("User Name: " .. player.Name, 0)
-local userIdLabel = createLabel("User ID: " .. player.UserId, 22)
+local usernameLabel = createLabel("Kullanıcı Adı: " .. player.Name, 0)
+local userIdLabel = createLabel("Kullanıcı ID: " .. player.UserId, 22)
 
 -- Oynama süresini göster (local süre, örnek olarak)
 local startTime = os.time()
@@ -815,7 +824,7 @@ local playTimeLabel = createLabel("Oynama Süresi: 0s", 44)
 spawn(function()
     while true do
         local elapsed = os.time() - startTime
-        playTimeLabel.Text = "Play Time: " .. elapsed .. " sn"
+        playTimeLabel.Text = "Oynama Süresi: " .. elapsed .. " sn"
         wait(1)
     end
 end)
