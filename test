@@ -217,7 +217,7 @@ end, "92502257917367") -- Float decal ID
 
 -- Instant Steal
 createMainButton(contents["Main"], "İnstant / Auto Steal", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))() 
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/ins"))() 
 end)
 
 -- Buton oluşturma fonksiyonu, her butonu "Visual" sekmesine ekliyoruz
