@@ -812,8 +812,8 @@ local function createLabel(text, positionY)
     return label
 end
 
-local usernameLabel = createLabel("Kullanıcı Adı: " .. player.Name, 0)
-local userIdLabel = createLabel("Kullanıcı ID: " .. player.UserId, 22)
+local usernameLabel = createLabel("User Name: " .. player.Name, 0)
+local userIdLabel = createLabel("User ID: " .. player.UserId, 22)
 
 -- Oynama süresini göster (local süre, örnek olarak)
 local startTime = os.time()
@@ -824,7 +824,7 @@ local playTimeLabel = createLabel("Oynama Süresi: 0s", 44)
 spawn(function()
     while true do
         local elapsed = os.time() - startTime
-        playTimeLabel.Text = "Oynama Süresi: " .. elapsed .. " sn"
+        playTimeLabel.Text = "Play Time: " .. elapsed .. " sn"
         wait(1)
     end
 end)
