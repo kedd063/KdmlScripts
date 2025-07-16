@@ -144,7 +144,7 @@ end, "90602373838483") -- Jump Boost decal ID
 createMainButton(contents["Main"], "Float", function()
     local floatActive = false
     local floatSpeed = 46
-    local floatTime = 15
+    local floatTime = 5
     local startTime = 0
 
     local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
