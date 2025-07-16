@@ -719,25 +719,16 @@ end
 local fpsBoostButton = Instance.new("TextButton")
 fpsBoostButton.Size = UDim2.new(0, 250, 0, 40)
 fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-fpsBoostButton.TextColor3 = Color3.new(1,1,1)
+fpsBoostButton.TextColor3 = Color3.new(1, 1, 1)
 fpsBoostButton.Font = Enum.Font.GothamBold
 fpsBoostButton.TextSize = 16
 fpsBoostButton.Text = "FPS Boost [OFF]"
-fpsBoostButton.Parent = contents["Other Stuffs"]
+fpsBoostButton.LayoutOrder = 2
+fpsBoostButton.Parent = frame
 Instance.new("UICorner", fpsBoostButton).CornerRadius = UDim.new(0, 6)
 
--- ServerHopButton'ın pozisyonuna göre fpsBoostButton pozisyonu ayarlanıyor
-fpsBoostButton.Position = UDim2.new(0, 10, 0, serverHopButton.AbsolutePosition.Y + serverHopButton.AbsoluteSize.Y + 10)
-
--- Ayrıca UI yüklenince serverHopButton.AbsolutePosition hesaplanmamış olabilir, 
--- bunu oyun başladığında veya kısa bir wait ile de ayarlamak daha sağlıklı olur:
-task.defer(function()
-    fpsBoostButton.Position = UDim2.new(0, 10, 0, serverHopButton.AbsolutePosition.Y + serverHopButton.AbsoluteSize.Y + 10)
-end)
-
--- FPS Boost fonksiyonu (eski kodun aynısı)
+-- FPS Boost fonksiyonu
 local lighting = game:GetService("Lighting")
-
 local fpsBoostEnabled = false
 local originalSettings = {}
 
