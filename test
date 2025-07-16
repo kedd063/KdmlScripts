@@ -625,37 +625,6 @@ autoSpinToggle.MouseButton1Click:Connect(function()
 end)
 
 
--- Server Hop (decal yok, URL ile)
-createMainButton(contents["Other Stuffs"], "Server Hop", function()
-    local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
-
-local function serverHop()
-    local HttpService = game:GetService("HttpService")
-    local PlaceId = game.PlaceId
-    local JobId = game.JobId
-
-    local success, servers = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-    end)
-
-    if success then
-        for _, server in ipairs(servers.data) do
-            if server.playing < server.maxPlayers and server.id ~= JobId then
-                -- TeleportData ile veri taşı (örneğin tekrar load etmesi için sinyal gönder)
-                TeleportService:TeleportToPlaceInstance(PlaceId, server.id, Players.LocalPlayer, "loadMyScript")
-                return
-            end
-        end
-    end
-end
-
--- Yeni server'a geldiyse çalıştır
-if game:GetService("TeleportService"):GetLocalPlayerTeleportData() == "loadMyScript" then
-    -- Burada HTTP'den script çekebilirsin (örneğin pastebin linki)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"))()
-end
-
 
 -- Başlangıçta "Main" sekmesi aktif olsun
 tabs["Main"].BackgroundColor3 = Color3.fromRGB(140, 90, 255)
