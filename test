@@ -647,7 +647,7 @@ local PlaceId = game.PlaceId
 local JobId = game.JobId
 
 -- Kendi script URL'in buraya:
-local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"
+local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/mine-sab"
 
 -- Daha önceki sunucular
 local teleportData = TeleportService:GetLocalPlayerTeleportData()
