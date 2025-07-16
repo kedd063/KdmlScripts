@@ -231,7 +231,7 @@ createMainButton(contents["Main"], "Float", function()
 end, "92502257917367") -- Float decal ID
 
 -- Instant Steal
-createMainButton(contents["Main"], "İnstant / Auto Steal", function()
+createMainButton(contents["Main"], "İnstant Steal", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/ins"))() 
 end)
 
