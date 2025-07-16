@@ -624,10 +624,10 @@ autoSpinToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Server Hop butonu
+-- Buton oluşturma
 local serverHopButton = Instance.new("TextButton")
 serverHopButton.Size = UDim2.new(0, 250, 0, 40)
-serverHopButton.Position = UDim2.new(0, 10, 0, 60) -- ilk buton 10'daysa bu 60 olsun
+serverHopButton.Position = UDim2.new(0, 10, 0, 60) -- Diğer butonlar varsa ona göre ayarla
 serverHopButton.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
 serverHopButton.TextColor3 = Color3.new(1, 1, 1)
 serverHopButton.Font = Enum.Font.GothamBold
@@ -636,6 +636,7 @@ serverHopButton.Text = "Server Hop"
 serverHopButton.Parent = contents["Other Stuffs"]
 Instance.new("UICorner", serverHopButton).CornerRadius = UDim.new(0, 6)
 
+-- Gerekli servisler
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -643,10 +644,14 @@ local LocalPlayer = Players.LocalPlayer
 
 local PlaceId = game.PlaceId
 local JobId = game.JobId
-local ServersAPI = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"
 
+-- Sunucu listesini çekme fonksiyonu
 local function getServers(cursor)
-    local url = ServersAPI .. (cursor and ("&cursor=" .. cursor) or "")
+    local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+    if cursor then
+        url = url .. "&cursor=" .. cursor
+    end
     local success, result = pcall(function()
         return HttpService:JSONDecode(game:HttpGet(url))
     end)
@@ -658,6 +663,7 @@ local function getServers(cursor)
     end
 end
 
+-- Server hop fonksiyonu
 local function serverHop()
     local cursor = nil
     local foundServerId = nil
@@ -677,18 +683,26 @@ local function serverHop()
     until foundServerId or not cursor
 
     if foundServerId then
-        print("Sunucu bulundu:", foundServerId, "Teleport ediliyor...")
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.Anchored = true
-        end
-        TeleportService:TeleportToPlaceInstance(PlaceId, foundServerId, LocalPlayer)
+        print("Sunucu bulundu: "..foundServerId..", teleport ediliyor...")
+        TeleportService:TeleportToPlaceInstance(PlaceId, foundServerId, LocalPlayer, {RunScript = true})
     else
         warn("Uygun sunucu bulunamadı.")
     end
 end
 
--- Buraya ekle:
+-- Butona tıklandığında server hop başlasın
 serverHopButton.MouseButton1Click:Connect(serverHop)
+
+-- Yeni servera geçince otomatik script çalıştırma
+local teleportData = TeleportService:GetLocalPlayerTeleportData()
+if teleportData and teleportData.RunScript then
+    local success, err = pcall(function()
+        loadstring(game:HttpGet(RAW_SCRIPT_URL))()
+    end)
+    if not success then
+        warn("Raw script çalıştırma hatası: ".. tostring(err))
+    end
+end
 
 
 
