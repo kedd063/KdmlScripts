@@ -638,23 +638,6 @@ Instance.new("UICorner", serverHopButton).CornerRadius = UDim.new(0, 6)
 
 -- Server hop işlevi
 
--- Yeni serverda otomatik script yükleme
-local teleportData = TeleportService:GetLocalPlayerTeleportData()
-if teleportData == "loadScript" then
-    print("Yeni serverda otomatik script yükleniyor...")
-    local success, err = pcall(function()
-        loadstring(game:HttpGet(SCRIPT_URL))()
-    end)
-    if not success then
-        warn("Script yüklenirken hata: ", err)
-    end
-end
-
--- Ana döngüyle server hop
-while true do
-    serverHop()
-    wait(WAIT_TIME)
-end
 
 
 
