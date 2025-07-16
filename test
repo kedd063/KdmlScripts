@@ -718,13 +718,13 @@ end
 -- FPS Boost Butonu
 local fpsBoostButton = Instance.new("TextButton")
 fpsBoostButton.Size = UDim2.new(0, 250, 0, 40)
+fpsBoostButton.Position = UDim2.new(0, 10, 0, 110) -- Sabit pozisyon
 fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-fpsBoostButton.TextColor3 = Color3.new(1, 1, 1)
+fpsBoostButton.TextColor3 = Color3.new(1,1,1)
 fpsBoostButton.Font = Enum.Font.GothamBold
 fpsBoostButton.TextSize = 16
 fpsBoostButton.Text = "FPS Boost [OFF]"
-fpsBoostButton.LayoutOrder = 2
-fpsBoostButton.Parent = frame
+fpsBoostButton.Parent = contents["Other Stuffs"] -- Burada nil değilse görünür
 Instance.new("UICorner", fpsBoostButton).CornerRadius = UDim.new(0, 6)
 
 -- FPS Boost fonksiyonu
