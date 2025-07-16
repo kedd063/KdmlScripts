@@ -674,33 +674,29 @@ local function serverHop()
             break
         end
 
-        local foundEmptyServerId = nil
-        local foundServerId = nil
+        local targetServer = nil
 
         for _, server in ipairs(servers.data) do
             if server.id ~= JobId and not table.find(visitedServers, server.id) then
-                if server.playing == 0 then
-                    foundEmptyServerId = server.id
+                -- 1 ile 5 oyuncu arası kontrolü
+                if server.playing >= 1 and server.playing <= 5 then
+                    targetServer = server.id
                     break
-                elseif server.playing < server.maxPlayers and not foundServerId then
-                    foundServerId = server.id
                 end
             end
         end
-
-        local targetServer = foundEmptyServerId or foundServerId
 
         if targetServer then
             print("Sunucu bulundu: "..targetServer..", teleport ediliyor...")
             table.insert(visitedServers, targetServer)
             TeleportService:TeleportToPlaceInstance(PlaceId, targetServer, LocalPlayer, {RunScript = true})
-            return -- teleport başladı, döngüyü kes
+            return -- teleport başladı, döngü sonlanıyor
         else
             cursor = servers.nextPageCursor
             if not cursor then
                 warn("Uygun yeni sunucu bulunamadı, liste temizleniyor.")
                 visitedServers = {}
-                -- Döngü devam edecek, yeniden baştan arar
+                -- Döngü devam edecek, baştan aramaya devam eder
             end
         end
     end
@@ -708,6 +704,7 @@ end
 
 serverHopButton.MouseButton1Click:Connect(serverHop)
 
+-- Teleport sonrası script çalıştırma
 local teleportData = TeleportService:GetLocalPlayerTeleportData()
 if teleportData and teleportData.RunScript then
     local success, err = pcall(function()
