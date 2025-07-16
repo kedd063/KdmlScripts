@@ -687,8 +687,6 @@ local function serverHop()
     end
 end
 
-serverHop()
-
 
 
 -- Başlangıçta "Main" sekmesi aktif olsun
