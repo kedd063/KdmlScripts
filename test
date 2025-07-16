@@ -687,6 +687,9 @@ local function serverHop()
     end
 end
 
+-- Buraya ekle:
+serverHopButton.MouseButton1Click:Connect(serverHop)
+
 
 
 -- Başlangıçta "Main" sekmesi aktif olsun
