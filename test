@@ -869,7 +869,7 @@ local playTimeLabel = createLabel("Play Time: 0s", 44)
 spawn(function()
     while true do
         local elapsed = os.time() - startTime
-        playTimeLabel.Text = "Oynama Süresi: " .. elapsed .. " sn"
+        playTimeLabel.Text = "Play Time: " .. elapsed .. " sn"
         wait(1)
     end
 end)
