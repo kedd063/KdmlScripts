@@ -111,6 +111,7 @@ end
 -- Speed Boost
 createMainButton(contents["Main"], "Free Cam", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+end, "99553077312278") -- Speed Boost decal ID
 
 -- Jump Boost
 createMainButton(contents["Main"], "Jump Boost", function()
