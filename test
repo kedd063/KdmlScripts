@@ -636,7 +636,8 @@ serverHopButton.Text = "Server Hop"
 serverHopButton.Parent = contents["Other Stuffs"]
 Instance.new("UICorner", serverHopButton).CornerRadius = UDim.new(0, 6)
 
--- Servisler
+-- ✅ Sunucu Hop Script (tam sürüm)
+
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -645,30 +646,33 @@ local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
 local JobId = game.JobId
 
+-- Kendi script URL'in buraya:
 local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"
 
--- Teleport parametresinden önceki ziyaret edilen sunucular alınır
+-- Daha önceki sunucular
 local teleportData = TeleportService:GetLocalPlayerTeleportData()
 local visitedServers = teleportData and teleportData.Visited or {}
 
--- Sunucu listesi çekme
+-- Sunucu listesi çek
 local function getServers(cursor)
     local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
     if cursor then
         url = url .. "&cursor=" .. cursor
     end
+
     local success, result = pcall(function()
         return HttpService:JSONDecode(game:HttpGet(url))
     end)
+
     if success and result then
         return result
     else
-        warn("Sunucu listesi alınamadı!")
+        warn("Sunucu listesi çekilemedi.")
         return nil
     end
 end
 
--- Server Hop
+-- Server Hop Fonksiyonu
 local function serverHop()
     local cursor = nil
 
@@ -685,7 +689,7 @@ local function serverHop()
         for _, server in ipairs(servers.data) do
             local notCurrent = server.id ~= JobId
             local notVisited = not table.find(visitedServers, server.id)
-            local hasFreeSlot = server.playing < server.maxPlayers
+            local hasFreeSlot = (server.maxPlayers - server.playing) >= 1
 
             if notCurrent and notVisited and hasFreeSlot then
                 if server.playing < minPlayers then
@@ -696,27 +700,32 @@ local function serverHop()
         end
 
         if targetServer then
-            print("Bulunan yeni sunucu: " .. targetServer)
-            table.insert(visitedServers, JobId) -- Şu anki sunucuyu ekliyoruz
-            TeleportService:TeleportToPlaceInstance(PlaceId, targetServer, LocalPlayer, { RunScript = true, Visited = visitedServers })
+            table.insert(visitedServers, JobId)
+            print("Uygun sunucu bulundu:", targetServer)
+            TeleportService:TeleportToPlaceInstance(
+                PlaceId,
+                targetServer,
+                LocalPlayer,
+                { RunScript = true, Visited = visitedServers }
+            )
             return
         else
             cursor = servers.nextPageCursor
             if not cursor then
-                warn("Uygun yeni sunucu bulunamadı, liste temizleniyor.")
+                warn("Hiç uygun sunucu kalmadı, liste sıfırlanıyor.")
                 visitedServers = {}
             end
         end
     end
 end
 
--- Teleport sonrası script tekrar çalıştır
+-- Teleport sonrası script kendini tekrar çalıştır
 if teleportData and teleportData.RunScript then
     local success, err = pcall(function()
         loadstring(game:HttpGet(RAW_SCRIPT_URL))()
     end)
     if not success then
-        warn("Raw script çalıştırma hatası: " .. tostring(err))
+        warn("Script yüklenemedi: " .. tostring(err))
     end
 end
 
