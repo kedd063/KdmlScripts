@@ -108,10 +108,25 @@ end
 
 -- MAIN sekmesine butonlar
 
--- Speed Boost
+-- Free Cam (decal yok, URL ile)
 createMainButton(contents["Main"], "Free Cam", function()
-   loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+end)
 
+-- Speed Boost
+createMainButton(contents["Main"], "Speed Boost", function()
+    local boostedSpeed = 48
+    local function applySpeedBoost()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = boostedSpeed
+    end
+    applySpeedBoost()
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        applySpeedBoost()
+    end)
+end, "99553077312278") -- Speed Boost decal ID
 -- Jump Boost
 createMainButton(contents["Main"], "Jump Boost", function()
     local character = player.Character or player.CharacterAdded:Wait()
