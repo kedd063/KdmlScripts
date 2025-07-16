@@ -627,7 +627,7 @@ end)
 -- Buton oluşturma
 local serverHopButton = Instance.new("TextButton")
 serverHopButton.Size = UDim2.new(0, 250, 0, 40)
-serverHopButton.Position = UDim2.new(0, 10, 0, 60) -- Diğer butonlar varsa ona göre ayarla
+serverHopButton.Position = UDim2.new(0, 10, 0, 60)
 serverHopButton.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
 serverHopButton.TextColor3 = Color3.new(1, 1, 1)
 serverHopButton.Font = Enum.Font.GothamBold
@@ -636,7 +636,7 @@ serverHopButton.Text = "Server Hop"
 serverHopButton.Parent = contents["Other Stuffs"]
 Instance.new("UICorner", serverHopButton).CornerRadius = UDim.new(0, 6)
 
--- Gerekli servisler
+-- Servisler
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -646,7 +646,8 @@ local PlaceId = game.PlaceId
 local JobId = game.JobId
 local RAW_SCRIPT_URL = "https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"
 
--- Sunucu listesini çekme fonksiyonu
+local visitedServers = {}
+
 local function getServers(cursor)
     local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
     if cursor then
@@ -663,37 +664,50 @@ local function getServers(cursor)
     end
 end
 
--- Server hop fonksiyonu
 local function serverHop()
     local cursor = nil
-    local foundServerId = nil
 
-    repeat
+    while true do
         local servers = getServers(cursor)
-        if not servers then break end
+        if not servers then
+            warn("Sunucu listesi alınamadı, çıkılıyor.")
+            break
+        end
+
+        local foundEmptyServerId = nil
+        local foundServerId = nil
 
         for _, server in ipairs(servers.data) do
-            if server.playing < server.maxPlayers and server.id ~= JobId then
-                foundServerId = server.id
-                break
+            if server.id ~= JobId and not table.find(visitedServers, server.id) then
+                if server.playing == 0 then
+                    foundEmptyServerId = server.id
+                    break
+                elseif server.playing < server.maxPlayers and not foundServerId then
+                    foundServerId = server.id
+                end
             end
         end
 
-        cursor = servers.nextPageCursor
-    until foundServerId or not cursor
+        local targetServer = foundEmptyServerId or foundServerId
 
-    if foundServerId then
-        print("Sunucu bulundu: "..foundServerId..", teleport ediliyor...")
-        TeleportService:TeleportToPlaceInstance(PlaceId, foundServerId, LocalPlayer, {RunScript = true})
-    else
-        warn("Uygun sunucu bulunamadı.")
+        if targetServer then
+            print("Sunucu bulundu: "..targetServer..", teleport ediliyor...")
+            table.insert(visitedServers, targetServer)
+            TeleportService:TeleportToPlaceInstance(PlaceId, targetServer, LocalPlayer, {RunScript = true})
+            return -- teleport başladı, döngüyü kes
+        else
+            cursor = servers.nextPageCursor
+            if not cursor then
+                warn("Uygun yeni sunucu bulunamadı, liste temizleniyor.")
+                visitedServers = {}
+                -- Döngü devam edecek, yeniden baştan arar
+            end
+        end
     end
 end
 
--- Butona tıklandığında server hop başlasın
 serverHopButton.MouseButton1Click:Connect(serverHop)
 
--- Yeni servera geçince otomatik script çalıştırma
 local teleportData = TeleportService:GetLocalPlayerTeleportData()
 if teleportData and teleportData.RunScript then
     local success, err = pcall(function()
@@ -703,6 +717,7 @@ if teleportData and teleportData.RunScript then
         warn("Raw script çalıştırma hatası: ".. tostring(err))
     end
 end
+
 
 
 
