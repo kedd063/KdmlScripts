@@ -745,14 +745,39 @@ local function enableFPSBoost()
     originalSettings = {
         QualityLevel = settings().Rendering.QualityLevel,
         Shadows = lighting.GlobalShadows,
-        Blur = lighting:FindFirstChildOfClass("BlurEffect"),
-        SunRays = lighting:FindFirstChildOfClass("SunRaysEffect"),
+        Brightness = lighting.Brightness,
+        FogEnd = lighting.FogEnd,
+        TerrainWater = terrain and terrain.WaterTransparency or nil,
+        Effects = {}
     }
 
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     lighting.GlobalShadows = false
-    if originalSettings.Blur then originalSettings.Blur.Enabled = false end
-    if originalSettings.SunRays then originalSettings.SunRays.Enabled = false end
+    lighting.Brightness = 0
+    lighting.FogEnd = 50
+
+    if terrain then
+        terrain.WaterTransparency = 1
+        terrain.WaterWaveSize = 0
+        terrain.WaterReflectance = 0
+        terrain.WaterColor = Color3.new(0, 0, 0)
+    end
+
+    for _, effect in pairs(lighting:GetChildren()) do
+        if effect:IsA("PostEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") then
+            originalSettings.Effects[effect.Name] = effect.Enabled
+            effect.Enabled = false
+        end
+    end
+
+    -- Remove textures and decals
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Decal") or obj:IsA("Texture") then
+            obj:Destroy()
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+            obj.Enabled = false
+        end
+    end
 
     fpsBoostButton.Text = "FPS Boost [ON]"
     fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
