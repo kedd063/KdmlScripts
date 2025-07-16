@@ -715,6 +715,83 @@ if teleportData and teleportData.RunScript then
     end
 end
 
+-- Buton oluşturma
+local fpsBoostButton = Instance.new("TextButton")
+fpsBoostButton.Size = UDim2.new(0, 250, 0, 40)
+fpsBoostButton.Position = UDim2.new(0, 10, 0, 110) -- Server Hop butonunun altına koyduk
+fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+fpsBoostButton.TextColor3 = Color3.new(1,1,1)
+fpsBoostButton.Font = Enum.Font.GothamBold
+fpsBoostButton.TextSize = 16
+fpsBoostButton.Text = "FPS Boost [OFF]"
+fpsBoostButton.Parent = contents["Other Stuffs"]
+Instance.new("UICorner", fpsBoostButton).CornerRadius = UDim.new(0, 6)
+
+local lighting = game:GetService("Lighting")
+local runService = game:GetService("RunService")
+
+local fpsBoostEnabled = false
+local originalSettings = {}
+
+local function enableFPSBoost()
+    -- Kaydet orijinal ayarları
+    originalSettings = {
+        QualityLevel = settings().Rendering.QualityLevel,
+        Shadows = lighting.GlobalShadows,
+        Blur = lighting:FindFirstChildOfClass("BlurEffect"),
+        SunRays = lighting:FindFirstChildOfClass("SunRaysEffect"),
+        -- Gerekirse diğer efektler eklenebilir
+    }
+
+    -- Grafik kalitesini düşür
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+    -- Gölgeleri kapat
+    lighting.GlobalShadows = false
+
+    -- Efektleri kapat
+    if originalSettings.Blur then originalSettings.Blur.Enabled = false end
+    if originalSettings.SunRays then originalSettings.SunRays.Enabled = false end
+
+    -- Ek olarak düşük çözünürlükte RenderFidelity yapabiliriz
+    -- (Yalnızca Roblox Studio'da çalışır)
+    -- settings().Rendering.RenderFidelity = Enum.RenderFidelity.Performance
+
+    fpsBoostButton.Text = "FPS Boost [ON]"
+    fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+    fpsBoostEnabled = true
+end
+
+local function disableFPSBoost()
+    -- Orijinal ayarları geri yükle
+    if originalSettings.QualityLevel then
+        settings().Rendering.QualityLevel = originalSettings.QualityLevel
+    end
+
+    if originalSettings.Shadows ~= nil then
+        lighting.GlobalShadows = originalSettings.Shadows
+    end
+
+    if originalSettings.Blur then
+        originalSettings.Blur.Enabled = true
+    end
+
+    if originalSettings.SunRays then
+        originalSettings.SunRays.Enabled = true
+    end
+
+    fpsBoostButton.Text = "FPS Boost [OFF]"
+    fpsBoostButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    fpsBoostEnabled = false
+end
+
+fpsBoostButton.MouseButton1Click:Connect(function()
+    if fpsBoostEnabled then
+        disableFPSBoost()
+    else
+        enableFPSBoost()
+    end
+end)
 
 
 
