@@ -624,18 +624,19 @@ autoSpinToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Other Stuffs sekmesine Auto Spin toggle butonu
-local autoSpinButton = Instance.new("TextButton")
-autoSpinToggle.Size = UDim2.new(0, 250, 0, 40)
-autoSpinToggle.Position = UDim2.new(0, 10, 0, 10)
-autoSpinToggle.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
-autoSpinToggle.TextColor3 = Color3.new(1, 1, 1)
-autoSpinToggle.Font = Enum.Font.GothamBold
-autoSpinToggle.TextSize = 16
-autoSpinToggle.Text = "Server Hop"
-autoSpinToggle.Parent = contents["Other Stuffs"]
-Instance.new("UICorner", autoSpinButton).CornerRadius = UDim.new(0, 6)
+-- Server Hop butonu
+local serverHopButton = Instance.new("TextButton")
+serverHopButton.Size = UDim2.new(0, 250, 0, 40)
+serverHopButton.Position = UDim2.new(0, 10, 0, 60) -- ilk buton 10'daysa bu 60 olsun
+serverHopButton.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
+serverHopButton.TextColor3 = Color3.new(1, 1, 1)
+serverHopButton.Font = Enum.Font.GothamBold
+serverHopButton.TextSize = 16
+serverHopButton.Text = "Server Hop"
+serverHopButton.Parent = contents["Other Stuffs"]
+Instance.new("UICorner", serverHopButton).CornerRadius = UDim.new(0, 6)
 
+-- Server hop işlevi
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 
@@ -664,6 +665,8 @@ if game:GetService("TeleportService"):GetLocalPlayerTeleportData() == "loadMyScr
     -- Burada HTTP'den script çekebilirsin (örneğin pastebin linki)
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/mine-key"))()
 end
+
+
 
 
 
