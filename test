@@ -1,1 +1,215 @@
+-- Rayfield UI sürümüne dönüştürülmüş kdml scripti (loadstring YOK)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local Window = Rayfield:CreateWindow({
+    Name = "Kdml Scripts | Rayfield UI",
+    LoadingTitle = "Kdml GUI",
+    LoadingSubtitle = "by kedd063",
+    ConfigurationSaving = {
+        Enabled = false
+    },
+    Discord = {
+        Enabled = false
+    },
+    KeySystem = false
+})
+
+-- Sekmeler
+local mainTab = Window:CreateTab("Main", 4483362458)
+local visualTab = Window:CreateTab("Visual", 4483362458)
+local miscTab = Window:CreateTab("Misc", 4483362458)
+local otherTab = Window:CreateTab("Other Stuffs", 4483362458)
+
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- MAIN TAB
+mainTab:CreateButton({
+    Name = "Free Cam",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+    end
+})
+
+mainTab:CreateButton({
+    Name = "Speed Boost",
+    Callback = function()
+        local boostedSpeed = 48
+        local function applySpeedBoost()
+            local char = player.Character or player.CharacterAdded:Wait()
+            local humanoid = char:WaitForChild("Humanoid")
+            humanoid.WalkSpeed = boostedSpeed
+        end
+        applySpeedBoost()
+        player.CharacterAdded:Connect(function()
+            task.wait(0.1)
+            applySpeedBoost()
+        end)
+    end
+})
+
+mainTab:CreateButton({
+    Name = "Jump Boost",
+    Callback = function()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.Jumping:Connect(function(active)
+            if active then
+                local rootPart = character:WaitForChild("HumanoidRootPart")
+                rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
+            end
+        end)
+    end
+})
+
+mainTab:CreateButton({
+    Name = "Float",
+    Callback = function()
+        local floatSpeed = 46
+        local floatTime = 15
+        local startTime = tick()
+        local floatActive = true
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local gravityConnection = RunService.Heartbeat:Connect(function()
+            if not floatActive then return end
+            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+        end)
+
+        local moveConnection = RunService.Heartbeat:Connect(function()
+            if not floatActive then return end
+            local elapsed = tick() - startTime
+            if elapsed >= floatTime then
+                gravityConnection:Disconnect()
+                moveConnection:Disconnect()
+                floatActive = false
+            else
+                local dir = workspace.CurrentCamera.CFrame.LookVector
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hrp.Velocity = move * floatSpeed
+            end
+        end)
+    end
+})
+
+mainTab:CreateButton({
+    Name = "Instant Steal",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/ins"))() 
+    end
+})
+
+mainTab:CreateButton({
+    Name = "TP To Cords (shhh)",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/ERW19MbK"))()
+    end
+})
+
+-- VISUAL TAB
+local espEnabled = false
+visualTab:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+    Callback = function(state)
+        espEnabled = state
+        local espObjects = {}
+
+        local function createNameTag(character, playerName)
+            if not character or not character:FindFirstChild("Head") then return end
+            local head = character.Head
+            local billboard = Instance.new("BillboardGui")
+            billboard.Adornee = head
+            billboard.Size = UDim2.new(0, 100, 0, 30)
+            billboard.StudsOffset = Vector3.new(0, 2, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+
+            local label = Instance.new("TextLabel")
+            label.BackgroundTransparency = 1
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.TextColor3 = Color3.new(1, 1, 1)
+            label.Text = playerName
+            label.Font = Enum.Font.GothamBold
+            label.TextScaled = true
+            label.Parent = billboard
+            return billboard
+        end
+
+        local function applyHighlight(character)
+            if not character then return end
+            local highlight = Instance.new("Highlight")
+            highlight.Adornee = character
+            highlight.FillColor = Color3.fromRGB(170, 0, 255)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0.7
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = character
+            return highlight
+        end
+
+        local function enableESP()
+            for _, plr in pairs(game.Players:GetPlayers()) do
+                if plr ~= player and plr.Character then
+                    local nameTag = createNameTag(plr.Character, plr.Name)
+                    local highlight = applyHighlight(plr.Character)
+                    espObjects[plr] = {nameTag = nameTag, highlight = highlight}
+                end
+            end
+        end
+
+        local function disableESP()
+            for _, objs in pairs(espObjects) do
+                if objs.nameTag then objs.nameTag:Destroy() end
+                if objs.highlight then objs.highlight:Destroy() end
+            end
+            espObjects = {}
+        end
+
+        if espEnabled then
+            enableESP()
+        else
+            disableESP()
+        end
+    end
+})
+
+-- FPS BOOST
+otherTab:CreateToggle({
+    Name = "FPS Boost",
+    CurrentValue = false,
+    Callback = function(state)
+        local lighting = game:GetService("Lighting")
+        local terrain = workspace:FindFirstChildOfClass("Terrain")
+        if state then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            lighting.GlobalShadows = false
+            lighting.Brightness = 0
+            lighting.FogEnd = 50
+            if terrain then
+                terrain.WaterTransparency = 1
+                terrain.WaterWaveSize = 0
+                terrain.WaterReflectance = 0
+                terrain.WaterColor = Color3.new(0, 0, 0)
+            end
+            for _, effect in pairs(lighting:GetChildren()) do
+                if effect:IsA("PostEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") then
+                    effect.Enabled = false
+                end
+            end
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("Decal") or obj:IsA("Texture") then
+                    obj:Destroy()
+                elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+                    obj.Enabled = false
+                end
+            end
+        else
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            lighting.GlobalShadows = true
+            lighting.Brightness = 1
+            lighting.FogEnd = 100000
+        end
+    end
+})
