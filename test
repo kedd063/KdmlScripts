@@ -173,7 +173,7 @@ MainTab:CreateButton({
 })
 
 MainTab:CreateButton({
-   Name = "TP To Cords (shhh)",
+   Name = "TP To Cords",
    Callback = function()
       loadstring(game:HttpGet("https://pastebin.com/raw/ERW19MbK"))()
    end,
