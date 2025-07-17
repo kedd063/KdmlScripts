@@ -235,6 +235,23 @@ createMainButton(contents["Main"], "İnstant Steal", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/ins"))() 
 end)
 
+-- Diğer Main butonlarının sonuna ekle
+local pastebinTpButton = Instance.new("TextButton")
+pastebinTpButton.Size = UDim2.new(0, 250, 0, 40)
+pastebinTpButton.Position = UDim2.new(0, 10, 0, (#contents["Main"]:GetChildren() - 1) * 45) -- otomatik pozisyonlama için
+pastebinTpButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+pastebinTpButton.TextColor3 = Color3.new(1, 1, 1)
+pastebinTpButton.Font = Enum.Font.GothamBold
+pastebinTpButton.TextSize = 16
+pastebinTpButton.Text = "Load Teleport GUI"
+pastebinTpButton.Parent = contents["Main"]
+Instance.new("UICorner", pastebinTpButton).CornerRadius = UDim.new(0, 6)
+
+pastebinTpButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ERW19MbK"))()
+end)
+
+
 -- Buton oluşturma fonksiyonu, her butonu "Visual" sekmesine ekliyoruz
 local function createToggleButton(name, defaultText, colorOff)
     local btn = Instance.new("TextButton")
