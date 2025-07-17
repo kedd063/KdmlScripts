@@ -180,100 +180,184 @@ MainTab:CreateButton({
 })
 
 -- VISUAL
+local espEnabled = false
 local espObjects = {}
+
 VisualTab:CreateToggle({
    Name = "ESP",
    CurrentValue = false,
    Callback = function(Value)
-      if Value then
+      espEnabled = Value
+      if espEnabled then
          for _, plr in pairs(Players:GetPlayers()) do
             if plr ~= player and plr.Character then
-               local highlight = Instance.new("Highlight")
-               highlight.FillColor = Color3.fromRGB(170,0,255)
-               highlight.FillTransparency = 0.5
-               highlight.OutlineTransparency = 0.7
-               highlight.Adornee = plr.Character
-               highlight.Parent = plr.Character
-               espObjects[plr] = highlight
+               -- Billboard
+               local head = plr.Character:FindFirstChild("Head")
+               if head and not head:FindFirstChild("ESP_NameTag") then
+                  local billboard = Instance.new("BillboardGui")
+                  billboard.Name = "ESP_NameTag"
+                  billboard.Adornee = head
+                  billboard.Size = UDim2.new(0, 100, 0, 30)
+                  billboard.StudsOffset = Vector3.new(0, 2, 0)
+                  billboard.AlwaysOnTop = true
+                  billboard.Parent = head
+
+                  local label = Instance.new("TextLabel")
+                  label.BackgroundTransparency = 1
+                  label.Size = UDim2.new(1, 0, 1, 0)
+                  label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                  label.TextStrokeTransparency = 0
+                  label.Font = Enum.Font.GothamBold
+                  label.TextScaled = true
+                  label.Text = plr.Name
+                  label.Parent = billboard
+               end
+
+               -- Highlight
+               if not plr.Character:FindFirstChild("ESP_Highlight") then
+                  local highlight = Instance.new("Highlight")
+                  highlight.Name = "ESP_Highlight"
+                  highlight.Adornee = plr.Character
+                  highlight.FillColor = Color3.fromRGB(170,0,255)
+                  highlight.FillTransparency = 0.5
+                  highlight.OutlineTransparency = 0.7
+                  highlight.Parent = plr.Character
+               end
             end
          end
       else
-         for _, hl in pairs(espObjects) do hl:Destroy() end
-         espObjects = {}
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+               local head = plr.Character:FindFirstChild("Head")
+               if head and head:FindFirstChild("ESP_NameTag") then head.ESP_NameTag:Destroy() end
+               if plr.Character:FindFirstChild("ESP_Highlight") then plr.Character.ESP_Highlight:Destroy() end
+            end
+         end
       end
    end,
 })
 
-local secretConnection
+
+local secretBrainrotsConnection
+
 VisualTab:CreateToggle({
    Name = "Secret Brainrots ESP",
    CurrentValue = false,
    Callback = function(Value)
       if Value then
-         secretConnection = RunService.RenderStepped:Connect(function()
-            for _, m in pairs(workspace:GetChildren()) do
+         secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
                if table.find({
-                  "Chimpanzini Spiderini","Los Tralaleritos","La Vacca Saturno Saturnita",
-                  "Torrtuginni Dragonfruitini","Graipuss Medussi","La Grande Combinasion",
-                  "Garamam and Madundung","Las Tralaleritas"
-               }, m.Name) then
-                  if not m:FindFirstChild("ESPBox") then
+                  "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+                  "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+                  "Garamam and Madundung", "Las Tralaleritas"
+               }, model.Name) then
+                  local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                  if head and not head:FindFirstChild("ESPBox") then
                      local box = Instance.new("BoxHandleAdornment")
-                     box.Adornee = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
-                     box.Size = box.Adornee.Size * Vector3.new(1.1,1.3,1.1)
+                     box.Name = "ESPBox"
+                     box.Adornee = head
+                     box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
                      box.Color3 = Color3.fromRGB(0,255,0)
                      box.AlwaysOnTop = true
                      box.Transparency = 0.5
-                     box.Parent = box.Adornee
-                     box.Name = "ESPBox"
+                     box.Parent = head
+                  end
+                  if head and not head:FindFirstChild("BillboardGui") then
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Size = UDim2.new(0, 200, 0, 60)
+                     billboard.Adornee = head
+                     billboard.AlwaysOnTop = true
+                     billboard.Parent = head
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1,0,1,0)
+                     label.BackgroundTransparency = 1
+                     label.Text = model.Name
+                     label.TextColor3 = Color3.fromRGB(0,255,0)
+                     label.TextStrokeTransparency = 0
+                     label.TextScaled = true
+                     label.Font = Enum.Font.SourceSansBold
+                     label.Parent = billboard
                   end
                end
             end
          end)
       else
-         if secretConnection then secretConnection:Disconnect() end
-         for _, m in pairs(workspace:GetChildren()) do
-            if m:FindFirstChild("ESPBox") then m.ESPBox:Destroy() end
+         if secretBrainrotsConnection then secretBrainrotsConnection:Disconnect() end
+         for _, model in pairs(workspace:GetChildren()) do
+            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if head then
+               for _, child in pairs(head:GetChildren()) do
+                  if child:IsA("BillboardGui") then child:Destroy() end
+                  if child:IsA("BoxHandleAdornment") then child:Destroy() end
+               end
+            end
          end
       end
-   end,
+   end
 })
 
-local godConnection
+
+local godBrainrotsConnection
+
 VisualTab:CreateToggle({
    Name = "Brainrot God ESP",
    CurrentValue = false,
    Callback = function(Value)
       if Value then
-         godConnection = RunService.RenderStepped:Connect(function()
-            for _, m in pairs(workspace:GetChildren()) do
+         godBrainrotsConnection = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
                if table.find({
-                  "Tralalero Tralala","Cocofanto Elefanto","Matteo",
-                  "Odin Din Din Dun","Girafa Celestre","Orcalero Orcala",
-                  "Trenostruzzo Turbo 3000","Tigroligre Frutonni","Statutino Libertino",
-                  "Gattatino Nyanino"
-               }, m.Name) then
-                  if not m:FindFirstChild("ESPBox") then
+                  "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
+                  "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
+                  "Trenostruzzo Turbo 3000", "Tigroligre Frutonni",
+                  "Statutino Libertino", "Gattatino Nyanino"
+               }, model.Name) then
+                  local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                  if head and not head:FindFirstChild("ESPBox") then
                      local box = Instance.new("BoxHandleAdornment")
-                     box.Adornee = m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart")
-                     box.Size = box.Adornee.Size * Vector3.new(1.1,1.3,1.1)
+                     box.Name = "ESPBox"
+                     box.Adornee = head
+                     box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
                      box.Color3 = Color3.fromRGB(255,0,0)
                      box.AlwaysOnTop = true
                      box.Transparency = 0.5
-                     box.Parent = box.Adornee
-                     box.Name = "ESPBox"
+                     box.Parent = head
+                  end
+                  if head and not head:FindFirstChild("BillboardGui") then
+                     local billboard = Instance.new("BillboardGui")
+                     billboard.Size = UDim2.new(0, 200, 0, 60)
+                     billboard.Adornee = head
+                     billboard.AlwaysOnTop = true
+                     billboard.Parent = head
+                     local label = Instance.new("TextLabel")
+                     label.Size = UDim2.new(1,0,1,0)
+                     label.BackgroundTransparency = 1
+                     label.Text = model.Name
+                     label.TextColor3 = Color3.fromRGB(255,0,0)
+                     label.TextStrokeTransparency = 0
+                     label.TextScaled = true
+                     label.Font = Enum.Font.SourceSansBold
+                     label.Parent = billboard
                   end
                end
             end
          end)
       else
-         if godConnection then godConnection:Disconnect() end
-         for _, m in pairs(workspace:GetChildren()) do
-            if m:FindFirstChild("ESPBox") then m.ESPBox:Destroy() end
+         if godBrainrotsConnection then godBrainrotsConnection:Disconnect() end
+         for _, model in pairs(workspace:GetChildren()) do
+            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if head then
+               for _, child in pairs(head:GetChildren()) do
+                  if child:IsA("BillboardGui") then child:Destroy() end
+                  if child:IsA("BoxHandleAdornment") then child:Destroy() end
+               end
+            end
          end
       end
-   end,
+   end
 })
+
 
 -- MISC
 for _, item in pairs({"Trap","Invisibility Cloak","Medusa's Head","Quantum Cloner","Body Swap Potion"}) do
