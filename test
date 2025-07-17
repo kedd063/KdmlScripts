@@ -243,7 +243,7 @@ pastebinTpButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
 pastebinTpButton.TextColor3 = Color3.new(1, 1, 1)
 pastebinTpButton.Font = Enum.Font.GothamBold
 pastebinTpButton.TextSize = 16
-pastebinTpButton.Text = "Load Teleport GUI"
+pastebinTpButton.Text = "TP To Cords"
 pastebinTpButton.Parent = contents["Main"]
 Instance.new("UICorner", pastebinTpButton).CornerRadius = UDim.new(0, 6)
 
