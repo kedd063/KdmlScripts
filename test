@@ -9,7 +9,7 @@ local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
-   Name = "Kdml Scripts",
+   Name = "Kdml Scripts | .gg/scVsN9E5YN",
    LoadingTitle = "Kdml Scripts",
    LoadingSubtitle = "by .gg/scVsN9E5YN",
    ConfigurationSaving = {
