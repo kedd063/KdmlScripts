@@ -1,70 +1,228 @@
-local raw = game:HttpGet("https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua")
-local Material = loadstring(raw)()
+-- ⚡ Kdml Scripts - MATERIAL UI Versiyonu
+local Material = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local player = Players.LocalPlayer
 
 local UI = Material.Load({
-    Title = "KDML Scripts",
+    Title = "Kdml Scripts | .gg/vsaKFZgYVD",
     Style = 1,
     SizeX = 400,
     SizeY = 300,
-    Theme = "Dark"
+    Theme = "Dark",
 })
 
--- Sayfalar
-local MainPage = UI.New({ Title = "Main" })
-local VisualPage = UI.New({ Title = "Visual" })
-local MiscPage = UI.New({ Title = "Misc" })
-local OtherPage = UI.New({ Title = "Other" })
+local MainTab = UI.New({ Title = "Main" })
+local VisualTab = UI.New({ Title = "Visual" })
+local MiscTab = UI.New({ Title = "Misc" })
+local OtherTab = UI.New({ Title = "Other" })
 
--- TEST MODU 🎮: Tuşlar görünür ama sadece print yapar
-
--- Main Bölümü
-MainPage.Button({
+-- Main Tab Buttons
+MainTab.Button({
     Text = "Free Cam",
-    Callback = function() print("[TEST] Free Cam") end
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+    end
 })
-MainPage.Button({
+
+MainTab.Button({
     Text = "Speed Boost",
-    Callback = function() print("[TEST] Speed Boost") end
+    Callback = function()
+        local boostedSpeed = 48
+        local function applySpeed()
+            local char = player.Character or player.CharacterAdded:Wait()
+            char:WaitForChild("Humanoid").WalkSpeed = boostedSpeed
+        end
+        applySpeed()
+        player.CharacterAdded:Connect(function()
+            task.wait(0.1)
+            applySpeed()
+        end)
+    end
 })
-MainPage.Button({
+
+MainTab.Button({
     Text = "Jump Boost",
-    Callback = function() print("[TEST] Jump Boost") end
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.Jumping:Connect(function(active)
+            if active then
+                local root = char:WaitForChild("HumanoidRootPart")
+                root.CFrame = root.CFrame + Vector3.new(0,55,0)
+            end
+        end)
+    end
 })
-MainPage.Button({
-    Text = "Float",
-    Callback = function() print("[TEST] Float") end
+
+MainTab.Button({
+    Text = "TP To Cords",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
+    end
 })
-MainPage.Button({
-    Text = "TP To Coords",
-    Callback = function() print("[TEST] TP 1") end
-})
-MainPage.Button({
-    Text = "TP To Coords V2",
-    Callback = function() print("[TEST] TP 2") end
+
+MainTab.Button({
+    Text = "TP To Cords V2",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
+    end
 })
 
 -- Visual Bölümü
-VisualPage.Toggle({
-    Text = "ESP",
-    Callback = function(state) print("[TEST] ESP State:", state) end
-})
-VisualPage.Toggle({
-    Text = "Secret Brainrots ESP",
-    Callback = function(state) print("[TEST] Secret ESP:", state) end
-})
-VisualPage.Toggle({
-    Text = "God Brainrots ESP",
-    Callback = function(state) print("[TEST] God ESP:", state) end
-})
+VisualTab.Toggle({ Text = "ESP Players", Enabled = false, Callback = function(Value)
+    local espEnabled = Value
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local head = plr.Character:FindFirstChild("Head")
+            if espEnabled then
+                if head and not head:FindFirstChild("ESP_NameTag") then
+                    local billboard = Instance.new("BillboardGui")
+                    billboard.Name = "ESP_NameTag"
+                    billboard.Adornee = head
+                    billboard.Size = UDim2.new(0, 100, 0, 30)
+                    billboard.StudsOffset = Vector3.new(0, 2, 0)
+                    billboard.AlwaysOnTop = true
+                    billboard.Parent = head
 
--- Misc Bölümü
-local items = { "Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion" }
-for _, item in pairs(items) do
-    MiscPage.Button({
-        Text = item,
-        Callback = function() print("[TEST] Item:", item) end
-    })
+                    local label = Instance.new("TextLabel")
+                    label.BackgroundTransparency = 1
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    label.TextStrokeTransparency = 0
+                    label.Font = Enum.Font.GothamBold
+                    label.TextScaled = true
+                    label.Text = plr.Name
+                    label.Parent = billboard
+                end
+                if not plr.Character:FindFirstChild("ESP_Highlight") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ESP_Highlight"
+                    highlight.Adornee = plr.Character
+                    highlight.FillColor = Color3.fromRGB(170, 0, 255)
+                    highlight.FillTransparency = 0.5
+                    highlight.OutlineTransparency = 0.7
+                    highlight.Parent = plr.Character
+                end
+            else
+                if head and head:FindFirstChild("ESP_NameTag") then head.ESP_NameTag:Destroy() end
+                if plr.Character:FindFirstChild("ESP_Highlight") then plr.Character.ESP_Highlight:Destroy() end
+            end
+        end
+    end
+end })
+
+local secretBrainrotsConnection
+VisualTab.Toggle({ Text = "Secret Brainrots ESP", Enabled = false, Callback = function(Value)
+    if Value then
+        secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
+                if table.find({
+                    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
+                    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
+                    "Garamam and Madundung", "Las Tralaleritas"
+                }, model.Name) then
+                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                    if head and not head:FindFirstChild("ESPBox") then
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Name = "ESPBox"
+                        box.Adornee = head
+                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
+                        box.Color3 = Color3.fromRGB(0,255,0)
+                        box.AlwaysOnTop = true
+                        box.Transparency = 0.5
+                        box.Parent = head
+                    end
+                    if head and not head:FindFirstChild("BillboardGui") then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Size = UDim2.new(0, 200, 0, 60)
+                        billboard.Adornee = head
+                        billboard.AlwaysOnTop = true
+                        billboard.Parent = head
+                        local label = Instance.new("TextLabel")
+                        label.Size = UDim2.new(1,0,1,0)
+                        label.BackgroundTransparency = 1
+                        label.Text = model.Name
+                        label.TextColor3 = Color3.fromRGB(0,255,0)
+                        label.TextStrokeTransparency = 0
+                        label.TextScaled = true
+                        label.Font = Enum.Font.SourceSansBold
+                        label.Parent = billboard
+                    end
+                end
+            end
+        end)
+    else
+        if secretBrainrotsConnection then secretBrainrotsConnection:Disconnect() end
+        for _, model in pairs(workspace:GetChildren()) do
+            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if head then
+                for _, child in pairs(head:GetChildren()) do
+                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then child:Destroy() end
+                end
+            end
+        end
+    end
+end })
+
+local godBrainrotsConnection
+VisualTab.Toggle({ Text = "Brainrot God ESP", Enabled = false, Callback = function(Value)
+    if Value then
+        godBrainrotsConnection = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
+                if table.find({
+                    "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
+                    "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
+                    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni",
+                    "Statutino Libertino", "Gattatino Nyanino"
+                }, model.Name) then
+                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                    if head and not head:FindFirstChild("ESPBox") then
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Name = "ESPBox"
+                        box.Adornee = head
+                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
+                        box.Color3 = Color3.fromRGB(255,0,0)
+                        box.AlwaysOnTop = true
+                        box.Transparency = 0.5
+                        box.Parent = head
+                    end
+                    if head and not head:FindFirstChild("BillboardGui") then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Size = UDim2.new(0, 200, 0, 60)
+                        billboard.Adornee = head
+                        billboard.AlwaysOnTop = true
+                        billboard.Parent = head
+                        local label = Instance.new("TextLabel")
+                        label.Size = UDim2.new(1,0,1,0)
+                        label.BackgroundTransparency = 1
+                        label.Text = model.Name
+                        label.TextColor3 = Color3.fromRGB(255,0,0)
+                        label.TextStrokeTransparency = 0
+                        label.TextScaled = true
+                        label.Font = Enum.Font.SourceSansBold
+                        label.Parent = billboard
+                    end
+                end
+            end
+        end)
+    else
+        if godBrainrotsConnection then godBrainrotsConnection:Disconnect() end
+        for _, model in pairs(workspace:GetChildren()) do
+            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if head then
+                for _, child in pairs(head:GetChildren()) do
+                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then child:Destroy() end
+                end
+            end
+        end
+    end
 end
+})
 
 -- Other Bölümü
 OtherPage.Toggle({
