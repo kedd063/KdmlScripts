@@ -1,57 +1,84 @@
-local VenyxLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/yenblox/Venyx-UI-Library/main/source.lua"))()
-local venyx = VenyxLib.new("KDML SCRIPTS - TEST MODE", 5013109572)
+local raw = game:HttpGet("https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua")
+local Material = loadstring(raw)()
 
-local main = venyx:addPage("Main", 5012544693)
-local visual = venyx:addPage("Visual", 5012544693)
-local misc = venyx:addPage("Misc", 5012544693)
-local other = venyx:addPage("Other", 5012544693)
+local UI = Material.Load({
+    Title = "KDML Scripts",
+    Style = 1,
+    SizeX = 400,
+    SizeY = 300,
+    Theme = "Dark"
+})
 
-local secMain = main:addSection("Main Features")
-local secVisual = visual:addSection("ESP Options")
-local secMisc = misc:addSection("Items")
-local secOther = other:addSection("Utilities")
+-- Sayfalar
+local MainPage = UI.New({ Title = "Main" })
+local VisualPage = UI.New({ Title = "Visual" })
+local MiscPage = UI.New({ Title = "Misc" })
+local OtherPage = UI.New({ Title = "Other" })
 
--- Her şeyde sadece print fonksiyonu
-local function noAction()
-    print("[TEST MODE] Butona tıklandı, ama çalışmaz :)")
-end
+-- TEST MODU 🎮: Tuşlar görünür ama sadece print yapar
 
--- Main sekmesi
-secMain:addButton("Free Cam", noAction)
-secMain:addButton("Speed Boost", noAction)
-secMain:addButton("Jump Boost", noAction)
-secMain:addButton("Float", noAction)
-secMain:addButton("TP To Coords", noAction)
-secMain:addButton("TP To Coords V2", noAction)
+-- Main Bölümü
+MainPage.Button({
+    Text = "Free Cam",
+    Callback = function() print("[TEST] Free Cam") end
+})
+MainPage.Button({
+    Text = "Speed Boost",
+    Callback = function() print("[TEST] Speed Boost") end
+})
+MainPage.Button({
+    Text = "Jump Boost",
+    Callback = function() print("[TEST] Jump Boost") end
+})
+MainPage.Button({
+    Text = "Float",
+    Callback = function() print("[TEST] Float") end
+})
+MainPage.Button({
+    Text = "TP To Coords",
+    Callback = function() print("[TEST] TP 1") end
+})
+MainPage.Button({
+    Text = "TP To Coords V2",
+    Callback = function() print("[TEST] TP 2") end
+})
 
--- Visual sekmesi
-secVisual:addToggle("ESP", false, function(val)
-    print("[TEST MODE] ESP toggle: ", val)
-end)
-secVisual:addToggle("Secret Brainrots ESP", false, function(val)
-    print("[TEST MODE] Secret Brainrots toggle: ", val)
-end)
-secVisual:addToggle("God Brainrots ESP", false, function(val)
-    print("[TEST MODE] God Brainrots toggle: ", val)
-end)
+-- Visual Bölümü
+VisualPage.Toggle({
+    Text = "ESP",
+    Callback = function(state) print("[TEST] ESP State:", state) end
+})
+VisualPage.Toggle({
+    Text = "Secret Brainrots ESP",
+    Callback = function(state) print("[TEST] Secret ESP:", state) end
+})
+VisualPage.Toggle({
+    Text = "God Brainrots ESP",
+    Callback = function(state) print("[TEST] God ESP:", state) end
+})
 
--- Misc sekmesi
-local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
+-- Misc Bölümü
+local items = { "Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion" }
 for _, item in pairs(items) do
-    secMisc:addButton(item, function()
-        print("[TEST MODE] Item button pressed: " .. item)
-    end)
+    MiscPage.Button({
+        Text = item,
+        Callback = function() print("[TEST] Item:", item) end
+    })
 end
 
--- Other sekmesi
-secOther:addToggle("Auto Candy Spin", false, function(val)
-    print("[TEST MODE] Candy Spin toggle: ", val)
-end)
+-- Other Bölümü
+OtherPage.Toggle({
+    Text = "Auto Candy Spin",
+    Callback = function(state) print("[TEST] Candy Spin:", state) end
+})
+OtherPage.Button({
+    Text = "Server Hop",
+    Callback = function() print("[TEST] Server Hop") end
+})
+OtherPage.Toggle({
+    Text = "FPS Boost",
+    Callback = function(state) print("[TEST] FPS Boost:", state) end
+})
 
-secOther:addButton("Server Hop", noAction)
-secOther:addToggle("FPS Boost", false, function(val)
-    print("[TEST MODE] FPS Boost toggle: ", val)
-end)
-
--- UI aç
-venyx:SelectPage(venyx.pages[1], true)
+-- UI'yi başlat
+UI:Init()
