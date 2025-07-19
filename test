@@ -1,124 +1,57 @@
 local VenyxLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/yenblox/Venyx-UI-Library/main/source.lua"))()
-local venyx = VenyxLib.new("KDML SCRIPTS | .gg/vsaKFZgYVD", 5013109572)
+local venyx = VenyxLib.new("KDML SCRIPTS - TEST MODE", 5013109572)
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local player = Players.LocalPlayer
-
--- Pages
 local main = venyx:addPage("Main", 5012544693)
 local visual = venyx:addPage("Visual", 5012544693)
 local misc = venyx:addPage("Misc", 5012544693)
 local other = venyx:addPage("Other", 5012544693)
 
--- Sections
-local secMain = main:addSection("Main Scripts")
-local secVisual = visual:addSection("ESP")
+local secMain = main:addSection("Main Features")
+local secVisual = visual:addSection("ESP Options")
 local secMisc = misc:addSection("Items")
 local secOther = other:addSection("Utilities")
 
--- MAIN BUTTONS
-secMain:addButton("Speed Boost", function()
-    local function applySpeed()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 48
-    end
-    applySpeed()
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        applySpeed()
-    end)
+-- Her şeyde sadece print fonksiyonu
+local function noAction()
+    print("[TEST MODE] Butona tıklandı, ama çalışmaz :)")
+end
+
+-- Main sekmesi
+secMain:addButton("Free Cam", noAction)
+secMain:addButton("Speed Boost", noAction)
+secMain:addButton("Jump Boost", noAction)
+secMain:addButton("Float", noAction)
+secMain:addButton("TP To Coords", noAction)
+secMain:addButton("TP To Coords V2", noAction)
+
+-- Visual sekmesi
+secVisual:addToggle("ESP", false, function(val)
+    print("[TEST MODE] ESP toggle: ", val)
+end)
+secVisual:addToggle("Secret Brainrots ESP", false, function(val)
+    print("[TEST MODE] Secret Brainrots toggle: ", val)
+end)
+secVisual:addToggle("God Brainrots ESP", false, function(val)
+    print("[TEST MODE] God Brainrots toggle: ", val)
 end)
 
-secMain:addButton("Jump Boost", function()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.Jumping:Connect(function(active)
-        if active then
-            local root = character:WaitForChild("HumanoidRootPart")
-            root.CFrame = root.CFrame + Vector3.new(0, 55, 0)
-        end
-    end)
-end)
-
-secMain:addButton("Float", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/float-ui-working.lua"))()
-end)
-
-secMain:addButton("TP To Coords", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/tp-to-cordinats"))()
-end)
-
--- VISUAL (ESP)
-secVisual:addToggle("ESP", false, function(state)
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
-            local head = plr.Character.Head
-            if state then
-                local tag = Instance.new("BillboardGui", head)
-                tag.Name = "ESP"
-                tag.Size = UDim2.new(0,100,0,40)
-                tag.AlwaysOnTop = true
-                tag.Adornee = head
-                local text = Instance.new("TextLabel", tag)
-                text.Size = UDim2.new(1,0,1,0)
-                text.BackgroundTransparency = 1
-                text.Text = plr.Name
-                text.TextColor3 = Color3.new(1,1,1)
-                text.TextScaled = true
-            else
-                if head:FindFirstChild("ESP") then head.ESP:Destroy() end
-            end
-        end
-    end
-end)
-
--- MISC ITEMS
+-- Misc sekmesi
 local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
 for _, item in pairs(items) do
     secMisc:addButton(item, function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer(item)
+        print("[TEST MODE] Item button pressed: " .. item)
     end)
 end
 
--- OTHER
+-- Other sekmesi
 secOther:addToggle("Auto Candy Spin", false, function(val)
-    _G.candySpin = val
-    task.spawn(function()
-        while _G.candySpin do
-            ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
-            task.wait(1)
-        end
-    end)
+    print("[TEST MODE] Candy Spin toggle: ", val)
 end)
 
-secOther:addButton("Server Hop", function()
-    local placeId, jobId = game.PlaceId, game.JobId
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Asc&limit=100"))
-    for _, s in pairs(servers.data) do
-        if s.id ~= jobId and s.playing < s.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(placeId, s.id, player)
-            break
-        end
-    end
+secOther:addButton("Server Hop", noAction)
+secOther:addToggle("FPS Boost", false, function(val)
+    print("[TEST MODE] FPS Boost toggle: ", val)
 end)
 
-secOther:addToggle("FPS Boost", false, function(state)
-    if state then
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-        game:GetService("Lighting").GlobalShadows = false
-        game:GetService("Lighting").FogEnd = 50
-    else
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-        game:GetService("Lighting").GlobalShadows = true
-        game:GetService("Lighting").FogEnd = 100000
-    end
-end)
-
--- Start UI
+-- UI aç
 venyx:SelectPage(venyx.pages[1], true)
