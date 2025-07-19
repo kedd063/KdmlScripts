@@ -1,10 +1,6 @@
--- ✅ ÇALIŞAN KDML VENYX UI v2
-
--- Venyx UI yükleniyor
 local VenyxLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/yenblox/Venyx-UI-Library/main/source.lua"))()
-local venyx = VenyxLib.new("Kdml Scripts | .gg/vsaKFZgYVD", 5013109572)
+local venyx = VenyxLib.new("KDML SCRIPTS | .gg/vsaKFZgYVD", 5013109572)
 
--- Roblox servisleri
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,23 +8,20 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
--- Sekmeler ve bölümler
+-- Pages
 local main = venyx:addPage("Main", 5012544693)
 local visual = venyx:addPage("Visual", 5012544693)
 local misc = venyx:addPage("Misc", 5012544693)
 local other = venyx:addPage("Other", 5012544693)
 
-local mainSection = main:addSection("Main Features")
-local visualSection = visual:addSection("ESP Options")
-local miscSection = misc:addSection("Items")
-local otherSection = other:addSection("Other")
+-- Sections
+local secMain = main:addSection("Main Scripts")
+local secVisual = visual:addSection("ESP")
+local secMisc = misc:addSection("Items")
+local secOther = other:addSection("Utilities")
 
--- Main Sekmesi
-mainSection:addButton("Free Cam", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
-end)
-
-mainSection:addButton("Speed Boost", function()
+-- MAIN BUTTONS
+secMain:addButton("Speed Boost", function()
     local function applySpeed()
         local char = player.Character or player.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
@@ -41,154 +34,82 @@ mainSection:addButton("Speed Boost", function()
     end)
 end)
 
-mainSection:addButton("Jump Boost", function()
+secMain:addButton("Jump Boost", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     humanoid.Jumping:Connect(function(active)
         if active then
-            local rootPart = character:WaitForChild("HumanoidRootPart")
-            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
+            local root = character:WaitForChild("HumanoidRootPart")
+            root.CFrame = root.CFrame + Vector3.new(0, 55, 0)
         end
     end)
 end)
 
-mainSection:addButton("Float", function()
+secMain:addButton("Float", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/float-ui-working.lua"))()
 end)
 
-mainSection:addButton("TP To Cords", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
+secMain:addButton("TP To Coords", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/tp-to-cordinats"))()
 end)
 
-mainSection:addButton("TP To Cords V2", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
-end)
-
--- ESP - Visual
-visualSection:addToggle("ESP", false, function(v)
+-- VISUAL (ESP)
+secVisual:addToggle("ESP", false, function(state)
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
             local head = plr.Character.Head
-            if v then
-                if not head:FindFirstChild("ESP_Name") then
-                    local tag = Instance.new("BillboardGui", head)
-                    tag.Name = "ESP_Name"
-                    tag.Size = UDim2.new(0, 100, 0, 40)
-                    tag.AlwaysOnTop = true
-                    tag.Adornee = head
-                    local txt = Instance.new("TextLabel", tag)
-                    txt.Size = UDim2.new(1, 0, 1, 0)
-                    txt.BackgroundTransparency = 1
-                    txt.Text = plr.Name
-                    txt.TextColor3 = Color3.new(1,1,1)
-                    txt.TextScaled = true
-                end
+            if state then
+                local tag = Instance.new("BillboardGui", head)
+                tag.Name = "ESP"
+                tag.Size = UDim2.new(0,100,0,40)
+                tag.AlwaysOnTop = true
+                tag.Adornee = head
+                local text = Instance.new("TextLabel", tag)
+                text.Size = UDim2.new(1,0,1,0)
+                text.BackgroundTransparency = 1
+                text.Text = plr.Name
+                text.TextColor3 = Color3.new(1,1,1)
+                text.TextScaled = true
             else
-                if head:FindFirstChild("ESP_Name") then head.ESP_Name:Destroy() end
+                if head:FindFirstChild("ESP") then head.ESP:Destroy() end
             end
         end
     end
 end)
 
-visualSection:addToggle("Secret Brainrots ESP", false, function(v)
-    if v then
-        _G.SecretESP = RunService.RenderStepped:Connect(function()
-            for _, model in pairs(workspace:GetChildren()) do
-                if table.find({"Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita", "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion", "Garamam and Madundung", "Las Tralaleritas"}, model.Name) then
-                    local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if part and not part:FindFirstChild("ESP_Box") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESP_Box"
-                        box.Adornee = part
-                        box.Size = part.Size * 1.3
-                        box.Color3 = Color3.fromRGB(0,255,0)
-                        box.AlwaysOnTop = true
-                        box.ZIndex = 10
-                        box.Transparency = 0.3
-                        box.Parent = part
-                    end
-                end
-            end
-        end)
-    else
-        if _G.SecretESP then _G.SecretESP:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if part and part:FindFirstChild("ESP_Box") then
-                part.ESP_Box:Destroy()
-            end
-        end
-    end
-end)
-
-visualSection:addToggle("Brainrot God ESP", false, function(v)
-    if v then
-        _G.GodESP = RunService.RenderStepped:Connect(function()
-            for _, model in pairs(workspace:GetChildren()) do
-                if table.find({"Tralalero Tralala", "Cocofanto Elefanto", "Matteo", "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala", "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino"}, model.Name) then
-                    local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if part and not part:FindFirstChild("ESP_Red") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESP_Red"
-                        box.Adornee = part
-                        box.Size = part.Size * 1.3
-                        box.Color3 = Color3.fromRGB(255,0,0)
-                        box.AlwaysOnTop = true
-                        box.ZIndex = 10
-                        box.Transparency = 0.3
-                        box.Parent = part
-                    end
-                end
-            end
-        end)
-    else
-        if _G.GodESP then _G.GodESP:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if part and part:FindFirstChild("ESP_Red") then
-                part.ESP_Red:Destroy()
-            end
-        end
-    end
-end)
-
--- Misc
-for _, item in pairs({"Trap","Invisibility Cloak","Medusa's Head","Quantum Cloner","Body Swap Potion"}) do
-    miscSection:addButton(item, function()
+-- MISC ITEMS
+local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
+for _, item in pairs(items) do
+    secMisc:addButton(item, function()
         local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
         net:InvokeServer(item)
     end)
 end
 
--- Other
-otherSection:addToggle("Auto Candy Spin Wheel", false, function(Value)
-    if Value then
-        _G.spin = true
-        task.spawn(function()
-            while _G.spin do
-                ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
-                task.wait(1)
-            end
-        end)
-    else
-        _G.spin = false
-    end
+-- OTHER
+secOther:addToggle("Auto Candy Spin", false, function(val)
+    _G.candySpin = val
+    task.spawn(function()
+        while _G.candySpin do
+            ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
+            task.wait(1)
+        end
+    end)
 end)
 
-otherSection:addButton("Server Hop", function()
-    local PlaceId = game.PlaceId
-    local JobId = game.JobId
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+secOther:addButton("Server Hop", function()
+    local placeId, jobId = game.PlaceId, game.JobId
+    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..placeId.."/servers/Public?sortOrder=Asc&limit=100"))
     for _, s in pairs(servers.data) do
-        if s.id ~= JobId and s.playing < s.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(PlaceId,s.id,player)
+        if s.id ~= jobId and s.playing < s.maxPlayers then
+            TeleportService:TeleportToPlaceInstance(placeId, s.id, player)
             break
         end
     end
 end)
 
-otherSection:addToggle("FPS Boost", false, function(Value)
-    if Value then
+secOther:addToggle("FPS Boost", false, function(state)
+    if state then
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
         game:GetService("Lighting").GlobalShadows = false
         game:GetService("Lighting").FogEnd = 50
@@ -199,5 +120,5 @@ otherSection:addToggle("FPS Boost", false, function(Value)
     end
 end)
 
--- UI Göster
+-- Start UI
 venyx:SelectPage(venyx.pages[1], true)
