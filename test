@@ -1,7 +1,10 @@
--- ⚡ Venyx UI yükle
+-- ✅ ÇALIŞAN KDML VENYX UI v2
+
+-- Venyx UI yükleniyor
 local VenyxLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/yenblox/Venyx-UI-Library/main/source.lua"))()
 local venyx = VenyxLib.new("Kdml Scripts | .gg/vsaKFZgYVD", 5013109572)
 
+-- Roblox servisleri
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,32 +12,36 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
--- Sekmeler
+-- Sekmeler ve bölümler
 local main = venyx:addPage("Main", 5012544693)
 local visual = venyx:addPage("Visual", 5012544693)
 local misc = venyx:addPage("Misc", 5012544693)
 local other = venyx:addPage("Other", 5012544693)
 
--- Main
-main:addButton("Free Cam", function()
+local mainSection = main:addSection("Main Features")
+local visualSection = visual:addSection("ESP Options")
+local miscSection = misc:addSection("Items")
+local otherSection = other:addSection("Other")
+
+-- Main Sekmesi
+mainSection:addButton("Free Cam", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
 end)
 
-main:addButton("Speed Boost", function()
-    local boostedSpeed = 48
-    local function applySpeedBoost()
+mainSection:addButton("Speed Boost", function()
+    local function applySpeed()
         local char = player.Character or player.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = boostedSpeed
+        humanoid.WalkSpeed = 48
     end
-    applySpeedBoost()
+    applySpeed()
     player.CharacterAdded:Connect(function()
         task.wait(0.1)
-        applySpeedBoost()
+        applySpeed()
     end)
 end)
 
-main:addButton("Jump Boost", function()
+mainSection:addButton("Jump Boost", function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     humanoid.Jumping:Connect(function(active)
@@ -45,162 +52,150 @@ main:addButton("Jump Boost", function()
     end)
 end)
 
-main:addButton("Float", function()
-    local floatActive = false
-    local floatSpeed = 46
-    local floatTime = 15
-    local startTime = 0
-
-    local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-    gui.Name = "FloatGUI"
-    gui.ResetOnSpawn = false
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 220, 0, 120)
-    frame.Position = UDim2.new(0.5, -110, 0.7, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-    frame.BorderSizePixel = 3
-    frame.Active = true
-    frame.Draggable = true
-    frame.Parent = gui
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 30)
-    title.BackgroundTransparency = 1
-    title.Text = "Float"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 18
-    title.TextColor3 = Color3.fromRGB(0, 170, 255)
-    title.Parent = frame
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 180, 0, 40)
-    button.Position = UDim2.new(0.5, -90, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    button.TextColor3 = Color3.new(1,1,1)
-    button.TextScaled = true
-    button.Font = Enum.Font.GothamBold
-    button.Text = "Start Float"
-    button.Parent = frame
-
-    local countdownLabel = Instance.new("TextLabel")
-    countdownLabel.Size = UDim2.new(0, 180, 0, 25)
-    countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
-    countdownLabel.BackgroundTransparency = 1
-    countdownLabel.TextColor3 = Color3.new(1, 1, 1)
-    countdownLabel.Font = Enum.Font.Gotham
-    countdownLabel.TextScaled = true
-    countdownLabel.Text = "Ready"
-    countdownLabel.Parent = frame
-
-    local moveConnection, gravityConnection
-
-    local function stopFloat()
-        floatActive = false
-        button.Text = "Start Float"
-        if moveConnection then moveConnection:Disconnect() end
-        if gravityConnection then gravityConnection:Disconnect() end
-        countdownLabel.Text = "Done"
-        gui:Destroy()
-    end
-
-    local function startFloat()
-        floatActive = true
-        button.Text = "Stop Float"
-        startTime = tick()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-
-        gravityConnection = RunService.Heartbeat:Connect(function()
-            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-        end)
-
-        moveConnection = RunService.Heartbeat:Connect(function()
-            if not floatActive then return end
-            local elapsed = tick() - startTime
-            local remaining = floatTime - elapsed
-            countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
-            if remaining <= 0 then
-                stopFloat()
-            else
-                local dir = workspace.CurrentCamera.CFrame.LookVector
-                local move = Vector3.new(dir.X, 0, dir.Z).Unit
-                hrp.Velocity = move * floatSpeed
-            end
-        end)
-    end
-
-    button.MouseButton1Click:Connect(function()
-        if not floatActive then startFloat() else stopFloat() end
-    end)
+mainSection:addButton("Float", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/main/float-ui-working.lua"))()
 end)
 
-main:addButton("TP To Cords", function()
+mainSection:addButton("TP To Cords", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
 end)
 
-main:addButton("TP To Cords V2", function()
+mainSection:addButton("TP To Cords V2", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
 end)
 
--- Visual
-local espEnabled = false
-local secretBrainrotsConnection
-local godBrainrotsConnection
-
-visual:addToggle("ESP", false, function(Value)
-    espEnabled = Value
-    -- içerik yukarıdakiyle aynı (kısalık için çıkarıldı)
+-- ESP - Visual
+visualSection:addToggle("ESP", false, function(v)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+            local head = plr.Character.Head
+            if v then
+                if not head:FindFirstChild("ESP_Name") then
+                    local tag = Instance.new("BillboardGui", head)
+                    tag.Name = "ESP_Name"
+                    tag.Size = UDim2.new(0, 100, 0, 40)
+                    tag.AlwaysOnTop = true
+                    tag.Adornee = head
+                    local txt = Instance.new("TextLabel", tag)
+                    txt.Size = UDim2.new(1, 0, 1, 0)
+                    txt.BackgroundTransparency = 1
+                    txt.Text = plr.Name
+                    txt.TextColor3 = Color3.new(1,1,1)
+                    txt.TextScaled = true
+                end
+            else
+                if head:FindFirstChild("ESP_Name") then head.ESP_Name:Destroy() end
+            end
+        end
+    end
 end)
 
-visual:addToggle("Secret Brainrots ESP", false, function(Value)
-    -- içerik dosyadan alınacak şekilde aynı şekilde taşındı
+visualSection:addToggle("Secret Brainrots ESP", false, function(v)
+    if v then
+        _G.SecretESP = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
+                if table.find({"Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita", "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion", "Garamam and Madundung", "Las Tralaleritas"}, model.Name) then
+                    local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                    if part and not part:FindFirstChild("ESP_Box") then
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Name = "ESP_Box"
+                        box.Adornee = part
+                        box.Size = part.Size * 1.3
+                        box.Color3 = Color3.fromRGB(0,255,0)
+                        box.AlwaysOnTop = true
+                        box.ZIndex = 10
+                        box.Transparency = 0.3
+                        box.Parent = part
+                    end
+                end
+            end
+        end)
+    else
+        if _G.SecretESP then _G.SecretESP:Disconnect() end
+        for _, model in pairs(workspace:GetChildren()) do
+            local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if part and part:FindFirstChild("ESP_Box") then
+                part.ESP_Box:Destroy()
+            end
+        end
+    end
 end)
 
-visual:addToggle("Brainrot God ESP", false, function(Value)
-    -- içerik dosyadan alınacak şekilde aynı şekilde taşındı
+visualSection:addToggle("Brainrot God ESP", false, function(v)
+    if v then
+        _G.GodESP = RunService.RenderStepped:Connect(function()
+            for _, model in pairs(workspace:GetChildren()) do
+                if table.find({"Tralalero Tralala", "Cocofanto Elefanto", "Matteo", "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala", "Trenostruzzo Turbo 3000", "Tigroligre Frutonni", "Statutino Libertino", "Gattatino Nyanino"}, model.Name) then
+                    local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+                    if part and not part:FindFirstChild("ESP_Red") then
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Name = "ESP_Red"
+                        box.Adornee = part
+                        box.Size = part.Size * 1.3
+                        box.Color3 = Color3.fromRGB(255,0,0)
+                        box.AlwaysOnTop = true
+                        box.ZIndex = 10
+                        box.Transparency = 0.3
+                        box.Parent = part
+                    end
+                end
+            end
+        end)
+    else
+        if _G.GodESP then _G.GodESP:Disconnect() end
+        for _, model in pairs(workspace:GetChildren()) do
+            local part = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+            if part and part:FindFirstChild("ESP_Red") then
+                part.ESP_Red:Destroy()
+            end
+        end
+    end
 end)
 
 -- Misc
 for _, item in pairs({"Trap","Invisibility Cloak","Medusa's Head","Quantum Cloner","Body Swap Potion"}) do
-    misc:addButton(item, function()
+    miscSection:addButton(item, function()
         local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
         net:InvokeServer(item)
     end)
 end
 
 -- Other
-other:addToggle("Auto Candy Spin Wheel", false, function(Value)
+otherSection:addToggle("Auto Candy Spin Wheel", false, function(Value)
     if Value then
+        _G.spin = true
         task.spawn(function()
-            while wait(1) do
-                if not Value then break end
+            while _G.spin do
                 ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
+                task.wait(1)
             end
         end)
+    else
+        _G.spin = false
     end
 end)
 
-other:addButton("Server Hop", function()
+otherSection:addButton("Server Hop", function()
     local PlaceId = game.PlaceId
     local JobId = game.JobId
     local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
     for _, s in pairs(servers.data) do
         if s.id ~= JobId and s.playing < s.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(PlaceId, s.id, player)
+            TeleportService:TeleportToPlaceInstance(PlaceId,s.id,player)
             break
         end
     end
 end)
 
-other:addToggle("FPS Boost", false, function(Value)
+otherSection:addToggle("FPS Boost", false, function(Value)
     if Value then
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
         game:GetService("Lighting").GlobalShadows = false
         game:GetService("Lighting").FogEnd = 50
     else
         settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        game:GetService("Lighting").GlobalShadows = true
+        game:GetService("Lighting").FogEnd = 100000
     end
 end)
 
