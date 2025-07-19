@@ -1,5 +1,5 @@
--- ⚡ Kdml Scripts - MATERIAL UI Versiyonu
-local Material = loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua"))()
+-- ⚡ WindUI yükle
+local Wind = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,78 +8,152 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
-local UI = Material.Load({
-    Title = "Kdml Scripts | .gg/vsaKFZgYVD",
-    Style = 1,
-    SizeX = 400,
-    SizeY = 300,
-    Theme = "Dark",
-})
+-- Pencere
+local Window = Wind:CreateWindow("Kdml Scripts | .gg/vsaKFZgYVD")
 
-local MainTab = UI.New({ Title = "Main" })
-local VisualTab = UI.New({ Title = "Visual" })
-local MiscTab = UI.New({ Title = "Misc" })
-local OtherTab = UI.New({ Title = "Other" })
+-- Sekmeler
+local MainTab = Window:CreateTab("Main")
+local VisualTab = Window:CreateTab("Visual")
+local MiscTab = Window:CreateTab("Misc")
+local OtherTab = Window:CreateTab("Other Stuffs")
 
--- Main Tab Buttons
-MainTab.Button({
-    Text = "Free Cam",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
-    end
-})
+-- MAIN
+MainTab:AddButton("Free Cam", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
+end)
 
-MainTab.Button({
-    Text = "Speed Boost",
-    Callback = function()
-        local boostedSpeed = 48
-        local function applySpeed()
-            local char = player.Character or player.CharacterAdded:Wait()
-            char:WaitForChild("Humanoid").WalkSpeed = boostedSpeed
-        end
-        applySpeed()
-        player.CharacterAdded:Connect(function()
-            task.wait(0.1)
-            applySpeed()
-        end)
-    end
-})
-
-MainTab.Button({
-    Text = "Jump Boost",
-    Callback = function()
+MainTab:AddButton("Speed Boost", function()
+    local boostedSpeed = 48
+    local function applySpeedBoost()
         local char = player.Character or player.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
-        humanoid.Jumping:Connect(function(active)
-            if active then
-                local root = char:WaitForChild("HumanoidRootPart")
-                root.CFrame = root.CFrame + Vector3.new(0,55,0)
+        humanoid.WalkSpeed = boostedSpeed
+    end
+    applySpeedBoost()
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        applySpeedBoost()
+    end)
+end)
+
+MainTab:AddButton("Jump Boost", function()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.Jumping:Connect(function(active)
+        if active then
+            local rootPart = character:WaitForChild("HumanoidRootPart")
+            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
+        end
+    end)
+end)
+
+MainTab:AddButton("Float", function()
+    local floatActive = false
+    local floatSpeed = 46
+    local floatTime = 15
+    local startTime = 0
+
+    local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    gui.Name = "FloatGUI"
+    gui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 220, 0, 120)
+    frame.Position = UDim2.new(0.5, -110, 0.7, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+    frame.BorderSizePixel = 3
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = gui
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.BackgroundTransparency = 1
+    title.Text = "Float"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextColor3 = Color3.fromRGB(0, 170, 255)
+    title.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 180, 0, 40)
+    button.Position = UDim2.new(0.5, -90, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    button.TextColor3 = Color3.new(1,1,1)
+    button.TextScaled = true
+    button.Font = Enum.Font.GothamBold
+    button.Text = "Start Float"
+    button.Parent = frame
+
+    local countdownLabel = Instance.new("TextLabel")
+    countdownLabel.Size = UDim2.new(0, 180, 0, 25)
+    countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
+    countdownLabel.BackgroundTransparency = 1
+    countdownLabel.TextColor3 = Color3.new(1, 1, 1)
+    countdownLabel.Font = Enum.Font.Gotham
+    countdownLabel.TextScaled = true
+    countdownLabel.Text = "Ready"
+    countdownLabel.Parent = frame
+
+    local moveConnection, gravityConnection
+
+    local function stopFloat()
+        floatActive = false
+        button.Text = "Start Float"
+        if moveConnection then moveConnection:Disconnect() end
+        if gravityConnection then gravityConnection:Disconnect() end
+        countdownLabel.Text = "Done"
+        gui:Destroy()
+    end
+
+    local function startFloat()
+        floatActive = true
+        button.Text = "Stop Float"
+        startTime = tick()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        gravityConnection = RunService.Heartbeat:Connect(function()
+            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
+        end)
+
+        moveConnection = RunService.Heartbeat:Connect(function()
+            if not floatActive then return end
+            local elapsed = tick() - startTime
+            local remaining = floatTime - elapsed
+            countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
+            if remaining <= 0 then
+                stopFloat()
+            else
+                local dir = workspace.CurrentCamera.CFrame.LookVector
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hrp.Velocity = move * floatSpeed
             end
         end)
     end
-})
 
-MainTab.Button({
-    Text = "TP To Cords",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
-    end
-})
+    button.MouseButton1Click:Connect(function()
+        if not floatActive then startFloat() else stopFloat() end
+    end)
+end)
 
-MainTab.Button({
-    Text = "TP To Cords V2",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
-    end
-})
+MainTab:AddButton("TP To Cords", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
+end)
 
--- Visual Bölümü
-VisualTab.Toggle({ Text = "ESP Players", Enabled = false, Callback = function(Value)
-    local espEnabled = Value
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character then
-            local head = plr.Character:FindFirstChild("Head")
-            if espEnabled then
+MainTab:AddButton("TP To Cords V2", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
+end)
+
+-- VISUAL
+local espEnabled = false
+VisualTab:AddToggle("ESP", false, function(Value)
+    espEnabled = Value
+    if espEnabled then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= player and plr.Character then
+                local head = plr.Character:FindFirstChild("Head")
                 if head and not head:FindFirstChild("ESP_NameTag") then
                     local billboard = Instance.new("BillboardGui")
                     billboard.Name = "ESP_NameTag"
@@ -99,25 +173,32 @@ VisualTab.Toggle({ Text = "ESP Players", Enabled = false, Callback = function(Va
                     label.Text = plr.Name
                     label.Parent = billboard
                 end
+
                 if not plr.Character:FindFirstChild("ESP_Highlight") then
                     local highlight = Instance.new("Highlight")
                     highlight.Name = "ESP_Highlight"
                     highlight.Adornee = plr.Character
-                    highlight.FillColor = Color3.fromRGB(170, 0, 255)
+                    highlight.FillColor = Color3.fromRGB(170,0,255)
                     highlight.FillTransparency = 0.5
                     highlight.OutlineTransparency = 0.7
                     highlight.Parent = plr.Character
                 end
-            else
+            end
+        end
+    else
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+                local head = plr.Character:FindFirstChild("Head")
                 if head and head:FindFirstChild("ESP_NameTag") then head.ESP_NameTag:Destroy() end
                 if plr.Character:FindFirstChild("ESP_Highlight") then plr.Character.ESP_Highlight:Destroy() end
             end
         end
     end
-end })
+end)
 
+-- Secret Brainrots
 local secretBrainrotsConnection
-VisualTab.Toggle({ Text = "Secret Brainrots ESP", Enabled = false, Callback = function(Value)
+VisualTab:AddToggle("Secret Brainrots ESP", false, function(Value)
     if Value then
         secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
             for _, model in pairs(workspace:GetChildren()) do
@@ -162,15 +243,17 @@ VisualTab.Toggle({ Text = "Secret Brainrots ESP", Enabled = false, Callback = fu
             local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
             if head then
                 for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then child:Destroy() end
+                    if child:IsA("BillboardGui") then child:Destroy() end
+                    if child:IsA("BoxHandleAdornment") then child:Destroy() end
                 end
             end
         end
     end
-end })
+end)
 
+-- ✅ Brainrot God ESP (Tam)
 local godBrainrotsConnection
-VisualTab.Toggle({ Text = "Brainrot God ESP", Enabled = false, Callback = function(Value)
+VisualTab:AddToggle("Brainrot God ESP", false, function(Value)
     if Value then
         godBrainrotsConnection = RunService.RenderStepped:Connect(function()
             for _, model in pairs(workspace:GetChildren()) do
@@ -216,102 +299,54 @@ VisualTab.Toggle({ Text = "Brainrot God ESP", Enabled = false, Callback = functi
             local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
             if head then
                 for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then child:Destroy() end
+                    if child:IsA("BillboardGui") then child:Destroy() end
+                    if child:IsA("BoxHandleAdornment") then child:Destroy() end
                 end
             end
         end
     end
+end)
+
+-- MISC
+for _, item in pairs({"Trap","Invisibility Cloak","Medusa's Head","Quantum Cloner","Body Swap Potion"}) do
+    MiscTab:AddButton(item, function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer(item)
+    end)
 end
-})
 
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy Medusa's Head",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("Medusa's Head")
-    end
-})
-
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy İnvisible Cloak",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("İnvisible Cloak")
-    end
-})
-
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy Body Swap Potion",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("Body Swap Potion")
-    end
-})
-
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy Trap",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("Trap")
-    end
-})
-
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy All Seeing Sentry",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("All Seeing Sentry")
-    end
-})
-
--- Misc Tab Button
-MiscTab.Button({
-    Text = "Buy Rainbow Sword",
-    Callback = function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer("Rainbow Sword")
-    end
-})
-
--- Other Bölümü
-OtherTab.Toggle({
-    Text = "Auto Candy Spin Wheel",
-    Callback = function(val)
-        if val then
-            task.spawn(function()
-                while val do
-                    ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
-                    task.wait(1)
-                end
-            end)
-        end
-    end,
-    Enabled = false
-})
-OtherTab.Button({
-    Text = "Server Hop",
-    Callback = function()
-        local PlaceId = game.PlaceId
-        local JobId = game.JobId
-        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-        for _, s in pairs(servers.data) do
-            if s.id ~= JobId and s.playing < s.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(PlaceId, s.id, player)
-                break
+-- OTHER
+local spinEnabled = false
+OtherTab:AddToggle("Auto Candy Spin Wheel", false, function(Value)
+    spinEnabled = Value
+    if Value then
+        task.spawn(function()
+            while spinEnabled do
+                ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
+                task.wait(1)
             end
+        end)
+    end
+end)
+
+OtherTab:AddButton("Server Hop", function()
+    local PlaceId = game.PlaceId
+    local JobId = game.JobId
+    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+    for _, s in pairs(servers.data) do
+        if s.id ~= JobId and s.playing < s.maxPlayers then
+            TeleportService:TeleportToPlaceInstance(PlaceId,s.id,player)
+            break
         end
     end
-})
-})
-OtherPage.Toggle({
-    Text = "FPS Boost",
-    Callback = function(state) print("[TEST] FPS Boost:", state) end
-})
+end)
 
--- UI'yi başlat
-UI:Init()
+OtherTab:AddToggle("FPS Boost", false, function(Value)
+    if Value then
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        game:GetService("Lighting").GlobalShadows = false
+        game:GetService("Lighting").FogEnd = 50
+    else
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    end
+end)
