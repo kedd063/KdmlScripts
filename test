@@ -224,14 +224,89 @@ VisualTab.Toggle({ Text = "Brainrot God ESP", Enabled = false, Callback = functi
 end
 })
 
--- Other Bölümü
-OtherPage.Toggle({
-    Text = "Auto Candy Spin",
-    Callback = function(state) print("[TEST] Candy Spin:", state) end
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy Medusa's Head",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("Medusa's Head")
+    end
 })
-OtherPage.Button({
+
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy İnvisible Cloak",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("İnvisible Cloak")
+    end
+})
+
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy Body Swap Potion",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("Body Swap Potion")
+    end
+})
+
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy Trap",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("Trap")
+    end
+})
+
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy All Seeing Sentry",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("All Seeing Sentry")
+    end
+})
+
+-- Misc Tab Button
+MiscTab.Button({
+    Text = "Buy Rainbow Sword",
+    Callback = function()
+        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
+        net:InvokeServer("Rainbow Sword")
+    end
+})
+
+-- Other Bölümü
+OtherTab.Toggle({
+    Text = "Auto Candy Spin Wheel",
+    Callback = function(val)
+        if val then
+            task.spawn(function()
+                while val do
+                    ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/CandyEventService/Spin"):FireServer()
+                    task.wait(1)
+                end
+            end)
+        end
+    end,
+    Enabled = false
+})
+OtherTab.Button({
     Text = "Server Hop",
-    Callback = function() print("[TEST] Server Hop") end
+    Callback = function()
+        local PlaceId = game.PlaceId
+        local JobId = game.JobId
+        local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+        for _, s in pairs(servers.data) do
+            if s.id ~= JobId and s.playing < s.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceId, s.id, player)
+                break
+            end
+        end
+    end
+})
 })
 OtherPage.Toggle({
     Text = "FPS Boost",
