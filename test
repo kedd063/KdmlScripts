@@ -8,7 +8,6 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
--- Pencere
 local Window = Wind:CreateWindow("Kdml Scripts | .gg/vsaKFZgYVD")
 
 -- Sekmeler
@@ -17,7 +16,8 @@ local VisualTab = Window:CreateTab("Visual")
 local MiscTab = Window:CreateTab("Misc")
 local OtherTab = Window:CreateTab("Other Stuffs")
 
--- MAIN
+-- MAIN TAB --
+
 MainTab:AddButton("Free Cam", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
 end)
@@ -53,9 +53,10 @@ MainTab:AddButton("Float", function()
     local floatTime = 15
     local startTime = 0
 
-    local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+    local gui = Instance.new("ScreenGui")
     gui.Name = "FloatGUI"
     gui.ResetOnSpawn = false
+    gui.Parent = player:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 220, 0, 120)
@@ -134,7 +135,11 @@ MainTab:AddButton("Float", function()
     end
 
     button.MouseButton1Click:Connect(function()
-        if not floatActive then startFloat() else stopFloat() end
+        if not floatActive then
+            startFloat()
+        else
+            stopFloat()
+        end
     end)
 end)
 
@@ -146,158 +151,215 @@ MainTab:AddButton("TP To Cords V2", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
 end)
 
--- VISUAL
+-- VISUAL TAB --
 
-local espConnection, secretBrainrotsConnection, godBrainrotsConnection
+local espConnections = {}
+local function clearESP()
+    for _, conn in pairs(espConnections) do
+        if conn then conn:Disconnect() end
+    end
+    espConnections = {}
 
-VisualTab:AddToggle("ESP", false, function(Value)
-    if espConnection then espConnection:Disconnect() end
-    if Value then
-        espConnection = RunService.RenderStepped:Connect(function()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local head = plr.Character:FindFirstChild("Head")
+            if head then
+                if head:FindFirstChild("ESP_NameTag") then head.ESP_NameTag:Destroy() end
+                if plr.Character:FindFirstChild("ESP_Highlight") then plr.Character.ESP_Highlight:Destroy() end
+            end
+        end
+    end
+
+    -- Brainrots cleanup
+    for _, model in pairs(workspace:GetChildren()) do
+        local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
+        if head then
+            for _, child in pairs(head:GetChildren()) do
+                if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end
+
+VisualTab:AddToggle("ESP", false, function(value)
+    if value then
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
             for _, plr in pairs(Players:GetPlayers()) do
                 if plr ~= player and plr.Character then
-                    if not plr.Character:FindFirstChild("ESP_Highlight") then
-                        local highlight = Instance.new("Highlight", plr.Character)
+                    local head = plr.Character:FindFirstChild("Head")
+                    if head and not head:FindFirstChild("ESP_NameTag") then
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Name = "ESP_NameTag"
+                        billboard.Adornee = head
+                        billboard.Size = UDim2.new(0, 100, 0, 30)
+                        billboard.StudsOffset = Vector3.new(0, 2, 0)
+                        billboard.AlwaysOnTop = true
+                        billboard.Parent = head
+
+                        local label = Instance.new("TextLabel")
+                        label.BackgroundTransparency = 1
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        label.TextStrokeTransparency = 0
+                        label.Font = Enum.Font.GothamBold
+                        label.TextSize = 14
+                        label.Text = plr.Name
+                        label.Parent = billboard
+                    end
+                    if plr.Character and not plr.Character:FindFirstChild("ESP_Highlight") then
+                        local highlight = Instance.new("Highlight")
                         highlight.Name = "ESP_Highlight"
                         highlight.FillColor = Color3.fromRGB(255, 255, 255)
-                        highlight.FillTransparency = 0.5
-                        highlight.OutlineTransparency = 0.7
+                        highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+                        highlight.Parent = plr.Character
                     end
                 end
             end
         end)
+        table.insert(espConnections, conn)
     else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("ESP_Highlight") then
-                plr.Character.ESP_Highlight:Destroy()
-            end
-        end
+        clearESP()
     end
 end)
 
-VisualTab:AddToggle("Secret Brainrots ESP", false, function(Value)
-    if secretBrainrotsConnection then secretBrainrotsConnection:Disconnect() end
-    if Value then
-        secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
+VisualTab:AddToggle("Secret Brainrots ESP", false, function(value)
+    if value then
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
             for _, model in pairs(workspace:GetChildren()) do
-                if table.find({
-                    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
-                    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
-                    "Garamam and Madundung", "Las Tralaleritas"
-                }, model.Name) then
-                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if head and not head:FindFirstChild("ESPBox") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESPBox"
-                        box.Adornee = head
-                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
-                        box.Color3 = Color3.fromRGB(0,255,0)
-                        box.AlwaysOnTop = true
-                        box.Transparency = 0.5
-                        box.Parent = head
-                    end
-                    if head and not head:FindFirstChild("BillboardGui") then
-                        local billboard = Instance.new("BillboardGui")
-                        billboard.Size = UDim2.new(0, 200, 0, 60)
-                        billboard.Adornee = head
-                        billboard.AlwaysOnTop = true
-                        billboard.Parent = head
-                        local label = Instance.new("TextLabel")
-                        label.Size = UDim2.new(1,0,1,0)
-                        label.BackgroundTransparency = 1
-                        label.Text = model.Name
-                        label.TextColor3 = Color3.fromRGB(0,255,0)
-                        label.TextStrokeTransparency = 0
-                        label.TextScaled = true
-                        label.Font = Enum.Font.SourceSansBold
-                        label.Parent = billboard
-                    end
+                if table.find({"Chimpanzini Spiderini", "Los Tralaleritos"}, model.Name) and not model:FindFirstChild("ESP_Highlight") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ESP_Highlight"
+                    highlight.FillColor = Color3.fromRGB(0, 255, 0)
+                    highlight.Parent = model
                 end
             end
         end)
+        table.insert(espConnections, conn)
     else
-        if secretBrainrotsConnection then secretBrainrotsConnection:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if head then
-                for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") then child:Destroy() end
-                    if child:IsA("BoxHandleAdornment") then child:Destroy() end
-                end
-            end
-        end
+        clearESP()
     end
 end)
 
-VisualTab:AddToggle("Brainrot God ESP", false, function(Value)
-    if godBrainrotsConnection then godBrainrotsConnection:Disconnect() end
-    if Value then
-        godBrainrotsConnection = RunService.RenderStepped:Connect(function()
+VisualTab:AddToggle("Brainrot God ESP", false, function(value)
+    if value then
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
             for _, model in pairs(workspace:GetChildren()) do
-                if table.find({
-                    "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
-                    "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
-                    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni",
-                    "Statutino Libertino", "Gattatino Nyanino"
-                }, model.Name) then
-                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if head and not head:FindFirstChild("ESPBox") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESPBox"
-                        box.Adornee = head
-                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
-                        box.Color3 = Color3.fromRGB(255, 0, 0)
-                        box.AlwaysOnTop = true
-                        box.Transparency = 0.5
-                        box.Parent = head
-                    end
-                    if head and not head:FindFirstChild("BillboardGui") then
-                        local billboard = Instance.new("BillboardGui")
-                        billboard.Size = UDim2.new(0, 200, 0, 60)
-                        billboard.Adornee = head
-                        billboard.AlwaysOnTop = true
-                        billboard.Parent = head
-                        local label = Instance.new("TextLabel")
-                        label.Size = UDim2.new(1,0,1,0)
-                        label.BackgroundTransparency = 1
-                        label.Text = model.Name
-                        label.TextColor3 = Color3.fromRGB(255,0,0)
-                        label.TextStrokeTransparency = 0
-                        label.TextScaled = true
-                        label.Font = Enum.Font.SourceSansBold
-                        label.Parent = billboard
-                    end
+                if table.find({"Tralalero Tralala", "Matteo"}, model.Name) and not model:FindFirstChild("ESP_Highlight") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ESP_Highlight"
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.Parent = model
                 end
             end
         end)
+        table.insert(espConnections, conn)
     else
-        if godBrainrotsConnection then godBrainrotsConnection:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if head then
-                for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") then child:Destroy() end
-                    if child:IsA("BoxHandleAdornment") then child:Destroy() end
-                end
+        clearESP()
+    end
+end)
+
+-- MISC TAB --
+
+local function buyItem(itemName)
+    local shop = workspace:FindFirstChild("Shop")
+    if shop then
+        local item = shop:FindFirstChild(itemName)
+        if item and item:FindFirstChild("ClickDetector") then
+            fireclickdetector(item.ClickDetector)
+        end
+    end
+end
+
+MiscTab:AddButton("Buy Trap", function()
+    buyItem("Trap")
+end)
+
+MiscTab:AddButton("Buy Invisibility Cloak", function()
+    buyItem("Invisibility Cloak")
+end)
+
+MiscTab:AddButton("Buy Medusa's Head", function()
+    buyItem("Medusa's Head")
+end)
+
+MiscTab:AddButton("Buy Quantum Cloner", function()
+    buyItem("Quantum Cloner")
+end)
+
+MiscTab:AddButton("Buy Body Swap Potion", function()
+    buyItem("Body Swap Potion")
+end)
+
+-- OTHER TAB --
+
+local autoSpinActive = false
+local autoSpinConnection
+
+OtherTab:AddToggle("Auto Candy Spin Wheel", false, function(value)
+    if value then
+        autoSpinActive = true
+        autoSpinConnection = RunService.Stepped:Connect(function()
+            local spinEvent = ReplicatedStorage:FindFirstChild("SpinEvent")
+            if spinEvent then
+                spinEvent:FireServer()
             end
+        end)
+    else
+        autoSpinActive = false
+        if autoSpinConnection then
+            autoSpinConnection:Disconnect()
         end
     end
 end)
 
--- MISC
+OtherTab:AddButton("Server Hop", function()
+    local PlaceID = game.PlaceId
+    local Servers = {}
+    local Cursor = ""
+    local http = game:GetService("HttpService")
+    local success, response = pcall(function()
+        return game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100")
+    end)
+    if success and response then
+        local data = http:JSONDecode(response)
+        for _, server in pairs(data.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                table.insert(Servers, server.id)
+            end
+        end
+    end
+    if #Servers > 0 then
+        local randomServer = Servers[math.random(1, #Servers)]
+        TeleportService:TeleportToPlaceInstance(PlaceID, randomServer, player)
+    else
+        warn("No available servers found!")
+    end
+end)
 
-MiscTab:AddButton("Rejoin", function()
+OtherTab:AddButton("FPS Boost", function()
+    setfpscap(1000)
+end)
+
+OtherTab:AddButton("Rejoin", function()
     TeleportService:Teleport(game.PlaceId, player)
 end)
 
-MiscTab:AddButton("Destroy GUI", function()
+OtherTab:AddButton("Destroy GUI", function()
     Window:Destroy()
 end)
 
--- OTHER
-
-OtherTab:AddLabel("Script Version: 1.0.0")
-
 OtherTab:AddButton("Copy Discord Link", function()
-    setclipboard("https://discord.gg/vsaKFZgYVD")
+    local success, err = pcall(function()
+        setclipboard("https://discord.gg/vsaKFZgYVD")
+    end)
+    if success then
+        print("Discord link copied to clipboard.")
+    else
+        warn("Failed to copy: ", err)
+    end
 end)
