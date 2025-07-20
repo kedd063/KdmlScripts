@@ -1,346 +1,166 @@
--- 🌬️ KDML WINDUI SÜRÜMÜ
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local player = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local random = Random.new()
 
-local window = WindUI:Window("KDML Scripts")
+local lp = Players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
 
--- 🔹 MAIN
-local main = window:Page("Main")
+local tpAmt = 60
+local fixedY = 70
+local teleporting = false
+local void = CFrame.new(0, -3.4e+38, 0)
 
-main:Button("Free Cam", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/Test4/main/Freecam'))()
-end)
-
-main:Button("Speed Boost", function()
-    local function applySpeedBoost()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 48
+local function getPing()
+    local pingStats = Stats.Network.ServerStatsItem
+    if pingStats then
+        return pingStats:GetValue() / 1000
     end
-    applySpeedBoost()
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        applySpeedBoost()
-    end)
-end)
-
-main:Button("Jump Boost", function()
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.Jumping:Connect(function(active)
-        if active then
-            local rootPart = character:WaitForChild("HumanoidRootPart")
-            rootPart.CFrame = rootPart.CFrame + Vector3.new(0, 55, 0)
-        end
-    end)
-end)
-
-main:Button("Float", function()
-    local floatActive = false
-    local floatSpeed = 46
-    local floatTime = 15
-    local startTime = 0
-    local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-    gui.Name = "FloatGUI"
-    gui.ResetOnSpawn = false
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 220, 0, 120)
-    frame.Position = UDim2.new(0.5, -110, 0.7, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-    frame.BorderSizePixel = 3
-    frame.Active = true
-    frame.Draggable = true
-    frame.Parent = gui
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0, 30)
-    title.BackgroundTransparency = 1
-    title.Text = "Float"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 18
-    title.TextColor3 = Color3.fromRGB(0, 170, 255)
-    title.Parent = frame
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 180, 0, 40)
-    button.Position = UDim2.new(0.5, -90, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    button.TextColor3 = Color3.new(1,1,1)
-    button.TextScaled = true
-    button.Font = Enum.Font.GothamBold
-    button.Text = "Start Float"
-    button.Parent = frame
-
-    local countdownLabel = Instance.new("TextLabel")
-    countdownLabel.Size = UDim2.new(0, 180, 0, 25)
-    countdownLabel.Position = UDim2.new(0.5, -90, 0, 85)
-    countdownLabel.BackgroundTransparency = 1
-    countdownLabel.TextColor3 = Color3.new(1, 1, 1)
-    countdownLabel.Font = Enum.Font.Gotham
-    countdownLabel.TextScaled = true
-    countdownLabel.Text = "Ready"
-    countdownLabel.Parent = frame
-
-    local moveConnection, gravityConnection
-
-    local function stopFloat()
-        floatActive = false
-        button.Text = "Start Float"
-        if moveConnection then moveConnection:Disconnect() end
-        if gravityConnection then gravityConnection:Disconnect() end
-        countdownLabel.Text = "Done"
-        gui:Destroy()
-    end
-
-    local function startFloat()
-        floatActive = true
-        button.Text = "Stop Float"
-        startTime = tick()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-
-        gravityConnection = RunService.Heartbeat:Connect(function()
-            hrp.Velocity = Vector3.new(hrp.Velocity.X, 0, hrp.Velocity.Z)
-        end)
-
-        moveConnection = RunService.Heartbeat:Connect(function()
-            if not floatActive then return end
-            local elapsed = tick() - startTime
-            local remaining = floatTime - elapsed
-            countdownLabel.Text = string.format("Ending in: %.1f", math.max(remaining, 0))
-            if remaining <= 0 then
-                stopFloat()
-            else
-                local dir = workspace.CurrentCamera.CFrame.LookVector
-                local move = Vector3.new(dir.X, 0, dir.Z).Unit
-                hrp.Velocity = move * floatSpeed
-            end
-        end)
-    end
-
-    button.MouseButton1Click:Connect(function()
-        if not floatActive then startFloat() else stopFloat() end
-    end)
-end)
-
-main:Button("TP To Cords", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats"))()
-end)
-
-main:Button("TP To Cords V2", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/kedd063/KdmlScripts/refs/heads/main/tp-to-cordinats-2"))()
-end)
-
--- 🔹 VISUAL
-local visual = window:Page("Visual")
-
--- 🧠 Secret Brainrots ESP
-visual:Toggle("Secret Brainrots ESP", false, function(val)
-    if val then
-        _G.secretBrainrotsConnection = RunService.RenderStepped:Connect(function()
-            for _, model in pairs(workspace:GetChildren()) do
-                if table.find({
-                    "Chimpanzini Spiderini", "Los Tralaleritos", "La Vacca Saturno Saturnita",
-                    "Torrtuginni Dragonfruitini", "Graipuss Medussi", "La Grande Combinasion",
-                    "Garamam and Madundung", "Las Tralaleritas"
-                }, model.Name) then
-                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if head and not head:FindFirstChild("ESPBox") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESPBox"
-                        box.Adornee = head
-                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
-                        box.Color3 = Color3.fromRGB(0,255,0)
-                        box.AlwaysOnTop = true
-                        box.Transparency = 0.5
-                        box.Parent = head
-                    end
-                    if head and not head:FindFirstChild("BillboardGui") then
-                        local billboard = Instance.new("BillboardGui")
-                        billboard.Size = UDim2.new(0, 200, 0, 60)
-                        billboard.Adornee = head
-                        billboard.AlwaysOnTop = true
-                        billboard.Parent = head
-                        local label = Instance.new("TextLabel")
-                        label.Size = UDim2.new(1,0,1,0)
-                        label.BackgroundTransparency = 1
-                        label.Text = model.Name
-                        label.TextColor3 = Color3.fromRGB(0,255,0)
-                        label.TextStrokeTransparency = 0
-                        label.TextScaled = true
-                        label.Font = Enum.Font.SourceSansBold
-                        label.Parent = billboard
-                    end
-                end
-            end
-        end)
-    else
-        if _G.secretBrainrotsConnection then _G.secretBrainrotsConnection:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if head then
-                for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then
-                        child:Destroy()
-                    end
-                end
-            end
-        end
-    end
-end)
-
--- 🔱 Brainrot God ESP
-visual:Toggle("Brainrot God ESP", false, function(val)
-    if val then
-        _G.godBrainrotsConnection = RunService.RenderStepped:Connect(function()
-            for _, model in pairs(workspace:GetChildren()) do
-                if table.find({
-                    "Tralalero Tralala", "Cocofanto Elefanto", "Matteo",
-                    "Odin Din Din Dun", "Girafa Celestre", "Orcalero Orcala",
-                    "Trenostruzzo Turbo 3000", "Tigroligre Frutonni",
-                    "Statutino Libertino", "Gattatino Nyanino"
-                }, model.Name) then
-                    local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-                    if head and not head:FindFirstChild("ESPBox") then
-                        local box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ESPBox"
-                        box.Adornee = head
-                        box.Size = head.Size * Vector3.new(1.1, 1.3, 1.1)
-                        box.Color3 = Color3.fromRGB(255,0,0)
-                        box.AlwaysOnTop = true
-                        box.Transparency = 0.5
-                        box.Parent = head
-                    end
-                    if head and not head:FindFirstChild("BillboardGui") then
-                        local billboard = Instance.new("BillboardGui")
-                        billboard.Size = UDim2.new(0, 200, 0, 60)
-                        billboard.Adornee = head
-                        billboard.AlwaysOnTop = true
-                        billboard.Parent = head
-                        local label = Instance.new("TextLabel")
-                        label.Size = UDim2.new(1,0,1,0)
-                        label.BackgroundTransparency = 1
-                        label.Text = model.Name
-                        label.TextColor3 = Color3.fromRGB(255,0,0)
-                        label.TextStrokeTransparency = 0
-                        label.TextScaled = true
-                        label.Font = Enum.Font.SourceSansBold
-                        label.Parent = billboard
-                    end
-                end
-            end
-        end)
-    else
-        if _G.godBrainrotsConnection then _G.godBrainrotsConnection:Disconnect() end
-        for _, model in pairs(workspace:GetChildren()) do
-            local head = model:FindFirstChild("Head") or model:FindFirstChildWhichIsA("BasePart")
-            if head then
-                for _, child in pairs(head:GetChildren()) do
-                    if child:IsA("BillboardGui") or child:IsA("BoxHandleAdornment") then
-                        child:Destroy()
-                    end
-                end
-            end
-        end
-    end
-end)
-visual:Toggle("ESP", false, function(val)
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character then
-            local head = plr.Character:FindFirstChild("Head")
-            if val then
-                if head and not head:FindFirstChild("ESP_NameTag") then
-                    local billboard = Instance.new("BillboardGui")
-                    billboard.Name = "ESP_NameTag"
-                    billboard.Adornee = head
-                    billboard.Size = UDim2.new(0, 100, 0, 30)
-                    billboard.StudsOffset = Vector3.new(0, 2, 0)
-                    billboard.AlwaysOnTop = true
-                    billboard.Parent = head
-
-                    local label = Instance.new("TextLabel")
-                    label.BackgroundTransparency = 1
-                    label.Size = UDim2.new(1, 0, 1, 0)
-                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    label.TextStrokeTransparency = 0
-                    label.Font = Enum.Font.GothamBold
-                    label.TextScaled = true
-                    label.Text = plr.Name
-                    label.Parent = billboard
-                end
-
-                if not plr.Character:FindFirstChild("ESP_Highlight") then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESP_Highlight"
-                    highlight.Adornee = plr.Character
-                    highlight.FillColor = Color3.fromRGB(170, 0, 255)
-                    highlight.FillTransparency = 0.5
-                    highlight.OutlineTransparency = 0.7
-                    highlight.Parent = plr.Character
-                end
-            else
-                if head and head:FindFirstChild("ESP_NameTag") then
-                    head.ESP_NameTag:Destroy()
-                end
-                if plr.Character:FindFirstChild("ESP_Highlight") then
-                    plr.Character.ESP_Highlight:Destroy()
-                end
-            end
-        end
-    end
-end)
-
--- 🔹 MISC
-local misc = window:Page("Misc")
-local items = {"Trap", "Invisibility Cloak", "Medusa's Head", "Quantum Cloner", "Body Swap Potion"}
-for _, item in pairs(items) do
-    misc:Button(item, function()
-        local net = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RF/CoinsShopService/RequestBuy")
-        net:InvokeServer(item)
-    end)
+    return 0.1
 end
 
--- 🔹 OTHER
-local other = window:Page("Other")
-other:Toggle("Auto Candy Spin Wheel", false, function(val)
-    if val then
-        task.spawn(function()
-            while val do
-                ReplicatedStorage.Packages.Net["RE/CandyEventService/Spin"]:FireServer()
-                task.wait(1)
-            end
-        end)
+local function TP(position)
+    if not teleporting and position then
+        teleporting = true
+        hrp.CFrame = position + Vector3.new(
+            random:NextNumber(-0.0001, 0.0001),
+            random:NextNumber(-0.0001, 0.0001),
+            random:NextNumber(-0.0001, 0.0001)
+        )
+        RunService.Heartbeat:Wait()
+        teleporting = false
     end
-end)
+end
 
-other:Button("Server Hop", function()
-    local PlaceId = game.PlaceId
-    local JobId = game.JobId
-    local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-    for _, s in pairs(servers.data) do
-        if s.id ~= JobId and s.playing < s.maxPlayers then
-            TeleportService:TeleportToPlaceInstance(PlaceId,s.id,player)
+local function TweenToPosition(targetCFrame, duration)
+    local tweenInfo = TweenInfo.new(duration or 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+    tween:Play()
+    task.wait(duration or 0.4)
+    tween:Cancel()
+    return true
+end
+
+local function TeleportToCoords(coords)
+    if not (coords and #coords == 3) then return false end
+    local target = CFrame.new(coords[1], coords[2], coords[3])
+
+    TweenToPosition(target, 0.3)
+
+    local ping = getPing()
+    local waitTime = math.clamp(ping, 0.05, 0.2)
+
+    for i = 1, tpAmt do
+        TP(target)
+        if i % 15 == 0 and (hrp.Position - target.Position).Magnitude <= 60 then
             break
         end
+        task.wait(waitTime)
+    end
+
+    TP(void)
+    task.wait(0.05)
+
+    for i = 1, math.max(3, math.floor(tpAmt / 25)) do
+        TP(target)
+        task.wait(waitTime)
+    end
+
+    task.wait(0.2)
+    return (hrp.Position - target.Position).Magnitude <= 50
+end
+
+-- RGB renk döngüsü fonksiyonu
+local function getRainbowColor(time)
+    local frequency = 2
+    local r = math.floor(math.sin(frequency * time + 0) * 127 + 128)
+    local g = math.floor(math.sin(frequency * time + 2) * 127 + 128)
+    local b = math.floor(math.sin(frequency * time + 4) * 127 + 128)
+    return Color3.fromRGB(r, g, b)
+end
+
+-- GUI Oluşturma
+local gui = Instance.new("ScreenGui")
+gui.Name = "KdmlScriptsGUI"
+gui.ResetOnSpawn = false
+gui.Parent = lp:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 180)
+frame.Position = UDim2.new(0, 20, 0, 20)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+-- RGB çerçeve
+local border = Instance.new("UIStroke")
+border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+border.Thickness = 3
+border.Parent = frame
+
+-- Başlık
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 28
+title.Text = "Kdml Scripts"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextStrokeTransparency = 0.5
+title.Parent = frame
+
+-- Alt yazı (Discord linki)
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, 0, 0, 20)
+subtitle.Position = UDim2.new(0, 0, 0, 140)
+subtitle.BackgroundTransparency = 1
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 14
+subtitle.Text = "https://discord.gg/vsaKFZgYVD"
+subtitle.TextColor3 = Color3.new(0.7, 0.7, 0.7)
+subtitle.Parent = frame
+
+-- Y Teleport etiketi
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, -20, 0, 30)
+label.Position = UDim2.new(0, 10, 0, 50)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.new(1, 1, 1)
+label.Text = "Y = "..fixedY
+label.Font = Enum.Font.Gotham
+label.TextScaled = true
+label.TextXAlignment = Enum.TextXAlignment.Left
+label.Parent = frame
+
+-- Teleport butonu
+local tpButton = Instance.new("TextButton")
+tpButton.Size = UDim2.new(1, -20, 0, 40)
+tpButton.Position = UDim2.new(0, 10, 0, 90)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+tpButton.TextColor3 = Color3.new(1, 1, 1)
+tpButton.Text = "TP to Y = "..fixedY
+tpButton.Font = Enum.Font.GothamBold
+tpButton.TextScaled = true
+tpButton.Parent = frame
+
+tpButton.MouseButton1Click:Connect(function()
+    if hrp then
+        local pos = hrp.Position
+        TeleportToCoords({pos.X, fixedY, pos.Z})
     end
 end)
 
-other:Toggle("FPS Boost", false, function(val)
-    if val then
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-        game:GetService("Lighting").GlobalShadows = false
-        game:GetService("Lighting").FogEnd = 50
-    else
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-        game:GetService("Lighting").GlobalShadows = true
-        game:GetService("Lighting").FogEnd = 100000
+-- RGB animasyonunu başlat
+spawn(function()
+    while true do
+        local time = tick()
+        local color = getRainbowColor(time)
+        border.Color = color
+        title.TextColor3 = color
+        wait(0.03)
     end
 end)
