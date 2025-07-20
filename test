@@ -1,1 +1,143 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local random = Random.new()
 
+local lp = Players.LocalPlayer
+
+local char, humanoid, hrp
+local teleporting = false
+local void = CFrame.new(0, -3.4028234663852886e+38, 0)
+local tpAmt = 60
+local fixedY = 70
+
+local function setupCharacter(newChar)
+	char = newChar
+	humanoid = char:WaitForChild("Humanoid")
+	hrp = char:WaitForChild("HumanoidRootPart")
+
+	humanoid.MaxHealth = math.huge
+	humanoid.Health = humanoid.MaxHealth
+	humanoid.HealthChanged:Connect(function()
+		if humanoid.Health < humanoid.MaxHealth then
+			humanoid.Health = humanoid.MaxHealth
+		end
+	end)
+
+	humanoid.Died:Connect(function()
+		lp:LoadCharacter()
+	end)
+end
+
+local function getPing()
+	local pingStats = Stats.Network.ServerStatsItem
+	if pingStats then
+		return pingStats:GetValue() / 1000
+	end
+	return 0.1
+end
+
+local function TP(position)
+	if not teleporting and position then
+		teleporting = true
+		hrp.CFrame = position + Vector3.new(
+			random:NextNumber(-0.0001, 0.0001),
+			random:NextNumber(-0.0001, 0.0001),
+			random:NextNumber(-0.0001, 0.0001)
+		)
+		RunService.Heartbeat:Wait()
+		teleporting = false
+	end
+end
+
+local function TweenToPosition(targetCFrame, duration)
+	local tweenInfo = TweenInfo.new(duration or 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+	tween:Play()
+	task.wait(duration or 0.4)
+	tween:Cancel()
+	return true
+end
+
+local function TeleportToCoords(coords)
+	if not (coords and #coords == 3) then return false end
+	local target = CFrame.new(coords[1], coords[2], coords[3])
+
+	TweenToPosition(target, 0.3)
+
+	local ping = getPing()
+	local waitTime = math.clamp(ping, 0.05, 0.2)
+
+	for i = 1, tpAmt do
+		TP(target)
+		if i % 15 == 0 and (hrp.Position - target.Position).Magnitude <= 60 then
+			break
+		end
+		task.wait(waitTime)
+	end
+
+	TP(void)
+	task.wait(0.05)
+
+	for i = 1, math.max(3, math.floor(tpAmt / 25)) do
+		TP(target)
+		task.wait(waitTime)
+	end
+
+	task.wait(0.2)
+	return (hrp.Position - target.Position).Magnitude <= 50
+end
+
+-- Character setup
+if lp.Character then
+	setupCharacter(lp.Character)
+end
+
+lp.CharacterAdded:Connect(setupCharacter)
+
+-- GUI Setup
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "TPGUI"
+gui.ResetOnSpawn = false
+
+-- Frame Container
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 200, 0, 120)
+frame.Position = UDim2.new(0, 20, 0, 20)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+
+local uicorner = Instance.new("UICorner", frame)
+uicorner.CornerRadius = UDim.new(0, 10)
+
+-- Label for Y value
+local label = Instance.new("TextLabel", frame)
+label.Size = UDim2.new(1, -20, 0, 30)
+label.Position = UDim2.new(0, 10, 0, 10)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.new(1, 1, 1)
+label.Text = "Y = "..fixedY
+label.Font = Enum.Font.Gotham
+label.TextScaled = true
+
+-- Teleport Button
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(1, -20, 0, 40)
+tpButton.Position = UDim2.new(0, 10, 0, 50)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+tpButton.TextColor3 = Color3.new(1, 1, 1)
+tpButton.Text = "Kdml Scripts | Roof TP"
+tpButton.Font = Enum.Font.GothamBold
+tpButton.TextScaled = true
+
+local btnCorner = Instance.new("UICorner", tpButton)
+btnCorner.CornerRadius = UDim.new(0, 6)
+
+-- Button click logic
+tpButton.MouseButton1Click:Connect(function()
+	if hrp then
+		local pos = hrp.Position
+		TeleportToCoords({pos.X, fixedY, pos.Z})
+	end
+end)
