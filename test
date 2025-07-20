@@ -1,1 +1,74 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+local random = Random.new()
 
+local char, humanoid, hrp
+local teleporting = false
+local fixedY = 70
+
+local function setupCharacter(newChar)
+	char = newChar
+	humanoid = char:WaitForChild("Humanoid")
+	hrp = char:WaitForChild("HumanoidRootPart")
+end
+
+if lp.Character then
+	setupCharacter(lp.Character)
+end
+lp.CharacterAdded:Connect(setupCharacter)
+
+local function TP(position)
+	if not teleporting and position then
+		teleporting = true
+		hrp.CFrame = CFrame.new(
+			position.X + random:NextNumber(-0.0001, 0.0001),
+			position.Y + random:NextNumber(-0.0001, 0.0001),
+			position.Z + random:NextNumber(-0.0001, 0.0001)
+		)
+		RunService.Heartbeat:Wait()
+		teleporting = false
+	end
+end
+
+local function TeleportToPosition(pos)
+	if not pos then return false end
+
+	local targetPos = Vector3.new(pos.X, pos.Y, pos.Z)
+
+	while (hrp.Position - targetPos).Magnitude > 10 do
+		TP(targetPos)
+		task.wait(0.05)
+	end
+
+	return true
+end
+
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "TPGUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0, 10, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(1, -20, 0, 40)
+tpButton.Position = UDim2.new(0, 10, 0, 10)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+tpButton.TextColor3 = Color3.new(1, 1, 1)
+tpButton.Text = "Kdml Scripts | Roof TP"
+tpButton.Font = Enum.Font.GothamBold
+tpButton.TextScaled = true
+Instance.new("UICorner", tpButton)
+
+tpButton.MouseButton1Click:Connect(function()
+	if hrp then
+		local pos = hrp.Position
+		TeleportToPosition(Vector3.new(pos.X, fixedY, pos.Z))
+	end
+end)
