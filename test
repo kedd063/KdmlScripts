@@ -1,1 +1,141 @@
-
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+repeat task.wait() until player:FindFirstChild("PlayerGui")
+ 
+local char, humanoid, hrP
+local teleporting = false
+local invulnerableDuringTP = false
+ 
+local function SetupCharacter()
+	char = player.Character or player.CharacterAdded:Wait()
+	humanoid = char:WaitForChild("Humanoid")
+	hrP = char:WaitForChild("HumanoidRootPart")
+ 
+	humanoid.Died:Connect(function()
+		if not teleporting then
+			player:LoadCharacter()
+		end
+	end)
+ 
+	humanoid.HealthChanged:Connect(function(h)
+		if invulnerableDuringTP and h < humanoid.MaxHealth then
+			humanoid.Health = humanoid.MaxHealth
+		end
+	end)
+end
+ 
+SetupCharacter()
+player.CharacterAdded:Connect(SetupCharacter)
+ 
+-- GUI original
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "StealthTPGui"
+screenGui.ResetOnSpawn = false
+ 
+local function CreateBox(name, pos)
+	local box = Instance.new("TextBox")
+	box.Parent = screenGui
+	box.Size = UDim2.new(0, 100, 0, 30)
+	box.Position = pos
+	box.PlaceholderText = name
+	box.Text = ""
+	box.ClearTextOnFocus = false
+	box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	box.TextColor3 = Color3.new(1, 1, 1)
+	box.Font = Enum.Font.Gotham
+	box.TextScaled = true
+	local corner = Instance.new("UICorner", box)
+	corner.CornerRadius = UDim.new(0, 6)
+	return box
+end
+ 
+local inputX = CreateBox("X", UDim2.new(0, 10, 0, 10))
+local inputY = CreateBox("Y", UDim2.new(0, 120, 0, 10))
+local inputZ = CreateBox("Z", UDim2.new(0, 230, 0, 10))
+ 
+local buttonSet = Instance.new("TextButton", screenGui)
+buttonSet.Size = UDim2.new(0, 120, 0, 30)
+buttonSet.Position = UDim2.new(0, 340, 0, 10)
+buttonSet.Text = "Use Current Pos"
+buttonSet.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+buttonSet.TextColor3 = Color3.new(1, 1, 1)
+buttonSet.Font = Enum.Font.GothamBold
+buttonSet.TextScaled = true
+Instance.new("UICorner", buttonSet).CornerRadius = UDim.new(0, 6)
+ 
+local buttonTP = Instance.new("TextButton", screenGui)
+buttonTP.Size = UDim2.new(0, 150, 0, 40)
+buttonTP.Position = UDim2.new(0, 10, 0, 50)
+buttonTP.Text = "Teleport"
+buttonTP.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+buttonTP.TextColor3 = Color3.new(1, 1, 1)
+buttonTP.Font = Enum.Font.GothamBold
+buttonTP.TextScaled = true
+Instance.new("UICorner", buttonTP).CornerRadius = UDim.new(0, 6)
+ 
+local statusLabel = Instance.new("TextLabel", screenGui)
+statusLabel.Size = UDim2.new(0, 300, 0, 30)
+statusLabel.Position = UDim2.new(0.5, -150, 0, 100)
+statusLabel.Text = ""
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextTransparency = 1
+statusLabel.TextColor3 = Color3.new(1, 1, 1)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextScaled = true
+ 
+local function ShowStatus(text, color)
+	statusLabel.Text = text
+	TweenService:Create(statusLabel, TweenInfo.new(0.3), {TextTransparency = 0, TextColor3 = color}):Play()
+	task.wait(2)
+	TweenService:Create(statusLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+end
+ 
+buttonSet.MouseButton1Click:Connect(function()
+	local pos = hrP.Position
+	inputX.Text = tostring(math.floor(pos.X))
+	inputY.Text = tostring(math.floor(pos.Y))
+	inputZ.Text = tostring(math.floor(pos.Z))
+end)
+ 
+-- StealthTP con velocidad adaptada para móvil y anticheat
+local function StealthTP(destinationVec3)
+	local start = hrP.Position
+	local direction = (destinationVec3 - start).Unit
+	local distance = (destinationVec3 - start).Magnitude
+ 
+	local steps = math.clamp(math.floor(distance / 4), 35, 100)
+	local delay = math.clamp(distance / 4000, 0.015, 0.035)
+ 
+	teleporting = true
+	invulnerableDuringTP = true
+ 
+	for i = 1, steps do
+		local nextPos = start + direction * (distance * (i / steps))
+		hrP.CFrame = CFrame.new(nextPos + Vector3.new(0, 1, 0))
+		task.wait(delay)
+	end
+ 
+	hrP.CFrame = CFrame.new(destinationVec3 + Vector3.new(0, 15, 0))
+	hrP.Velocity = Vector3.new(0, -40, 0)
+ 
+	teleporting = false
+	invulnerableDuringTP = false
+	return true
+end
+ 
+buttonTP.MouseButton1Click:Connect(function()
+	local x = tonumber(inputX.Text)
+	local y = tonumber(inputY.Text)
+	local z = tonumber(inputZ.Text)
+	if x and y and z then
+		local success = StealthTP(Vector3.new(x, y, z))
+		if success then
+			ShowStatus("Teleport successful!", Color3.fromRGB(0, 255, 100))
+		else
+			ShowStatus("Teleport failed.", Color3.fromRGB(255, 50, 50))
+		end
+	else
+		ShowStatus("Invalid coordinates.", Color3.fromRGB(255, 150, 0))
+	end
+end)
