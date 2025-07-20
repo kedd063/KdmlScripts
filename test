@@ -1,1 +1,64 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
+local lp = Players.LocalPlayer
+
+-- GUI oluştur
+local gui = Instance.new("ScreenGui")
+gui.Name = "RespawnGUI"
+gui.ResetOnSpawn = false
+gui.Parent = lp:WaitForChild("PlayerGui")
+
+-- Ana frame
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 150, 0, 50)
+frame.Position = UDim2.new(0, 10, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- Respawn butonu
+local respawnButton = Instance.new("TextButton", frame)
+respawnButton.Size = UDim2.new(1, -20, 1, -10)
+respawnButton.Position = UDim2.new(0, 10, 0, 5)
+respawnButton.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+respawnButton.TextColor3 = Color3.new(1, 1, 1)
+respawnButton.Text = "Respawn"
+respawnButton.Font = Enum.Font.GothamBold
+respawnButton.TextScaled = true
+Instance.new("UICorner", respawnButton)
+
+respawnButton.MouseButton1Click:Connect(function()
+    lp:LoadCharacter()
+end)
+
+-- Void kontrolü ve otomatik respawn
+local function onCharacterAdded(char)
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local humanoid = char:WaitForChild("Humanoid")
+
+    -- Void yüksekliği (çok aşağı düşerse respawn yap)
+    local voidY = -50
+
+    -- Her frame kontrol et
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        if hrp and hrp.Position.Y < voidY then
+            conn:Disconnect() -- Bu kontrolü durdur
+            if humanoid and humanoid.Health > 0 then
+                humanoid.Health = 0 -- Ölmesini sağla ki LoadCharacter düzgün çalışsın
+            end
+            wait(0.5) -- Kısa bekle
+            lp:LoadCharacter()
+        end
+    end)
+end
+
+-- İlk karakter için
+if lp.Character then
+    onCharacterAdded(lp.Character)
+end
+
+-- Her karakter spawnında ayarla
+lp.CharacterAdded:Connect(onCharacterAdded)
