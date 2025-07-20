@@ -177,7 +177,7 @@ iyButton.MouseButton1Click:Connect(function()
 end)
 
 -- SPEED HACK
-local TARGET_SPEED = 46
+local TARGET_SPEED = 44
 local speedEnabled = false
 local heartbeatConn, propChangedConn
 
