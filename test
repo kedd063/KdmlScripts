@@ -2,8 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
-local UserInputService = game:GetService("UserInputService")
-
+local TeleportService = game:GetService("TeleportService")
 local random = Random.new()
 local lp = Players.LocalPlayer
 
@@ -101,7 +100,7 @@ gui.Name = "TPGUI"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 
--- Sürüklenebilir ana panel
+-- Sürüklenebilir Panel
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 200, 0, 80)
 frame.Position = UDim2.new(0, 50, 0, 100)
@@ -110,8 +109,8 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
-local uicorner = Instance.new("UICorner", frame)
-uicorner.CornerRadius = UDim.new(0, 10)
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
 
 local tpButton = Instance.new("TextButton", frame)
 tpButton.Size = UDim2.new(1, -20, 0, 40)
@@ -122,21 +121,20 @@ tpButton.Text = "Kdml Scripts | Roof TP"
 tpButton.Font = Enum.Font.GothamBold
 tpButton.TextScaled = true
 
-local btnCorner = Instance.new("UICorner", tpButton)
-btnCorner.CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", tpButton)
 
--- Tam ekran efekt paneli
+-- Full Screen Overlay
 local overlay = Instance.new("Frame", gui)
 overlay.Size = UDim2.new(1, 0, 1, 0)
-overlay.Position = UDim2.new(0, 0, 0, 0)
 overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 overlay.BackgroundTransparency = 0
 overlay.Visible = false
 overlay.ZIndex = 10
 
+-- RGB Text
 local textLabel = Instance.new("TextLabel", overlay)
 textLabel.Size = UDim2.new(1, 0, 0, 100)
-textLabel.Position = UDim2.new(0, 0, 0.45, 0)
+textLabel.Position = UDim2.new(0, 0, 0.42, 0)
 textLabel.BackgroundTransparency = 1
 textLabel.Font = Enum.Font.GothamBlack
 textLabel.TextScaled = true
@@ -144,7 +142,20 @@ textLabel.Text = "KDML SCRIPTS TELEPORTING YOU"
 textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 textLabel.ZIndex = 11
 
--- RGB efekt fonksiyonu
+-- Rejoin Button
+local rejoinBtn = Instance.new("TextButton", overlay)
+rejoinBtn.Size = UDim2.new(0, 200, 0, 50)
+rejoinBtn.Position = UDim2.new(0.5, -100, 0.65, 0)
+rejoinBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+rejoinBtn.Text = "REJOIN"
+rejoinBtn.TextColor3 = Color3.new(1, 1, 1)
+rejoinBtn.Font = Enum.Font.GothamBold
+rejoinBtn.TextScaled = true
+rejoinBtn.ZIndex = 11
+
+Instance.new("UICorner", rejoinBtn)
+
+-- RGB Animation
 local running = false
 local function startRGB()
 	running = true
@@ -160,23 +171,46 @@ local function stopRGB()
 	running = false
 end
 
--- Teleport + efekt
+-- Rejoin Handler
+rejoinBtn.MouseButton1Click:Connect(function()
+	TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
+end)
+
+-- Teleport + Effect
 local function TeleportWithEffect(coords)
-	local success = TeleportToCoords(coords)
-	if success then
-		overlay.Visible = true
-		task.spawn(startRGB)
-		task.wait(5)
+	-- Ekranı göster, RGB başlat
+	overlay.Visible = true
+	task.spawn(startRGB)
+
+	task.delay(5, function()
 		stopRGB()
 		overlay.Visible = false
-	end
-	return success
+	end)
+
+	-- Hemen teleport et
+	TeleportToCoords(coords)
 end
 
--- Buton tıklama
+-- Tuş tıklama
 tpButton.MouseButton1Click:Connect(function()
 	if hrp then
 		local pos = hrp.Position
 		TeleportWithEffect({pos.X, fixedY, pos.Z})
 	end
+end)
+
+-- Infinite Yield Button
+local iyButton = Instance.new("TextButton", frame)
+iyButton.Size = UDim2.new(1, -20, 0, 40)
+iyButton.Position = UDim2.new(0, 10, 0, 65)
+iyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+iyButton.TextColor3 = Color3.new(1, 1, 1)
+iyButton.Text = "Infinite Yield (for respawn)"
+iyButton.Font = Enum.Font.GothamBold
+iyButton.TextScaled = true
+
+Instance.new("UICorner", iyButton)
+
+iyButton.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
 end)
