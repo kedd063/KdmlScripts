@@ -61,21 +61,18 @@ end
 local function TeleportToCoords(coords)
 	if not (coords and #coords == 3) then return false end
 	local target = CFrame.new(coords[1], coords[2], coords[3])
-	
+	TweenToPosition(target, 0.3)
 	local ping = getPing()
 	local waitTime = math.clamp(ping, 0.05, 0.2)
-
-	local success = false
-	local attempts = 0
-	while not success and attempts < tpAmt do
-		TweenToPosition(target, 0.3)
+	
+	local tries = 0
+	while (hrp.Position - target.Position).Magnitude > 50 and tries < tpAmt do
 		TP(target)
 		task.wait(waitTime)
-		success = (hrp.Position - target.Position).Magnitude <= 50
-		attempts = attempts + 1
+		tries = tries + 1
 	end
 
-	if not success then
+	if (hrp.Position - target.Position).Magnitude > 50 then
 		TP(void)
 		task.wait(0.05)
 		for i = 1, math.max(3, math.floor(tpAmt / 25)) do
