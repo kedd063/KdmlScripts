@@ -57,18 +57,23 @@ local function TweenToPosition(targetCFrame, duration)
 	return true
 end
 
--- 🔧 Garantili Void Reset (ölmeden)
-local function VoidReset()
+-- 💀 Void reset ama god mode (ölmeden)
+local function GodVoidReset()
 	local oldCF = hrp.CFrame
-	local fakeVoid = CFrame.new(999999, 999999, 999999)
+	if humanoid then
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+		humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+	end
 
-	hrp.Anchored = true
-	hrp.CFrame = fakeVoid
+	hrp.CFrame = CFrame.new(0, -3.4028235e+38, 0)
 	RunService.Heartbeat:Wait()
 	RunService.Heartbeat:Wait()
 
 	hrp.CFrame = oldCF
-	hrp.Anchored = false
+
+	if humanoid then
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+	end
 end
 
 local function TeleportToCoords(coords)
@@ -85,8 +90,7 @@ local function TeleportToCoords(coords)
 		task.wait(waitTime)
 	end
 
-	-- Void etkisi (ölmeden)
-	VoidReset()
+	GodVoidReset()
 
 	for i = 1, 6 do
 		TP(target)
