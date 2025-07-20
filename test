@@ -89,7 +89,6 @@ local function TeleportToCoords(coords)
 	return (hrp.Position - target.Position).Magnitude <= 50
 end
 
--- Karakter setup
 if lp.Character then
 	setupCharacter(lp.Character)
 end
@@ -99,8 +98,9 @@ lp.CharacterAdded:Connect(setupCharacter)
 local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 gui.Name = "TPGUI"
 gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true -- ekranı tam kaplaması için
 
--- Ana Buton GUI'si
+-- Buton arayüzü
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 200, 0, 80)
 frame.Position = UDim2.new(0, 20, 0, 20)
@@ -122,12 +122,12 @@ tpButton.TextScaled = true
 local btnCorner = Instance.new("UICorner", tpButton)
 btnCorner.CornerRadius = UDim.new(0, 6)
 
--- Fullscreen Overlay
+-- FULLSCREEN TELEPORT OVERLAY
 local overlay = Instance.new("Frame", gui)
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.Position = UDim2.new(0, 0, 0, 0)
 overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-overlay.BackgroundTransparency = 0.3
+overlay.BackgroundTransparency = 0 -- tamamen siyah
 overlay.Visible = false
 overlay.ZIndex = 10
 
@@ -141,7 +141,7 @@ textLabel.Text = "KDML SCRIPTS TELEPORTING YOU"
 textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 textLabel.ZIndex = 11
 
--- RGB Efekt
+-- RGB Efekti
 local running = false
 local function startRGB()
 	running = true
@@ -160,17 +160,18 @@ end
 -- Efektli Teleport
 local function TeleportWithEffect(coords)
 	overlay.Visible = true
-	startRGB()
+	task.spawn(startRGB)
 
-	local success = TeleportToCoords(coords)
+	task.wait(5) -- ekran 5 saniye kalacak
 
 	stopRGB()
 	overlay.Visible = false
 
+	local success = TeleportToCoords(coords)
 	return success
 end
 
--- Buton tıklanınca teleport başlat
+-- Buton tıklanınca ışınlan
 tpButton.MouseButton1Click:Connect(function()
 	if hrp then
 		local pos = hrp.Position
