@@ -199,18 +199,18 @@ tpButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Infinite Yield Button
-local iyButton = Instance.new("TextButton", frame)
-iyButton.Size = UDim2.new(1, -20, 0, 40)
-iyButton.Position = UDim2.new(0, 10, 0, 65)
-iyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
-iyButton.TextColor3 = Color3.new(1, 1, 1)
-iyButton.Text = "Infinite Yield (for respawn)"
-iyButton.Font = Enum.Font.GothamBold
-iyButton.TextScaled = true
+-- Respawn Button
+local respawnButton = Instance.new("TextButton", frame)
+respawnButton.Size = UDim2.new(1, -20, 0, 40)
+respawnButton.Position = UDim2.new(0, 10, 0, 110)
+respawnButton.BackgroundColor3 = Color3.fromRGB(80, 160, 80)
+respawnButton.TextColor3 = Color3.new(1, 1, 1)
+respawnButton.Text = "Respawn"
+respawnButton.Font = Enum.Font.GothamBold
+respawnButton.TextScaled = true
 
-Instance.new("UICorner", iyButton)
+Instance.new("UICorner", respawnButton)
 
-iyButton.MouseButton1Click:Connect(function()
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+respawnButton.MouseButton1Click:Connect(function()
+    lp:LoadCharacter()  -- Infinite Yield'in ":respawn" komutunun yaptığı şey
 end)
