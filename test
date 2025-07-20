@@ -3,17 +3,33 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
 local random = Random.new()
-
+ 
 local lp = Players.LocalPlayer
-local char = lp.Character or lp.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
-local hrp = char:WaitForChild("HumanoidRootPart")
-
+ 
+local char, humanoid, hrp
+local teleporting = false
+local void = CFrame.new(0, -3.4028234663852886e+38, 0)
 local tpAmt = 60
 local fixedY = 70
-local teleporting = false
-local void = CFrame.new(0, -3.4e+38, 0)
-
+ 
+local function setupCharacter(newChar)
+    char = newChar
+    humanoid = char:WaitForChild("Humanoid")
+    hrp = char:WaitForChild("HumanoidRootPart")
+ 
+    humanoid.MaxHealth = math.huge
+    humanoid.Health = humanoid.MaxHealth
+    humanoid.HealthChanged:Connect(function()
+        if humanoid.Health < humanoid.MaxHealth then
+            humanoid.Health = humanoid.MaxHealth
+        end
+    end)
+ 
+    humanoid.Died:Connect(function()
+        lp:LoadCharacter()
+    end)
+end
+ 
 local function getPing()
     local pingStats = Stats.Network.ServerStatsItem
     if pingStats then
@@ -21,7 +37,7 @@ local function getPing()
     end
     return 0.1
 end
-
+ 
 local function TP(position)
     if not teleporting and position then
         teleporting = true
@@ -34,7 +50,7 @@ local function TP(position)
         teleporting = false
     end
 end
-
+ 
 local function TweenToPosition(targetCFrame, duration)
     local tweenInfo = TweenInfo.new(duration or 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
     local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
@@ -43,16 +59,16 @@ local function TweenToPosition(targetCFrame, duration)
     tween:Cancel()
     return true
 end
-
+ 
 local function TeleportToCoords(coords)
     if not (coords and #coords == 3) then return false end
     local target = CFrame.new(coords[1], coords[2], coords[3])
-
+ 
     TweenToPosition(target, 0.3)
-
+ 
     local ping = getPing()
     local waitTime = math.clamp(ping, 0.05, 0.2)
-
+ 
     for i = 1, tpAmt do
         TP(target)
         if i % 15 == 0 and (hrp.Position - target.Position).Magnitude <= 60 then
@@ -60,107 +76,50 @@ local function TeleportToCoords(coords)
         end
         task.wait(waitTime)
     end
-
+ 
     TP(void)
     task.wait(0.05)
-
+ 
     for i = 1, math.max(3, math.floor(tpAmt / 25)) do
         TP(target)
         task.wait(waitTime)
     end
-
+ 
     task.wait(0.2)
     return (hrp.Position - target.Position).Magnitude <= 50
 end
-
--- RGB renk döngüsü fonksiyonu
-local function getRainbowColor(time)
-    local frequency = 2
-    local r = math.floor(math.sin(frequency * time + 0) * 127 + 128)
-    local g = math.floor(math.sin(frequency * time + 2) * 127 + 128)
-    local b = math.floor(math.sin(frequency * time + 4) * 127 + 128)
-    return Color3.fromRGB(r, g, b)
+ 
+if lp.Character then
+    setupCharacter(lp.Character)
 end
-
--- GUI Oluşturma
-local gui = Instance.new("ScreenGui")
-gui.Name = "KdmlScriptsGUI"
+ 
+lp.CharacterAdded:Connect(setupCharacter)
+ 
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "TPGUI"
 gui.ResetOnSpawn = false
-gui.Parent = lp:WaitForChild("PlayerGui")
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 180)
-frame.Position = UDim2.new(0, 20, 0, 20)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-frame.BorderSizePixel = 0
-frame.Parent = gui
-
--- RGB çerçeve
-local border = Instance.new("UIStroke")
-border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-border.Thickness = 3
-border.Parent = frame
-
--- Başlık
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
-title.BackgroundTransparency = 1
-title.Position = UDim2.new(0, 0, 0, 0)
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 28
-title.Text = "Kdml Scripts"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.TextStrokeTransparency = 0.5
-title.Parent = frame
-
--- Alt yazı (Discord linki)
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 20)
-subtitle.Position = UDim2.new(0, 0, 0, 140)
-subtitle.BackgroundTransparency = 1
-subtitle.Font = Enum.Font.Gotham
-subtitle.TextSize = 14
-subtitle.Text = "https://discord.gg/vsaKFZgYVD"
-subtitle.TextColor3 = Color3.new(0.7, 0.7, 0.7)
-subtitle.Parent = frame
-
--- Y Teleport etiketi
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, -20, 0, 30)
-label.Position = UDim2.new(0, 10, 0, 50)
-label.BackgroundTransparency = 1
+ 
+local label = Instance.new("TextLabel", gui)
+label.Size = UDim2.new(0, 130, 0, 30)
+label.Position = UDim2.new(0, 10, 0, 10)
+label.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 label.TextColor3 = Color3.new(1, 1, 1)
 label.Text = "Y = "..fixedY
 label.Font = Enum.Font.Gotham
 label.TextScaled = true
-label.TextXAlignment = Enum.TextXAlignment.Left
-label.Parent = frame
-
--- Teleport butonu
-local tpButton = Instance.new("TextButton")
-tpButton.Size = UDim2.new(1, -20, 0, 40)
-tpButton.Position = UDim2.new(0, 10, 0, 90)
+ 
+local tpButton = Instance.new("TextButton", gui)
+tpButton.Size = UDim2.new(0, 150, 0, 40)
+tpButton.Position = UDim2.new(0, 10, 0, 50)
 tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
 tpButton.TextColor3 = Color3.new(1, 1, 1)
 tpButton.Text = "TP to Y = "..fixedY
 tpButton.Font = Enum.Font.GothamBold
 tpButton.TextScaled = true
-tpButton.Parent = frame
-
+ 
 tpButton.MouseButton1Click:Connect(function()
     if hrp then
         local pos = hrp.Position
         TeleportToCoords({pos.X, fixedY, pos.Z})
-    end
-end)
-
--- RGB animasyonunu başlat
-spawn(function()
-    while true do
-        local time = tick()
-        local color = getRainbowColor(time)
-        border.Color = color
-        title.TextColor3 = color
-        wait(0.03)
     end
 end)
