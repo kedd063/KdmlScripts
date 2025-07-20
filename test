@@ -2,8 +2,9 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
-local random = Random.new()
+local UserInputService = game:GetService("UserInputService")
 
+local random = Random.new()
 local lp = Players.LocalPlayer
 
 local char, humanoid, hrp
@@ -94,18 +95,20 @@ if lp.Character then
 end
 lp.CharacterAdded:Connect(setupCharacter)
 
--- GUI Setup
+-- GUI
 local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 gui.Name = "TPGUI"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true -- ekranı tam kaplaması için
+gui.IgnoreGuiInset = true
 
--- Buton arayüzü
+-- Sürüklenebilir ana panel
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 200, 0, 80)
-frame.Position = UDim2.new(0, 20, 0, 20)
+frame.Position = UDim2.new(0, 50, 0, 100)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
 
 local uicorner = Instance.new("UICorner", frame)
 uicorner.CornerRadius = UDim.new(0, 10)
@@ -122,12 +125,12 @@ tpButton.TextScaled = true
 local btnCorner = Instance.new("UICorner", tpButton)
 btnCorner.CornerRadius = UDim.new(0, 6)
 
--- FULLSCREEN TELEPORT OVERLAY
+-- Tam ekran efekt paneli
 local overlay = Instance.new("Frame", gui)
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.Position = UDim2.new(0, 0, 0, 0)
 overlay.BackgroundColor3 = Color3.new(0, 0, 0)
-overlay.BackgroundTransparency = 0 -- tamamen siyah
+overlay.BackgroundTransparency = 0
 overlay.Visible = false
 overlay.ZIndex = 10
 
@@ -141,7 +144,7 @@ textLabel.Text = "KDML SCRIPTS TELEPORTING YOU"
 textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 textLabel.ZIndex = 11
 
--- RGB Efekti
+-- RGB efekt fonksiyonu
 local running = false
 local function startRGB()
 	running = true
@@ -157,21 +160,20 @@ local function stopRGB()
 	running = false
 end
 
--- Efektli Teleport
+-- Teleport + efekt
 local function TeleportWithEffect(coords)
-	overlay.Visible = true
-	task.spawn(startRGB)
-
-	task.wait(5) -- ekran 5 saniye kalacak
-
-	stopRGB()
-	overlay.Visible = false
-
 	local success = TeleportToCoords(coords)
+	if success then
+		overlay.Visible = true
+		task.spawn(startRGB)
+		task.wait(5)
+		stopRGB()
+		overlay.Visible = false
+	end
 	return success
 end
 
--- Buton tıklanınca ışınlan
+-- Buton tıklama
 tpButton.MouseButton1Click:Connect(function()
 	if hrp then
 		local pos = hrp.Position
