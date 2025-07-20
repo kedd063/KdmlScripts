@@ -57,6 +57,20 @@ local function TweenToPosition(targetCFrame, duration)
 	return true
 end
 
+-- 🔧 Garantili Void Reset (ölmeden)
+local function VoidReset()
+	local oldCF = hrp.CFrame
+	local fakeVoid = CFrame.new(999999, 999999, 999999)
+
+	hrp.Anchored = true
+	hrp.CFrame = fakeVoid
+	RunService.Heartbeat:Wait()
+	RunService.Heartbeat:Wait()
+
+	hrp.CFrame = oldCF
+	hrp.Anchored = false
+end
+
 local function TeleportToCoords(coords)
 	if not (coords and #coords == 3) then return false end
 	local target = CFrame.new(coords[1], coords[2], coords[3])
@@ -71,16 +85,14 @@ local function TeleportToCoords(coords)
 		task.wait(waitTime)
 	end
 
-	local void = hrp.CFrame * CFrame.new(0, -1000, 0)
-	TP(void)
-	task.wait(0.03)
+	-- Void etkisi (ölmeden)
+	VoidReset()
 
 	for i = 1, 6 do
 		TP(target)
 		task.wait(waitTime)
 	end
 
-	-- Fail-safe tekrarlar
 	for i = 1, 3 do
 		if (hrp.Position - target.Position).Magnitude > 20 then
 			TP(target)
