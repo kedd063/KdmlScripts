@@ -7,8 +7,6 @@ local random = Random.new()
 
 local char, humanoid, hrp
 local teleporting = false
-local void = CFrame.new(0, -3.4028235e+38, 0)
-local tpAmt = 60
 local fixedY = 70
 
 local function setupCharacter(newChar)
@@ -40,47 +38,28 @@ local function TP(position)
 	if not teleporting and position then
 		teleporting = true
 		hrp.CFrame = position + Vector3.new(
-			random:NextNumber(-0.0001, 0.0001),
-			random:NextNumber(-0.0001, 0.0001),
-			random:NextNumber(-0.0001, 0.0001)
+			random:NextNumber(-0.5, 0.5),
+			0,
+			random:NextNumber(-0.5, 0.5)
 		)
 		RunService.Heartbeat:Wait()
 		teleporting = false
 	end
 end
 
-local function TweenToPosition(targetCFrame, duration)
-	local tweenInfo = TweenInfo.new(duration or 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-	tween:Play()
-	task.wait(duration or 0.4)
-	tween:Cancel()
-	return true
-end
-
-local function TeleportToCoords(coords)
+-- Basit ve stabil teleport fonksiyonu
+local function TeleportToCoordsSimple(coords)
 	if not (coords and #coords == 3) then return false end
 	local target = CFrame.new(coords[1], coords[2], coords[3])
-	TweenToPosition(target, 0.3)
-	local ping = getPing()
-	local waitTime = math.clamp(ping, 0.05, 0.2)
-
-	for i = 1, tpAmt do
-		TP(target)
-		if i % 15 == 0 and (hrp.Position - target.Position).Magnitude <= 60 then break end
-		task.wait(waitTime)
-	end
-
-	TP(void)
-	task.wait(0.05)
-
-	for i = 1, math.max(3, math.floor(tpAmt / 25)) do
-		TP(target)
-		task.wait(waitTime)
-	end
-
-	task.wait(0.2)
-	return (hrp.Position - target.Position).Magnitude <= 50
+	
+	-- Direkt teleport, tween yok
+	TP(target)
+	
+	-- Serverın konumu sabitlemesi için bekle
+	task.wait(0.5)
+	
+	-- Konumun doğruluğunu kontrol et
+	return (hrp.Position - target.Position).Magnitude <= 5
 end
 
 -- GUI
@@ -206,8 +185,8 @@ end
 local speedToggle = createToggle(
 	frame,
 	UDim2.new(0, 10, 0, 110),
-	"Speed Boost: ON",
-	"Speed Boost: OFF",
+	"Speed Hack: ON",
+	"Speed Hack: OFF",
 	false,
 	function(enabled)
 		speedEnabled = enabled
@@ -283,7 +262,7 @@ end)
 
 -- TELEPORT EFFECT
 local function TeleportWithEffect(coords)
-	local success = TeleportToCoords(coords)
+	local success = TeleportToCoordsSimple(coords)
 	if success then
 		overlay.Visible = true
 		task.spawn(startRGB)
