@@ -1,1 +1,301 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local lp = Players.LocalPlayer
+local random = Random.new()
 
+local char, humanoid, hrp
+local teleporting = false
+local void = CFrame.new(0, -3.4028235e+38, 0)
+local tpAmt = 60
+local fixedY = 70
+
+local function setupCharacter(newChar)
+	char = newChar
+	humanoid = char:WaitForChild("Humanoid")
+	hrp = char:WaitForChild("HumanoidRootPart")
+	humanoid.MaxHealth = math.huge
+	humanoid.Health = math.huge
+	humanoid.HealthChanged:Connect(function()
+		if humanoid.Health < humanoid.MaxHealth then
+			humanoid.Health = humanoid.MaxHealth
+		end
+	end)
+	humanoid.Died:Connect(function()
+		lp:LoadCharacter()
+	end)
+end
+
+if lp.Character then setupCharacter(lp.Character) end
+lp.CharacterAdded:Connect(setupCharacter)
+
+local function getPing()
+	local pingStats = Stats.Network.ServerStatsItem
+	if pingStats then return pingStats:GetValue() / 1000 end
+	return 0.1
+end
+
+local function TP(position)
+	if not teleporting and position then
+		teleporting = true
+		hrp.CFrame = position + Vector3.new(
+			random:NextNumber(-0.0001, 0.0001),
+			random:NextNumber(-0.0001, 0.0001),
+			random:NextNumber(-0.0001, 0.0001)
+		)
+		RunService.Heartbeat:Wait()
+		teleporting = false
+	end
+end
+
+local function TweenToPosition(targetCFrame, duration)
+	local tweenInfo = TweenInfo.new(duration or 0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+	tween:Play()
+	task.wait(duration or 0.4)
+	tween:Cancel()
+	return true
+end
+
+local function TeleportToCoords(coords)
+	if not (coords and #coords == 3) then return false end
+	local target = CFrame.new(coords[1], coords[2], coords[3])
+	TweenToPosition(target, 0.3)
+	local ping = getPing()
+	local waitTime = math.clamp(ping, 0.05, 0.2)
+
+	for i = 1, tpAmt do
+		TP(target)
+		if i % 15 == 0 and (hrp.Position - target.Position).Magnitude <= 60 then break end
+		task.wait(waitTime)
+	end
+
+	TP(void)
+	task.wait(0.05)
+
+	for i = 1, math.max(3, math.floor(tpAmt / 25)) do
+		TP(target)
+		task.wait(waitTime)
+	end
+
+	task.wait(0.2)
+	return (hrp.Position - target.Position).Magnitude <= 50
+end
+
+-- GUI
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "TPGUI"
+gui.ResetOnSpawn = false
+
+-- RGB overlay
+local overlay = Instance.new("Frame", gui)
+overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+overlay.BackgroundTransparency = 0
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.Visible = false
+overlay.ZIndex = 999
+
+local overlayText = Instance.new("TextLabel", overlay)
+overlayText.Size = UDim2.new(1, 0, 1, 0)
+overlayText.BackgroundTransparency = 1
+overlayText.Text = "KDML SCRIPTS TELEPORTING YOU"
+overlayText.Font = Enum.Font.GothamBlack
+overlayText.TextScaled = true
+overlayText.ZIndex = 1000
+overlayText.TextColor3 = Color3.new(1, 0, 0)
+
+local running = false
+local function startRGB()
+	running = true
+	while running do
+		local t = tick() * 2
+		overlayText.TextColor3 = Color3.fromHSV((t % 1), 1, 1)
+		RunService.RenderStepped:Wait()
+	end
+end
+local function stopRGB()
+	running = false
+end
+
+-- Draggable Frame
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 200, 0, 220)
+frame.Position = UDim2.new(0, 10, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame)
+
+-- Butonlar
+local function createToggle(parent, position, textOn, textOff, defaultState, callback)
+	local state = defaultState
+	local button = Instance.new("TextButton", parent)
+	button.Size = UDim2.new(1, -20, 0, 40)
+	button.Position = position
+	button.BackgroundColor3 = state and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Text = state and textOn or textOff
+	button.Font = Enum.Font.GothamBold
+	button.TextScaled = true
+	Instance.new("UICorner", button)
+
+	button.MouseButton1Click:Connect(function()
+		state = not state
+		button.BackgroundColor3 = state and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+		button.Text = state and textOn or textOff
+		if callback then callback(state) end
+	end)
+
+	return button
+end
+
+-- TP Button
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(1, -20, 0, 40)
+tpButton.Position = UDim2.new(0, 10, 0, 10)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+tpButton.TextColor3 = Color3.new(1, 1, 1)
+tpButton.Text = "Kdml Scripts | Roof TP"
+tpButton.Font = Enum.Font.GothamBold
+tpButton.TextScaled = true
+Instance.new("UICorner", tpButton)
+
+-- Infinite Yield
+local iyButton = Instance.new("TextButton", frame)
+iyButton.Size = UDim2.new(1, -20, 0, 40)
+iyButton.Position = UDim2.new(0, 10, 0, 60)
+iyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+iyButton.TextColor3 = Color3.new(1, 1, 1)
+iyButton.Text = "Infinite Yield (for respawn)"
+iyButton.Font = Enum.Font.GothamBold
+iyButton.TextScaled = true
+Instance.new("UICorner", iyButton)
+
+iyButton.MouseButton1Click:Connect(function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+-- SPEED HACK
+local TARGET_SPEED = 60
+local speedEnabled = false
+local heartbeatConn, propChangedConn
+
+local function enableSpeedHack(humanoid)
+	if not humanoid then return end
+	humanoid.WalkSpeed = TARGET_SPEED
+
+	propChangedConn = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		if speedEnabled and humanoid.WalkSpeed ~= TARGET_SPEED then
+			humanoid.WalkSpeed = TARGET_SPEED
+		end
+	end)
+
+	heartbeatConn = RunService.Heartbeat:Connect(function()
+		if speedEnabled and humanoid and humanoid.WalkSpeed ~= TARGET_SPEED then
+			humanoid.WalkSpeed = TARGET_SPEED
+		end
+	end)
+end
+
+local function disableSpeedHack()
+	if heartbeatConn then heartbeatConn:Disconnect() end
+	if propChangedConn then propChangedConn:Disconnect() end
+end
+
+local speedToggle = createToggle(
+	frame,
+	UDim2.new(0, 10, 0, 110),
+	"Speed Boost: ON",
+	"Speed Boost: OFF",
+	false,
+	function(enabled)
+		speedEnabled = enabled
+		if enabled and lp.Character then
+			enableSpeedHack(lp.Character:FindFirstChild("Humanoid"))
+		else
+			disableSpeedHack()
+		end
+	end
+)
+
+-- JUMP BOOST
+local gravityEnabled = false
+local forceName = "LowGravityForce"
+
+local function enableJumpBoost(character)
+	local hum = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+
+	hum.UseJumpPower = false
+	hum.JumpHeight = 50
+
+	if not hrp:FindFirstChild(forceName) then
+		local bf = Instance.new("BodyForce")
+		bf.Name = forceName
+		bf.Force = Vector3.new(0, workspace.Gravity * hrp.AssemblyMass * 0.75, 0)
+		bf.Parent = hrp
+	end
+end
+
+local function disableJumpBoost(character)
+	local hum = character:FindFirstChild("Humanoid")
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+
+	if hum then
+		hum.JumpHeight = 7.2
+		hum.UseJumpPower = true
+	end
+
+	if hrp then
+		local f = hrp:FindFirstChild(forceName)
+		if f then f:Destroy() end
+	end
+end
+
+local jumpToggle = createToggle(
+	frame,
+	UDim2.new(0, 10, 0, 160),
+	"Jump Boost: ON",
+	"Jump Boost: OFF",
+	false,
+	function(enabled)
+		gravityEnabled = enabled
+		if enabled and lp.Character then
+			enableJumpBoost(lp.Character)
+		else
+			disableJumpBoost(lp.Character)
+		end
+	end
+)
+
+-- On character respawn, reapply toggles
+lp.CharacterAdded:Connect(function(char)
+	if speedEnabled then
+		local hum = char:WaitForChild("Humanoid")
+		enableSpeedHack(hum)
+	end
+	if gravityEnabled then
+		task.wait(0.1)
+		enableJumpBoost(char)
+	end
+end)
+
+-- TELEPORT EFFECT
+local function TeleportWithEffect(coords)
+	local success = TeleportToCoords(coords)
+	if success then
+		overlay.Visible = true
+		task.spawn(startRGB)
+		task.wait(3.5)
+		stopRGB()
+		overlay.Visible = false
+	end
+end
+
+tpButton.MouseButton1Click:Connect(function()
+	if hrp then
+		local pos = hrp.Position
+		TeleportWithEffect({pos.X, fixedY, pos.Z})
+	end
+end)
