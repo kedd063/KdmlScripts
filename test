@@ -1,174 +1,55 @@
--- Geliştirilmiş teleport fonksiyonu
-local function TeleportToCoordsImproved(coords)
-    if not (coords and #coords == 3) then return false end
-    if not hrp then return false end
-    
-    local target = CFrame.new(coords[1], coords[2], coords[3])
-    local maxAttempts = 5
-    local successThreshold = 3 -- 3 birimden az fark kabul edilir
-    
-    for attempt = 1, maxAttempts do
-        -- Birden fazla yöntemle teleport dene
-        
-        -- Yöntem 1: CFrame ile direkt
-        hrp.CFrame = target
-        task.wait(0.1)
-        
-        -- Yöntem 2: Position ile
-        hrp.Position = target.Position
-        task.wait(0.1)
-        
-        -- Yöntem 3: Velocity sıfırlama ile
-        if hrp:FindFirstChild("AssemblyLinearVelocity") then
-            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        end
-        hrp.CFrame = target
-        task.wait(0.2)
-        
-        -- Başarı kontrolü
-        local distance = (hrp.Position - target.Position).Magnitude
-        if distance <= successThreshold then
-            print("Teleport başarılı! Deneme:", attempt, "Mesafe:", math.floor(distance * 100) / 100)
-            return true
-        end
-        
-        print("Deneme", attempt, "başarısız. Mesafe:", math.floor(distance * 100) / 100)
-        
-        -- Sonraki deneme için biraz bekle
-        task.wait(0.3)
-    end
-    
-    print("Teleport başarısız! Tüm denemeler tükendi.")
-    return false
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local lp = Players.LocalPlayer
+local random = Random.new()
+
+local char, humanoid, hrp
+local teleporting = false
+local fixedY = 70
+
+-- Karakter kurulumu
+local function setupCharacter(newChar)
+	char = newChar
+	humanoid = char:WaitForChild("Humanoid")
+	hrp = char:WaitForChild("HumanoidRootPart")
+	humanoid.MaxHealth = math.huge
+	humanoid.Health = math.huge
+	humanoid.HealthChanged:Connect(function()
+		if humanoid.Health < humanoid.MaxHealth then
+			humanoid.Health = humanoid.MaxHealth
+		end
+	end)
+	humanoid.Died:Connect(function()
+		lp:LoadCharacter()
+	end)
 end
 
--- Network lag kompensasyonu ile teleport
-local function TeleportWithNetworkCompensation(coords)
-    if not (coords and #coords == 3) then return false end
-    if not hrp then return false end
-    
-    local target = CFrame.new(coords[1], coords[2], coords[3])
-    local ping = getPing()
-    local compensation = math.max(ping * 2, 0.5) -- Minimum 0.5 saniye bekle
-    
-    -- Karakteri dondur
-    local originalAnchored = hrp.Anchored
-    hrp.Anchored = true
-    
-    -- Teleport
-    hrp.CFrame = target
-    
-    -- Network lag için bekle
-    task.wait(compensation)
-    
-    -- Karakteri serbest bırak
-    hrp.Anchored = originalAnchored
-    
-    -- Doğrulama
-    task.wait(0.2)
-    local distance = (hrp.Position - target.Position).Magnitude
-    
-    if distance <= 5 then
-        return true
-    else
-        -- Başarısızsa tekrar dene
-        hrp.CFrame = target
-        task.wait(0.5)
-        return (hrp.Position - target.Position).Magnitude <= 5
-    end
+if lp.Character then setupCharacter(lp.Character) end
+lp.CharacterAdded:Connect(setupCharacter)
+
+-- Ping hesaplama
+local function getPing()
+	local pingStats = Stats.Network.ServerStatsItem
+	if pingStats then return pingStats:GetValue() / 1000 end
+	return 0.1
 end
 
--- Multi-method teleport (en güvenilir)
-local function TeleportMultiMethod(coords)
-    if not (coords and #coords == 3) then return false end
-    if not hrp then return false end
-    
-    local target = CFrame.new(coords[1], coords[2], coords[3])
-    local methods = {}
-    
-    -- Yöntem listesi
-    methods[1] = function()
-        -- Velocity temizle + CFrame
-        if hrp:FindFirstChild("AssemblyLinearVelocity") then
-            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        end
-        if hrp:FindFirstChild("AssemblyAngularVelocity") then
-            hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-        end
-        hrp.CFrame = target
-    end
-    
-    methods[2] = function()
-        -- Anchor + CFrame + Unanchor
-        local wasAnchored = hrp.Anchored
-        hrp.Anchored = true
-        hrp.CFrame = target
-        task.wait(0.1)
-        hrp.Anchored = wasAnchored
-    end
-    
-    methods[3] = function()
-        -- Position + CFrame kombinasyonu
-        hrp.Position = target.Position
-        task.wait(0.05)
-        hrp.CFrame = target
-    end
-    
-    methods[4] = function()
-        -- BodyPosition ile
-        local bp = Instance.new("BodyPosition")
-        bp.MaxForce = Vector3.new(4000, 4000, 4000)
-        bp.Position = target.Position
-        bp.Parent = hrp
-        task.wait(0.3)
-        bp:Destroy()
-        hrp.CFrame = target
-    end
-    
-    -- Her yöntemi dene
-    for i, method in ipairs(methods) do
-        method()
-        task.wait(0.3)
-        
-        local distance = (hrp.Position - target.Position).Magnitude
-        if distance <= 3 then
-            print("Teleport başarılı! Yöntem:", i, "Mesafe:", math.floor(distance * 100) / 100)
-            return true
-        end
-    end
-    
-    -- Son çare: Karakter respawn
-    print("Tüm yöntemler başarısız. Karakter yeniden yükleniyor...")
-    lp:LoadCharacter()
-    
-    -- Yeni karakter yüklenene kadar bekle
-    lp.CharacterAdded:Wait()
-    task.wait(1)
-    
-    -- Yeni karakterle tekrar dene
-    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        lp.Character.HumanoidRootPart.CFrame = target
-        return true
-    end
-    
-    return false
-end
-
--- ADVANCED: Daha da gelişmiş sürekli deneme sistemi
+-- ADVANCED SUREKLİ TELEPORT SİSTEMİ
 local function TeleportUntilSuccessAdvanced(coords)
     if not (coords and #coords == 3) then return false end
     if not hrp then return false end
     
     local target = CFrame.new(coords[1], coords[2], coords[3])
     local attempt = 1
-    local maxTime = 45 -- 45 saniye sürekli dene
+    local maxTime = 45
     local startTime = tick()
     local consecutiveFails = 0
     
     print("🚀 ADVANCED SÜREKLI TELEPORT BAŞLADI")
     print("📍 Hedef Koordinatlar:", coords[1], coords[2], coords[3])
     
-    -- Teleport sırasında karakteri stabilize et
     local originalWalkSpeed = humanoid.WalkSpeed
     humanoid.WalkSpeed = 0
     
@@ -176,26 +57,21 @@ local function TeleportUntilSuccessAdvanced(coords)
         local currentTime = tick() - startTime
         print("🔄 Deneme", attempt, "- Geçen Süre:", math.floor(currentTime * 10) / 10, "sn")
         
-        -- Dinamik yöntem seçimi - başarısızlık sayısına göre
         local methodIndex = ((attempt - 1) % 5) + 1
         
-        -- Çok başarısızlık varsa daha agresif yöntemler kullan
         if consecutiveFails > 3 then
-            methodIndex = 5 -- Karakter respawn yöntemi
+            methodIndex = 5
         end
         
         if methodIndex == 1 then
-            -- Yöntem 1: Basit CFrame
             hrp.CFrame = target
             
         elseif methodIndex == 2 then
-            -- Yöntem 2: Double CFrame (iki kez)
             hrp.CFrame = target
             task.wait(0.05)
             hrp.CFrame = target
             
         elseif methodIndex == 3 then
-            -- Yöntem 3: Velocity sıfırlama + Anchor
             if hrp:FindFirstChild("AssemblyLinearVelocity") then
                 hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                 hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
@@ -207,7 +83,6 @@ local function TeleportUntilSuccessAdvanced(coords)
             hrp.Anchored = wasAnchored
             
         elseif methodIndex == 4 then
-            -- Yöntem 4: BodyPosition ile zorla
             local bp = Instance.new("BodyPosition")
             bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
             bp.P = 3000
@@ -220,15 +95,13 @@ local function TeleportUntilSuccessAdvanced(coords)
             hrp.CFrame = target
             
         elseif methodIndex == 5 then
-            -- Yöntem 5: Son çare - Karakter respawn
             print("🔄 Son çare yöntemi - Karakter yeniden yükleniyor...")
             local respawnPos = target
             
             lp:LoadCharacter()
             
-            -- Yeni karakter gelene kadar bekle
             local newChar = lp.CharacterAdded:Wait()
-            task.wait(2) -- Tam yüklenmesi için bekle
+            task.wait(2)
             
             local newHrp = newChar:WaitForChild("HumanoidRootPart", 5)
             if newHrp then
@@ -238,10 +111,8 @@ local function TeleportUntilSuccessAdvanced(coords)
             end
         end
         
-        -- Kontrol için bekle
         task.wait(0.25)
         
-        -- Başarı kontrolü
         local distance = (hrp.Position - target.Position).Magnitude
         if distance <= 4 then
             consecutiveFails = 0
@@ -250,20 +121,17 @@ local function TeleportUntilSuccessAdvanced(coords)
             print("   • Deneme Sayısı:", attempt)
             print("   • Toplam Süre:", math.floor((tick() - startTime) * 100) / 100, "saniye")
             print("   • Son Mesafe:", math.floor(distance * 100) / 100, "birim")
-            print("   • Kullanılan Yöntem:", methodIndex)
             
-            -- Walkspeed'i geri yükle
             humanoid.WalkSpeed = originalWalkSpeed
             return true
         else
             consecutiveFails = consecutiveFails + 1
-            print("❌ Başarısız - Mesafe:", math.floor(distance * 100) / 100, "Ardışık Başarısızlık:", consecutiveFails)
+            print("❌ Başarısız - Mesafe:", math.floor(distance * 100) / 100)
         end
         
         attempt = attempt + 1
         
-        -- Adaptif bekleme süresi
-        local waitTime = 0.1 + (consecutiveFails * 0.1) -- Başarısızlık arttıkça daha fazla bekle
+        local waitTime = 0.1 + (consecutiveFails * 0.1)
         if attempt % 15 == 0 then
             print("⏰ 15 deneme tamamlandı, uzun bekleme...")
             waitTime = 2
@@ -273,17 +141,221 @@ local function TeleportUntilSuccessAdvanced(coords)
     end
     
     print("⏰ ZAMAN AŞIMI! 45 saniyede teleport başarısız oldu.")
-    humanoid.WalkSpeed = originalWalkSpeed -- Walkspeed'i geri yükle
+    humanoid.WalkSpeed = originalWalkSpeed
     return false
 end
 
--- Ana teleport fonksiyonu - artık sürekli deneme sistemi kullanıyor
+-- Ana teleport fonksiyonu
 local function TeleportToCoordsSimple(coords)
-    -- Advanced sürekli deneme sistemini kullan
     return TeleportUntilSuccessAdvanced(coords)
 end
 
--- Teleport effect fonksiyonu - real-time updates ile
+-- GUI OLUŞTURMA
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "TPGUI"
+gui.ResetOnSpawn = false
+
+print("✅ GUI oluşturuldu!")
+
+-- RGB overlay
+local overlay = Instance.new("Frame", gui)
+overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+overlay.BackgroundTransparency = 0
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.Visible = false
+overlay.ZIndex = 999
+
+local overlayText = Instance.new("TextLabel", overlay)
+overlayText.Size = UDim2.new(1, 0, 1, 0)
+overlayText.BackgroundTransparency = 1
+overlayText.Text = "KDML SCRIPTS TELEPORTING YOU"
+overlayText.Font = Enum.Font.GothamBlack
+overlayText.TextScaled = true
+overlayText.ZIndex = 1000
+overlayText.TextColor3 = Color3.new(1, 0, 0)
+
+-- RGB animasyon fonksiyonları
+local running = false
+local function startRGB()
+	running = true
+	while running do
+		local t = tick() * 2
+		overlayText.TextColor3 = Color3.fromHSV((t % 1), 1, 1)
+		RunService.RenderStepped:Wait()
+	end
+end
+
+local function stopRGB()
+	running = false
+end
+
+-- Ana GUI çerçevesi
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 250, 0, 280)  -- Biraz daha büyük yaptım
+frame.Position = UDim2.new(0, 10, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Active = true
+frame.Draggable = true
+frame.BorderSizePixel = 0
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
+
+print("✅ Ana frame oluşturuldu!")
+
+-- Toggle buton oluşturma fonksiyonu
+local function createToggle(parent, position, textOn, textOff, defaultState, callback)
+	local state = defaultState
+	local button = Instance.new("TextButton", parent)
+	button.Size = UDim2.new(1, -20, 0, 40)
+	button.Position = position
+	button.BackgroundColor3 = state and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Text = state and textOn or textOff
+	button.Font = Enum.Font.GothamBold
+	button.TextScaled = true
+	button.BorderSizePixel = 0
+	
+	local buttonCorner = Instance.new("UICorner", button)
+	buttonCorner.CornerRadius = UDim.new(0, 5)
+
+	button.MouseButton1Click:Connect(function()
+		state = not state
+		button.BackgroundColor3 = state and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+		button.Text = state and textOn or textOff
+		if callback then callback(state) end
+	end)
+
+	return button
+end
+
+-- Teleport butonu
+local tpButton = Instance.new("TextButton", frame)
+tpButton.Size = UDim2.new(1, -20, 0, 50)  -- Daha büyük yaptım
+tpButton.Position = UDim2.new(0, 10, 0, 10)
+tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+tpButton.TextColor3 = Color3.new(1, 1, 1)
+tpButton.Text = "🚀 KDML SCRIPTS | ROOF TP"
+tpButton.Font = Enum.Font.GothamBold
+tpButton.TextScaled = true
+tpButton.BorderSizePixel = 0
+
+local tpButtonCorner = Instance.new("UICorner", tpButton)
+tpButtonCorner.CornerRadius = UDim.new(0, 8)
+
+-- Infinite Yield butonu
+local iyButton = Instance.new("TextButton", frame)
+iyButton.Size = UDim2.new(1, -20, 0, 40)
+iyButton.Position = UDim2.new(0, 10, 0, 70)
+iyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+iyButton.TextColor3 = Color3.new(1, 1, 1)
+iyButton.Text = "⚡ Infinite Yield (for respawn)"
+iyButton.Font = Enum.Font.GothamBold
+iyButton.TextScaled = true
+iyButton.BorderSizePixel = 0
+
+local iyButtonCorner = Instance.new("UICorner", iyButton)
+iyButtonCorner.CornerRadius = UDim.new(0, 5)
+
+iyButton.MouseButton1Click:Connect(function()
+	print("Infinite Yield yükleniyor...")
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+-- SPEED HACK
+local TARGET_SPEED = 60
+local speedEnabled = false
+local heartbeatConn, propChangedConn
+
+local function enableSpeedHack(humanoid)
+	if not humanoid then return end
+	humanoid.WalkSpeed = TARGET_SPEED
+
+	propChangedConn = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		if speedEnabled and humanoid.WalkSpeed ~= TARGET_SPEED then
+			humanoid.WalkSpeed = TARGET_SPEED
+		end
+	end)
+
+	heartbeatConn = RunService.Heartbeat:Connect(function()
+		if speedEnabled and humanoid and humanoid.WalkSpeed ~= TARGET_SPEED then
+			humanoid.WalkSpeed = TARGET_SPEED
+		end
+	end)
+end
+
+local function disableSpeedHack()
+	if heartbeatConn then heartbeatConn:Disconnect() end
+	if propChangedConn then propChangedConn:Disconnect() end
+end
+
+local speedToggle = createToggle(
+	frame,
+	UDim2.new(0, 10, 0, 120),
+	"🏃 Speed Hack: ON",
+	"🚶 Speed Hack: OFF",
+	false,
+	function(enabled)
+		speedEnabled = enabled
+		if enabled and lp.Character then
+			enableSpeedHack(lp.Character:FindFirstChild("Humanoid"))
+		else
+			disableSpeedHack()
+		end
+	end
+)
+
+-- JUMP BOOST
+local gravityEnabled = false
+local forceName = "LowGravityForce"
+
+local function enableJumpBoost(character)
+	local hum = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+
+	hum.UseJumpPower = false
+	hum.JumpHeight = 50
+
+	if not hrp:FindFirstChild(forceName) then
+		local bf = Instance.new("BodyForce")
+		bf.Name = forceName
+		bf.Force = Vector3.new(0, workspace.Gravity * hrp.AssemblyMass * 0.75, 0)
+		bf.Parent = hrp
+	end
+end
+
+local function disableJumpBoost(character)
+	local hum = character:FindFirstChild("Humanoid")
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+
+	if hum then
+		hum.JumpHeight = 7.2
+		hum.UseJumpPower = true
+	end
+
+	if hrp then
+		local f = hrp:FindFirstChild(forceName)
+		if f then f:Destroy() end
+	end
+end
+
+local jumpToggle = createToggle(
+	frame,
+	UDim2.new(0, 10, 0, 170),
+	"🦘 Jump Boost: ON",
+	"🚶 Jump Boost: OFF",
+	false,
+	function(enabled)
+		gravityEnabled = enabled
+		if enabled and lp.Character then
+			enableJumpBoost(lp.Character)
+		else
+			disableJumpBoost(lp.Character)
+		end
+	end
+)
+
+-- Teleport effect fonksiyonu
 local function TeleportWithEffect(coords)
     print("🎯 TELEPORT EFFECT BAŞLADI:", coords[1], coords[2], coords[3])
     
@@ -291,26 +363,22 @@ local function TeleportWithEffect(coords)
     overlayText.Text = "KDML SCRIPTS - TELEPORTING..."
     task.spawn(startRGB)
     
-    -- Başka bir thread'de teleport yap, böylece overlay devam eder
     local success = false
     local teleportThread = task.spawn(function()
         success = TeleportToCoordsSimple(coords)
     end)
     
-    -- Teleport devam ederken overlay'i güncelle
     local startTime = tick()
     while not success and (tick() - startTime) < 45 do
         local elapsed = math.floor(tick() - startTime)
         overlayText.Text = "KDML SCRIPTS - TELEPORTING... (" .. elapsed .. "s)"
         task.wait(1)
         
-        -- Thread bitip bitmediğini kontrol et
         if coroutine.status(teleportThread) == "dead" then
             break
         end
     end
     
-    -- Sonuç göster
     if success then
         overlayText.Text = "KDML SCRIPTS - TELEPORT SUCCESSFUL! ✅"
         overlayText.TextColor3 = Color3.new(0, 1, 0)
@@ -324,7 +392,38 @@ local function TeleportWithEffect(coords)
     stopRGB()
     overlay.Visible = false
     overlayText.Text = "KDML SCRIPTS TELEPORTING YOU"
-    overlayText.TextColor3 = Color3.new(1, 0, 0) -- Orijinal renge geri dön
+    overlayText.TextColor3 = Color3.new(1, 0, 0)
     
     return success
 end
+
+-- Teleport buton eventi
+tpButton.MouseButton1Click:Connect(function()
+	print("🚀 Teleport butonu tıklandı!")
+	if hrp then
+		local pos = hrp.Position
+		print("🎯 Mevcut pozisyon:", pos.X, pos.Y, pos.Z)
+		print("🎯 Hedef pozisyon:", pos.X, fixedY, pos.Z)
+		TeleportWithEffect({pos.X, fixedY, pos.Z})
+	else
+		print("❌ HumanoidRootPart bulunamadı!")
+	end
+end)
+
+-- Karakter respawn olduğunda toggleları yeniden aktif et
+lp.CharacterAdded:Connect(function(char)
+	task.wait(1)  -- Karakter tam yüklensin
+	
+	if speedEnabled then
+		local hum = char:WaitForChild("Humanoid")
+		enableSpeedHack(hum)
+	end
+	if gravityEnabled then
+		task.wait(0.1)
+		enableJumpBoost(char)
+	end
+end)
+
+print("✅ SCRIPT TAM OLARAK YÜKLENDİ!")
+print("🎮 Sol üst köşede GUI'yi görmelisin!")
+print("🚀 Teleport butonu ile çatıya ışınlanabilirsin!")
