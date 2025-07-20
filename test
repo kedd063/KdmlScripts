@@ -7,8 +7,8 @@ local random = Random.new()
 
 local char, humanoid, hrp
 local teleporting = false
-local void = CFrame.new(0, -3.4028235e+38, 0)
-local tpAmt = 150 -- Artırıldı (60 -> 150)
+-- Void tamamen kaldırıldı - artık daha güvenli
+local tpAmt = 180 -- Void olmadığı için artırıldı
 local fixedY = 70
 
 local function setupCharacter(newChar)
@@ -77,14 +77,28 @@ local function TeleportToCoords(coords)
 		task.wait(waitTime)
 	end
 
-	-- Void teleportasyon kısa süreli
-	TP(void)
-	task.wait(0.03)
+	-- Void yerine yatay spam teleportasyon
+	for i = 1, 10 do
+		local offsetX = random:NextNumber(-5, 5)
+		local offsetZ = random:NextNumber(-5, 5)
+		TP(CFrame.new(target.Position.X + offsetX, target.Position.Y, target.Position.Z + offsetZ))
+		task.wait(0.01)
+	end
+
+	-- Çoklu açı teleportasyon (void yerine)
+	local angles = {0, 45, 90, 135, 180, 225, 270, 315}
+	for _, angle in ipairs(angles) do
+		local rad = math.rad(angle)
+		local offsetX = math.cos(rad) * 3
+		local offsetZ = math.sin(rad) * 3
+		TP(CFrame.new(target.Position.X + offsetX, target.Position.Y, target.Position.Z + offsetZ))
+		task.wait(0.008)
+	end
 
 	-- Final teleportasyon artırıldı
-	for i = 1, math.max(5, math.floor(tpAmt / 20)) do -- Daha fazla final tp
+	for i = 1, math.max(8, math.floor(tpAmt / 15)) do -- Daha fazla final tp
 		TP(target)
-		task.wait(waitTime * 0.8) -- Daha hızlı
+		task.wait(waitTime * 0.6) -- Daha hızlı
 	end
 
 	-- Alternatif yöntem: Humanoid MoveTo
@@ -218,7 +232,7 @@ iyButton.MouseButton1Click:Connect(function()
 end)
 
 -- SPEED HACK
-local TARGET_SPEED = 75 -- Artırıldı (60 -> 75)
+local TARGET_SPEED = 44 -- Artırıldı (60 -> 75)
 local speedEnabled = false
 local heartbeatConn, propChangedConn
 
@@ -269,7 +283,7 @@ local function enableJumpBoost(character)
 	local hrp = character:WaitForChild("HumanoidRootPart")
 
 	hum.UseJumpPower = false
-	hum.JumpHeight = 65 -- Artırıldı (50 -> 65)
+	hum.JumpHeight = 60 -- Artırıldı (50 -> 65)
 
 	if not hrp:FindFirstChild(forceName) then
 		local bf = Instance.new("BodyForce")
@@ -366,20 +380,25 @@ tpButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Emergency TP (süper hızlı)
+-- Void-free Emergency TP (süper hızlı)
 emergencyTpButton.MouseButton1Click:Connect(function()
 	if hrp then
 		statusLabel.Text = "Status: Emergency TP..."
 		local pos = hrp.Position
 		local target = CFrame.new(pos.X, fixedY, pos.Z)
 		
-		-- Direkt teleportasyon
-		for i = 1, 200 do
+		-- Direkt teleportasyon - void yok!
+		for i = 1, 250 do
 			TP(target)
-			if i % 5 == 0 and (hrp.Position - target.Position).Magnitude <= 20 then
+			if i % 5 == 0 and (hrp.Position - target.Position).Magnitude <= 15 then
+				-- Extra doğrulama teleportları
+				for j = 1, 3 do
+					TP(target)
+					task.wait(0.005)
+				end
 				break
 			end
-			task.wait(0.01)
+			task.wait(0.008)
 		end
 		
 		statusLabel.Text = "Status: Emergency Complete"
